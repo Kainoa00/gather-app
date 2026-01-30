@@ -1,12 +1,16 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Outfit } from 'next/font/google'
 import './globals.css'
 
-const inter = Inter({ subsets: ['latin'] })
+const outfit = Outfit({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700', '800'],
+  variable: '--font-outfit',
+})
 
 export const metadata: Metadata = {
-  title: 'Parent Planner - Caregiving Coordination Made Simple',
-  description: 'One secure place to manage the logistics of your parents\' care. Coordinate with family, track appointments, and store critical information.',
+  title: 'Gather - One Secure Place for Your Family',
+  description: 'Coordinate caregiving, share moments, and keep your family connected. One secure place for appointments, memories, and everything in between.',
 }
 
 export default function RootLayout({
@@ -16,7 +20,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={`${outfit.className} antialiased`}>{children}</body>
     </html>
   )
 }

@@ -71,29 +71,29 @@ export default function VaultComponent({ vault, onUpdateVault }: VaultProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">The Vault</h2>
-          <p className="text-gray-600 mt-1">
+          <h2 className="text-2xl font-bold text-warm-900">The Vault</h2>
+          <p className="text-warm-600 mt-1">
             Critical information at your fingertips
           </p>
         </div>
-        <div className="flex items-center gap-2 px-3 py-2 bg-green-50 rounded-lg">
-          <Shield className="h-5 w-5 text-green-600" />
-          <span className="text-sm text-green-700 font-medium">Encrypted</span>
+        <div className="flex items-center gap-2 px-3 py-2 bg-sage-50 rounded-xl">
+          <Shield className="h-5 w-5 text-sage-600" />
+          <span className="text-sm text-sage-700 font-medium">Encrypted</span>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex flex-wrap gap-2 border-b border-gray-200 pb-2">
+      <div className="flex flex-wrap gap-2 border-b border-cream-200 pb-2">
         {tabs.map((tab) => {
           const Icon = tab.icon
           return (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`flex items-center px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                 activeTab === tab.id
-                  ? 'bg-primary-100 text-primary-700'
-                  : 'text-gray-600 hover:bg-gray-50'
+                  ? 'bg-primary-100 text-primary-700 shadow-sm'
+                  : 'text-warm-600 hover:bg-cream-100'
               }`}
             >
               <Icon className="h-4 w-4 mr-2" />
@@ -104,13 +104,13 @@ export default function VaultComponent({ vault, onUpdateVault }: VaultProps) {
       </div>
 
       {/* Content */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+      <div className="bg-white rounded-2xl shadow-sm border border-cream-200">
         {/* Insurance Cards */}
         {activeTab === 'insurance' && (
           <div className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-900">Insurance Cards</h3>
-              <button className="text-sm text-primary-600 hover:text-primary-700 font-medium">
+              <h3 className="font-semibold text-warm-900">Insurance Cards</h3>
+              <button className="text-sm text-primary-600 hover:text-primary-700 font-medium transition-colors">
                 + Add Card
               </button>
             </div>
@@ -118,38 +118,38 @@ export default function VaultComponent({ vault, onUpdateVault }: VaultProps) {
               {vault.insuranceCards.map((card) => (
                 <div
                   key={card.id}
-                  className="border border-gray-200 rounded-xl p-4 hover:border-primary-200 transition-colors"
+                  className="border border-cream-200 rounded-2xl p-4 hover:border-primary-200 hover:shadow-warm transition-all duration-200"
                 >
                   <div className="flex items-start justify-between">
                     <div>
-                      <h4 className="font-medium text-gray-900">{card.name}</h4>
+                      <h4 className="font-medium text-warm-900">{card.name}</h4>
                       {card.notes && (
-                        <span className="text-xs text-gray-500">{card.notes}</span>
+                        <span className="text-xs text-warm-500">{card.notes}</span>
                       )}
                     </div>
-                    <CreditCard className="h-5 w-5 text-gray-400" />
+                    <CreditCard className="h-5 w-5 text-cream-400" />
                   </div>
                   <div className="mt-4 space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500">Member ID</span>
+                      <span className="text-sm text-warm-500">Member ID</span>
                       <div className="flex items-center gap-2">
-                        <span className="font-mono text-sm">{card.memberId}</span>
+                        <span className="font-mono text-sm text-warm-700">{card.memberId}</span>
                         <button
                           onClick={() => copyToClipboard(card.memberId, `ins-${card.id}`)}
-                          className="p-1 hover:bg-gray-100 rounded"
+                          className="p-1 hover:bg-cream-100 rounded-lg transition-colors"
                         >
                           {copiedId === `ins-${card.id}` ? (
-                            <Check className="h-4 w-4 text-green-600" />
+                            <Check className="h-4 w-4 text-sage-600" />
                           ) : (
-                            <Copy className="h-4 w-4 text-gray-400" />
+                            <Copy className="h-4 w-4 text-warm-400" />
                           )}
                         </button>
                       </div>
                     </div>
                     {card.groupNumber && (
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-500">Group #</span>
-                        <span className="font-mono text-sm">{card.groupNumber}</span>
+                        <span className="text-sm text-warm-500">Group #</span>
+                        <span className="font-mono text-sm text-warm-700">{card.groupNumber}</span>
                       </div>
                     )}
                   </div>
@@ -163,35 +163,35 @@ export default function VaultComponent({ vault, onUpdateVault }: VaultProps) {
         {activeTab === 'medications' && (
           <div className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-900">Current Medications</h3>
-              <button className="text-sm text-primary-600 hover:text-primary-700 font-medium">
+              <h3 className="font-semibold text-warm-900">Current Medications</h3>
+              <button className="text-sm text-primary-600 hover:text-primary-700 font-medium transition-colors">
                 + Add Medication
               </button>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="text-left text-sm text-gray-500 border-b border-gray-100">
+                  <tr className="text-left text-sm text-warm-500 border-b border-cream-100">
                     <th className="pb-3 font-medium">Medication</th>
                     <th className="pb-3 font-medium">Dosage</th>
                     <th className="pb-3 font-medium">Frequency</th>
                     <th className="pb-3 font-medium">Prescribed By</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-cream-100">
                   {vault.medications.map((med) => (
-                    <tr key={med.id} className="hover:bg-gray-50">
+                    <tr key={med.id} className="hover:bg-cream-50 transition-colors">
                       <td className="py-3">
                         <div>
-                          <span className="font-medium text-gray-900">{med.name}</span>
+                          <span className="font-medium text-warm-900">{med.name}</span>
                           {med.notes && (
-                            <p className="text-xs text-gray-500 mt-0.5">{med.notes}</p>
+                            <p className="text-xs text-warm-500 mt-0.5">{med.notes}</p>
                           )}
                         </div>
                       </td>
-                      <td className="py-3 text-gray-600">{med.dosage}</td>
-                      <td className="py-3 text-gray-600">{med.frequency}</td>
-                      <td className="py-3 text-gray-600">{med.prescribedBy || '-'}</td>
+                      <td className="py-3 text-warm-600">{med.dosage}</td>
+                      <td className="py-3 text-warm-600">{med.frequency}</td>
+                      <td className="py-3 text-warm-600">{med.prescribedBy || '-'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -204,8 +204,8 @@ export default function VaultComponent({ vault, onUpdateVault }: VaultProps) {
         {activeTab === 'providers' && (
           <div className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-900">Healthcare Providers</h3>
-              <button className="text-sm text-primary-600 hover:text-primary-700 font-medium">
+              <h3 className="font-semibold text-warm-900">Healthcare Providers</h3>
+              <button className="text-sm text-primary-600 hover:text-primary-700 font-medium transition-colors">
                 + Add Provider
               </button>
             </div>
@@ -213,20 +213,20 @@ export default function VaultComponent({ vault, onUpdateVault }: VaultProps) {
               {vault.providers.map((provider) => (
                 <div
                   key={provider.id}
-                  className="border border-gray-200 rounded-xl p-4 hover:border-primary-200 transition-colors"
+                  className="border border-cream-200 rounded-2xl p-4 hover:border-primary-200 hover:shadow-warm transition-all duration-200"
                 >
                   <div className="flex items-start justify-between">
                     <div>
-                      <h4 className="font-medium text-gray-900">{provider.name}</h4>
+                      <h4 className="font-medium text-warm-900">{provider.name}</h4>
                       <span className="text-sm text-primary-600">{provider.specialty}</span>
                     </div>
                   </div>
                   {provider.address && (
-                    <p className="text-sm text-gray-500 mt-2">{provider.address}</p>
+                    <p className="text-sm text-warm-500 mt-2">{provider.address}</p>
                   )}
                   <a
                     href={`tel:${provider.phone}`}
-                    className="mt-4 flex items-center justify-center gap-2 w-full px-4 py-2 bg-primary-50 text-primary-700 rounded-lg hover:bg-primary-100 transition-colors font-medium"
+                    className="mt-4 flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-primary-50 text-primary-700 rounded-xl hover:bg-primary-100 transition-colors font-medium"
                   >
                     <Phone className="h-4 w-4" />
                     {provider.phone}
@@ -241,8 +241,8 @@ export default function VaultComponent({ vault, onUpdateVault }: VaultProps) {
         {activeTab === 'access' && (
           <div className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-900">Access Codes</h3>
-              <button className="text-sm text-primary-600 hover:text-primary-700 font-medium">
+              <h3 className="font-semibold text-warm-900">Access Codes</h3>
+              <button className="text-sm text-primary-600 hover:text-primary-700 font-medium transition-colors">
                 + Add Code
               </button>
             </div>
@@ -253,42 +253,42 @@ export default function VaultComponent({ vault, onUpdateVault }: VaultProps) {
                 return (
                   <div
                     key={code.id}
-                    className="border border-gray-200 rounded-xl p-4 hover:border-primary-200 transition-colors"
+                    className="border border-cream-200 rounded-2xl p-4 hover:border-primary-200 hover:shadow-warm transition-all duration-200"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="p-2 bg-gray-100 rounded-lg">
-                          <Icon className="h-5 w-5 text-gray-600" />
+                        <div className="p-2 bg-cream-100 rounded-xl">
+                          <Icon className="h-5 w-5 text-warm-600" />
                         </div>
-                        <span className="font-medium text-gray-900">{code.label}</span>
+                        <span className="font-medium text-warm-900">{code.label}</span>
                       </div>
-                      <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full capitalize">
+                      <span className="text-xs px-2 py-1 bg-cream-100 text-warm-600 rounded-full capitalize">
                         {code.type}
                       </span>
                     </div>
-                    <div className="mt-4 flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
-                      <span className="font-mono text-lg">
+                    <div className="mt-4 flex items-center justify-between bg-cream-50 rounded-xl px-3 py-2">
+                      <span className="font-mono text-lg text-warm-700">
                         {isVisible ? code.code : '••••••'}
                       </span>
                       <div className="flex items-center gap-1">
                         <button
                           onClick={() => toggleCodeVisibility(code.id)}
-                          className="p-2 hover:bg-gray-200 rounded-lg"
+                          className="p-2 hover:bg-cream-200 rounded-lg transition-colors"
                         >
                           {isVisible ? (
-                            <EyeOff className="h-4 w-4 text-gray-500" />
+                            <EyeOff className="h-4 w-4 text-warm-500" />
                           ) : (
-                            <Eye className="h-4 w-4 text-gray-500" />
+                            <Eye className="h-4 w-4 text-warm-500" />
                           )}
                         </button>
                         <button
                           onClick={() => copyToClipboard(code.code, `code-${code.id}`)}
-                          className="p-2 hover:bg-gray-200 rounded-lg"
+                          className="p-2 hover:bg-cream-200 rounded-lg transition-colors"
                         >
                           {copiedId === `code-${code.id}` ? (
-                            <Check className="h-4 w-4 text-green-600" />
+                            <Check className="h-4 w-4 text-sage-600" />
                           ) : (
-                            <Copy className="h-4 w-4 text-gray-500" />
+                            <Copy className="h-4 w-4 text-warm-500" />
                           )}
                         </button>
                       </div>
@@ -302,11 +302,11 @@ export default function VaultComponent({ vault, onUpdateVault }: VaultProps) {
       </div>
 
       {/* Security Notice */}
-      <div className="bg-blue-50 rounded-xl p-4 flex items-start gap-3">
-        <Shield className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+      <div className="bg-sage-50 rounded-2xl p-4 flex items-start gap-3">
+        <Shield className="h-5 w-5 text-sage-600 flex-shrink-0 mt-0.5" />
         <div>
-          <h4 className="font-medium text-blue-900">Your data is protected</h4>
-          <p className="text-sm text-blue-700 mt-1">
+          <h4 className="font-medium text-sage-900">Your data is protected</h4>
+          <p className="text-sm text-sage-700 mt-1">
             All information in the Vault is encrypted at rest and in transit.
             Only Care Circle members with appropriate permissions can access this data.
           </p>

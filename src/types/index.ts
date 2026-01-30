@@ -24,6 +24,7 @@ export interface CalendarEvent {
   claimedByName?: string
   createdBy: string
   createdAt: Date
+  reminder?: number // minutes before event (15, 30, 60, 1440)
 }
 
 export interface InsuranceCard {
@@ -80,4 +81,65 @@ export interface Incident {
   reportedByName: string
   createdAt: Date
   tags?: string[]
+  photos?: string[]
+}
+
+export interface NotificationPreferences {
+  enabled: boolean
+  defaultReminder: number // minutes before event
+  emailNotifications: boolean
+  pushNotifications: boolean
+}
+
+// Home Feed Types
+export interface FeedPost {
+  id: string
+  authorId: string
+  authorName: string
+  authorInitials: string
+  content: string
+  media?: {
+    type: 'image' | 'video'
+    url: string
+    thumbnail?: string
+  }[]
+  location?: string
+  taggedMembers?: string[]
+  likes: string[] // array of user IDs who liked
+  comments: FeedComment[]
+  createdAt: Date
+  isPinned?: boolean
+  linkedGiftId?: string // if this post is about a gift
+}
+
+export interface FeedComment {
+  id: string
+  authorId: string
+  authorName: string
+  content: string
+  createdAt: Date
+}
+
+// Family Fun Types
+export type GiftType = 'sports' | 'event' | 'dining' | 'giftcard' | 'other'
+
+export interface FamilyGift {
+  id: string
+  type: GiftType
+  title: string
+  description?: string
+  date?: Date
+  time?: string
+  location?: string
+  details?: string // seat numbers, confirmation codes, etc.
+  imageUrl?: string
+  value?: number // for gift cards
+  code?: string // gift card code
+  sharedBy: string
+  sharedByName: string
+  forMembers: string[] // 'all' or specific member IDs
+  rsvps: string[] // member IDs who are attending
+  comments: FeedComment[]
+  createdAt: Date
+  isFeatured?: boolean
 }

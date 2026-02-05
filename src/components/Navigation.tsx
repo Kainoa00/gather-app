@@ -10,8 +10,7 @@ import {
   X,
   Heart,
   Home,
-  Gift,
-  Sparkles
+  ClipboardList,
 } from 'lucide-react'
 
 interface NavigationProps {
@@ -22,10 +21,9 @@ interface NavigationProps {
 const navItems = [
   { id: 'home', label: 'Home', icon: Home },
   { id: 'calendar', label: 'Calendar', icon: Calendar },
+  { id: 'log', label: 'Care Log', icon: ClipboardList },
   { id: 'circle', label: 'Circle', icon: Users },
-  { id: 'fun', label: 'Fun', icon: Gift },
   { id: 'vault', label: 'Vault', icon: Shield },
-  { id: 'log', label: 'Log', icon: Activity },
 ]
 
 export default function Navigation({ activeTab, onTabChange }: NavigationProps) {
@@ -48,7 +46,7 @@ export default function Navigation({ activeTab, onTabChange }: NavigationProps) 
                 </div>
               </div>
               <span className="text-xl font-bold gradient-text">
-                Gather
+                GatherIn
               </span>
             </button>
           </div>
@@ -58,6 +56,7 @@ export default function Navigation({ activeTab, onTabChange }: NavigationProps) 
             {navItems.map((item) => {
               const Icon = item.icon
               const isActive = activeTab === item.id
+              const isLog = item.id === 'log'
               return (
                 <button
                   key={item.id}
@@ -65,7 +64,9 @@ export default function Navigation({ activeTab, onTabChange }: NavigationProps) 
                   className={`
                     flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300
                     ${isActive
-                      ? 'bg-lavender-100 text-lavender-700 shadow-soft'
+                      ? isLog
+                        ? 'bg-gradient-to-r from-lavender-100 to-peach-100 text-lavender-700 shadow-soft'
+                        : 'bg-lavender-100 text-lavender-700 shadow-soft'
                       : 'text-navy-600 hover:bg-cream-100 hover:text-navy-800'
                     }
                   `}

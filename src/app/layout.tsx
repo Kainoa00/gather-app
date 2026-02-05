@@ -9,8 +9,8 @@ const outfit = Outfit({
 })
 
 export const metadata: Metadata = {
-  title: 'Gather - One Secure Place for Your Family',
-  description: 'Coordinate caregiving, share moments, and keep your family connected. One secure place for appointments, memories, and everything in between.',
+  title: 'GatherIn - Stay Connected to Your Loved One\'s Care',
+  description: 'A family portal for skilled nursing facilities. Real-time care logs, visit coordination, and secure health information sharing.',
 }
 
 export default function RootLayout({

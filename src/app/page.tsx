@@ -5,25 +5,42 @@ import Navigation from '@/components/Navigation'
 import CareCircle from '@/components/CareCircle'
 import CareCalendar from '@/components/CareCalendar'
 import VaultComponent from '@/components/Vault'
-import IncidentFeed from '@/components/IncidentFeed'
+import CareLog from '@/components/CareLog'
 import HomeFeed from '@/components/HomeFeed'
-import FamilyFun from '@/components/FamilyFun'
 import ExportModal from '@/components/ExportModal'
-import { demoMembers, demoEvents, demoVault, demoIncidents, demoPosts, demoGifts } from '@/lib/demo-data'
-import { CareCircleMember, CalendarEvent, Vault, Incident, EventType, IncidentSeverity, FeedPost, FamilyGift } from '@/types'
-import { Heart, Shield, Calendar, Users, Activity, ArrowRight, Sparkles, Download, Home as HomeIcon, Gift, Star, Zap, Lock, Camera, CheckCircle2 } from 'lucide-react'
+import PatientSummary from '@/components/PatientSummary'
+import NotificationCenter from '@/components/NotificationCenter'
+import VisitTracker from '@/components/VisitTracker'
+import DailyDigest from '@/components/DailyDigest'
+import WellnessTrends from '@/components/WellnessTrends'
+import VitalsTrends from '@/components/VitalsTrends'
+import QuickActions from '@/components/QuickActions'
+import { demoMembers, demoEvents, demoVault, demoLogEntries, demoPosts, demoPatient, demoVisits, demoNotifications, demoWellnessDays } from '@/lib/demo-data'
+import { CareCircleMember, CalendarEvent, Vault, LogEntry, FeedPost, UserRole, Visit, Notification } from '@/types'
+import { Heart, Shield, Calendar, Users, ClipboardList, ArrowRight, Sparkles, Download, Home as HomeIcon, Lock, CheckCircle2, Building2 } from 'lucide-react'
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('landing')
   const [members, setMembers] = useState<CareCircleMember[]>(demoMembers)
   const [events, setEvents] = useState<CalendarEvent[]>(demoEvents)
   const [vault, setVault] = useState<Vault>(demoVault)
-  const [incidents, setIncidents] = useState<Incident[]>(demoIncidents)
+  const [logEntries, setLogEntries] = useState<LogEntry[]>(demoLogEntries)
   const [posts, setPosts] = useState<FeedPost[]>(demoPosts)
-  const [gifts, setGifts] = useState<FamilyGift[]>(demoGifts)
+  const [visits, setVisits] = useState<Visit[]>(demoVisits)
+  const [notifications, setNotifications] = useState<Notification[]>(demoNotifications)
   const [showExportModal, setShowExportModal] = useState(false)
 
-  const currentUserId = '1' // Demo: Sarah is the current user (admin)
+  // Demo: Sarah is the current user (admin/family)
+  const currentUserId = '1'
+  const currentUserName = 'Sarah Johnson'
+  const currentUserRole: UserRole = 'admin'
+
+  // Simulate nurse view toggle for demo
+  const [demoRole, setDemoRole] = useState<UserRole>('admin')
+
+  // Sub-tab states
+  const [homeSubTab, setHomeSubTab] = useState<'feed' | 'digest' | 'visits'>('feed')
+  const [logSubTab, setLogSubTab] = useState<'timeline' | 'trends' | 'vitals' | 'wellness'>('timeline')
 
   const handleAddMember = (member: Omit<CareCircleMember, 'id' | 'joinedAt'>) => {
     const newMember: CareCircleMember = {
@@ -38,7 +55,7 @@ export default function Home() {
     setEvents(
       events.map((event) =>
         event.id === eventId
-          ? { ...event, claimedBy: '1', claimedByName: userName }
+          ? { ...event, claimedBy: currentUserId, claimedByName: userName }
           : event
       )
     )
@@ -49,19 +66,59 @@ export default function Home() {
       ...event,
       id: String(events.length + 1),
       createdAt: new Date(),
-      createdBy: '1',
+      createdBy: currentUserId,
     }
     setEvents([...events, newEvent])
   }
 
-  const handleAddIncident = (incident: Omit<Incident, 'id' | 'createdAt' | 'reportedBy'>) => {
-    const newIncident: Incident = {
-      ...incident,
-      id: String(incidents.length + 1),
+  // Care Log handlers
+  const handleAddLogEntry = (entry: Omit<LogEntry, 'id' | 'createdAt' | 'comments'>) => {
+    const newEntry: LogEntry = {
+      ...entry,
+      id: `log-${logEntries.length + 1}`,
       createdAt: new Date(),
-      reportedBy: '1',
+      comments: [],
     }
-    setIncidents([newIncident, ...incidents])
+    setLogEntries([newEntry, ...logEntries])
+
+    // Auto-generate notification
+    const notifTypeMap: Record<string, Notification['type']> = {
+      vitals: 'vitals',
+      medication: 'medication',
+      mood: 'mood',
+      incident: 'incident',
+      activity: 'general',
+    }
+    const newNotification: Notification = {
+      id: `notif-${Date.now()}`,
+      type: notifTypeMap[entry.category] || 'general',
+      title: entry.title,
+      message: entry.notes || 'New entry logged',
+      sourceId: newEntry.id,
+      sourceType: 'log_entry',
+      createdAt: new Date(),
+      readBy: [],
+    }
+    setNotifications([newNotification, ...notifications])
+  }
+
+  const handleAddLogComment = (entryId: string, content: string) => {
+    const currentMember = members.find(m => m.id === currentUserId)
+    setLogEntries(logEntries.map(entry => {
+      if (entry.id === entryId) {
+        return {
+          ...entry,
+          comments: [...entry.comments, {
+            id: `lc-${Date.now()}`,
+            authorId: currentUserId,
+            authorName: currentMember?.name || 'You',
+            content,
+            createdAt: new Date(),
+          }],
+        }
+      }
+      return entry
+    }))
   }
 
   // Home Feed handlers
@@ -71,7 +128,7 @@ export default function Home() {
       id: String(posts.length + 1),
       createdAt: new Date(),
       likes: [],
-      comments: []
+      comments: [],
     }
     setPosts([newPost, ...posts])
   }
@@ -84,7 +141,7 @@ export default function Home() {
           ...post,
           likes: isLiked
             ? post.likes.filter(id => id !== currentUserId)
-            : [...post.likes, currentUserId]
+            : [...post.likes, currentUserId],
         }
       }
       return post
@@ -102,62 +159,74 @@ export default function Home() {
             authorId: currentUserId,
             authorName: currentMember?.name || 'You',
             content,
-            createdAt: new Date()
-          }]
+            createdAt: new Date(),
+          }],
         }
       }
       return post
     }))
   }
 
-  // Family Fun handlers
-  const handleAddGift = (gift: Omit<FamilyGift, 'id' | 'createdAt' | 'rsvps' | 'comments'>) => {
-    const newGift: FamilyGift = {
-      ...gift,
-      id: `g${gifts.length + 1}`,
-      createdAt: new Date(),
-      rsvps: [],
-      comments: []
-    }
-    setGifts([newGift, ...gifts])
-  }
-
-  const handleRsvp = (giftId: string) => {
-    setGifts(gifts.map(gift => {
-      if (gift.id === giftId) {
-        const isRsvped = gift.rsvps.includes(currentUserId)
-        return {
-          ...gift,
-          rsvps: isRsvped
-            ? gift.rsvps.filter(id => id !== currentUserId)
-            : [...gift.rsvps, currentUserId]
-        }
-      }
-      return gift
-    }))
-  }
-
-  const handleAddGiftComment = (giftId: string, content: string) => {
+  // Visit handlers
+  const handleCheckIn = () => {
     const currentMember = members.find(m => m.id === currentUserId)
-    setGifts(gifts.map(gift => {
-      if (gift.id === giftId) {
+    const newVisit: Visit = {
+      id: `v-${Date.now()}`,
+      visitorId: currentUserId,
+      visitorName: currentMember?.name || currentUserName,
+      visitorRelationship: currentMember?.relationship,
+      checkInTime: new Date(),
+    }
+    setVisits([newVisit, ...visits])
+  }
+
+  const handleCheckOut = (mood: string, note: string) => {
+    setVisits(visits.map(visit => {
+      if (visit.visitorId === currentUserId && !visit.checkOutTime) {
+        const checkOutTime = new Date()
+        const duration = Math.round((checkOutTime.getTime() - new Date(visit.checkInTime).getTime()) / 60000)
         return {
-          ...gift,
-          comments: [...gift.comments, {
-            id: `gc${Date.now()}`,
-            authorId: currentUserId,
-            authorName: currentMember?.name || 'You',
-            content,
-            createdAt: new Date()
-          }]
+          ...visit,
+          checkOutTime,
+          duration,
+          mood: mood as Visit['mood'],
+          note: note || undefined,
         }
       }
-      return gift
+      return visit
+    }))
+
+    // Create a notification for the visit
+    const newNotification: Notification = {
+      id: `notif-visit-${Date.now()}`,
+      type: 'visit',
+      title: `${currentUserName} Visited`,
+      message: note || 'Family visit completed',
+      sourceId: `v-${Date.now()}`,
+      sourceType: 'visit',
+      createdAt: new Date(),
+      readBy: [],
+    }
+    setNotifications([newNotification, ...notifications])
+  }
+
+  // Notification handlers
+  const handleMarkAsRead = (notificationId: string) => {
+    setNotifications(notifications.map(n => {
+      if (n.id === notificationId && !n.readBy.includes(currentUserId)) {
+        return { ...n, readBy: [...n.readBy, currentUserId] }
+      }
+      return n
     }))
   }
 
-  const handleViewGift = (giftId: string) => {
-    setActiveTab('fun')
+  const handleMarkAllAsRead = () => {
+    setNotifications(notifications.map(n => {
+      if (!n.readBy.includes(currentUserId)) {
+        return { ...n, readBy: [...n.readBy, currentUserId] }
+      }
+      return n
+    }))
   }
 
   // Landing page
@@ -186,11 +255,15 @@ export default function Home() {
               </div>
 
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight animate-slide-up" style={{ animationDelay: '100ms' }}>
-                <span className="gradient-text">Gather</span>
+                <span className="gradient-text">GatherIn</span>
               </h1>
 
               <p className="mt-6 text-xl sm:text-2xl text-navy-600 leading-relaxed animate-slide-up" style={{ animationDelay: '200ms' }}>
-                One secure place for your family.
+                Stay connected to your loved one's care journey.
+              </p>
+
+              <p className="mt-3 text-lg text-navy-500 animate-slide-up" style={{ animationDelay: '250ms' }}>
+                A family portal for skilled nursing facilities.
               </p>
 
               <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center animate-slide-up" style={{ animationDelay: '300ms' }}>
@@ -218,15 +291,14 @@ export default function Home() {
             <div className="card-glass p-6 sm:p-8 text-center animate-slide-up" style={{ animationDelay: '400ms' }}>
               <div className="flex justify-center mb-4">
                 <div className="p-3 bg-peach-100 rounded-2xl">
-                  <Zap className="h-6 w-6 text-peach-600" />
+                  <Building2 className="h-6 w-6 text-peach-600" />
                 </div>
               </div>
               <p className="text-lg text-navy-700">
-                <strong className="text-navy-900">Think about this:</strong> If you had to go to the ER with your parent right now,
-                would you have their medication list and insurance ID ready?
+                <strong className="text-navy-900">When your loved one is in a skilled nursing facility,</strong> staying informed shouldn't be a guessing game.
               </p>
               <p className="mt-2 text-peach-600 font-medium">
-                Upload them to Gather now so you're prepared when it matters most.
+                GatherIn gives your family real-time care updates, visit coordination, and peace of mind.
               </p>
             </div>
           </div>
@@ -240,27 +312,29 @@ export default function Home() {
                 Everything Your Family Needs
               </h2>
               <p className="mt-4 text-lg text-navy-600 max-w-2xl mx-auto">
-                Stop the chaos of group texts. Gather keeps everyone on the same page.
+                Stay informed about your loved one's daily care. No more wondering how Mom is doing today.
               </p>
             </div>
 
             {/* Bento Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {/* Feature 1 - Home Feed (Large) */}
+              {/* Feature 1 - Care Log (Star Feature - Large) */}
               <div className="bento-item md:col-span-2 lg:col-span-2 card-glass p-8 animate-slide-up opacity-0" style={{ animationFillMode: 'forwards' }}>
                 <div className="flex flex-col sm:flex-row gap-6 items-start">
-                  <div className="p-4 bg-gradient-to-br from-lavender-100 to-lavender-200 rounded-2xl shrink-0">
-                    <Camera className="h-8 w-8 text-lavender-600" />
+                  <div className="p-4 bg-gradient-to-br from-lavender-100 to-peach-100 rounded-2xl shrink-0">
+                    <ClipboardList className="h-8 w-8 text-lavender-600" />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold text-navy-900 mb-2">Family Feed</h3>
+                    <h3 className="text-2xl font-bold text-navy-900 mb-2">Daily Care Log</h3>
                     <p className="text-navy-600 text-lg leading-relaxed">
-                      Share photos and videos of precious family moments. Like a private Instagram just for your loved ones. Keep everyone connected no matter the distance.
+                      Nurses log vitals, medications, activities, and mood throughout the day. Family members see a real-time timeline with the ability to comment and ask questions.
                     </p>
                     <div className="mt-4 flex flex-wrap gap-2">
-                      <span className="px-3 py-1 bg-lavender-100 text-lavender-700 text-sm font-medium rounded-full">Photos</span>
-                      <span className="px-3 py-1 bg-lavender-100 text-lavender-700 text-sm font-medium rounded-full">Videos</span>
-                      <span className="px-3 py-1 bg-lavender-100 text-lavender-700 text-sm font-medium rounded-full">Comments</span>
+                      <span className="px-3 py-1 bg-red-50 text-red-700 text-sm font-medium rounded-full">Vitals</span>
+                      <span className="px-3 py-1 bg-blue-50 text-blue-700 text-sm font-medium rounded-full">Medications</span>
+                      <span className="px-3 py-1 bg-green-50 text-green-700 text-sm font-medium rounded-full">Activities</span>
+                      <span className="px-3 py-1 bg-purple-50 text-purple-700 text-sm font-medium rounded-full">Mood</span>
+                      <span className="px-3 py-1 bg-orange-50 text-orange-700 text-sm font-medium rounded-full">Incidents</span>
                     </div>
                   </div>
                 </div>
@@ -271,20 +345,20 @@ export default function Home() {
                 <div className="p-3 bg-mint-100 rounded-2xl w-fit mb-4">
                   <Calendar className="h-6 w-6 text-mint-600" />
                 </div>
-                <h3 className="text-xl font-bold text-navy-900 mb-2">Care Calendar</h3>
+                <h3 className="text-xl font-bold text-navy-900 mb-2">Visit Calendar</h3>
                 <p className="text-navy-600">
-                  Track appointments with "I'll do it" claim buttons. No more coordination mistakes.
+                  See the best times to visit, how your loved one is feeling, and coordinate with family and facility events.
                 </p>
               </div>
 
-              {/* Feature 3 - Family Fun */}
+              {/* Feature 3 - Home Feed */}
               <div className="bento-item card-glass p-6 animate-slide-up opacity-0" style={{ animationFillMode: 'forwards' }}>
                 <div className="p-3 bg-peach-100 rounded-2xl w-fit mb-4">
-                  <Gift className="h-6 w-6 text-peach-600" />
+                  <Heart className="h-6 w-6 text-peach-600" />
                 </div>
-                <h3 className="text-xl font-bold text-navy-900 mb-2">Family Fun</h3>
+                <h3 className="text-xl font-bold text-navy-900 mb-2">Moments Feed</h3>
                 <p className="text-navy-600">
-                  Share tickets, gift cards, and restaurant reservations. Plan experiences together.
+                  Joyful moments, visit recaps, activity photos, and milestones shared by staff and family.
                 </p>
               </div>
 
@@ -295,7 +369,7 @@ export default function Home() {
                 </div>
                 <h3 className="text-xl font-bold text-navy-900 mb-2">Care Circle</h3>
                 <p className="text-navy-600">
-                  Invite family with role-based permissions. Everyone sees exactly what they need.
+                  Family and staff contact directory. Everyone who's part of your loved one's care, in one place.
                 </p>
               </div>
 
@@ -308,27 +382,16 @@ export default function Home() {
                   <div>
                     <h3 className="text-2xl font-bold text-navy-900 mb-2">The Vault</h3>
                     <p className="text-navy-600 text-lg leading-relaxed">
-                      Insurance cards, medications, healthcare providers, and access codes. All critical information in one secure, easily accessible place.
+                      Facility info, room number, visiting hours, insurance cards, medications, and care team contacts. Everything you need in one secure, accessible place.
                     </p>
                     <div className="mt-4 flex flex-wrap gap-2">
+                      <span className="px-3 py-1 bg-mint-100 text-mint-700 text-sm font-medium rounded-full">Facility Info</span>
                       <span className="px-3 py-1 bg-mint-100 text-mint-700 text-sm font-medium rounded-full">Insurance</span>
                       <span className="px-3 py-1 bg-mint-100 text-mint-700 text-sm font-medium rounded-full">Medications</span>
-                      <span className="px-3 py-1 bg-mint-100 text-mint-700 text-sm font-medium rounded-full">Providers</span>
-                      <span className="px-3 py-1 bg-mint-100 text-mint-700 text-sm font-medium rounded-full">Access Codes</span>
+                      <span className="px-3 py-1 bg-mint-100 text-mint-700 text-sm font-medium rounded-full">Care Team</span>
                     </div>
                   </div>
                 </div>
-              </div>
-
-              {/* Feature 6 - Care Log */}
-              <div className="bento-item card-glass p-6 animate-slide-up opacity-0" style={{ animationFillMode: 'forwards' }}>
-                <div className="p-3 bg-cream-200 rounded-2xl w-fit mb-4">
-                  <Activity className="h-6 w-6 text-navy-600" />
-                </div>
-                <h3 className="text-xl font-bold text-navy-900 mb-2">Care Log</h3>
-                <p className="text-navy-600">
-                  Log health updates with photos. Searchable history for doctor visits and incidents.
-                </p>
               </div>
             </div>
           </div>
@@ -348,8 +411,8 @@ export default function Home() {
               </h2>
               <p className="text-lg text-navy-600 mb-10 max-w-2xl mx-auto">
                 Your family's health information deserves the highest protection.
-                Gather uses encryption at rest and in transit, with
-                two-factor authentication for sensitive data access.
+                GatherIn uses encryption at rest and in transit, with
+                role-based access control for sensitive data.
               </p>
               <div className="flex flex-wrap justify-center gap-6">
                 <div className="flex items-center gap-2 text-navy-700">
@@ -362,7 +425,7 @@ export default function Home() {
                 </div>
                 <div className="flex items-center gap-2 text-navy-700">
                   <CheckCircle2 className="h-5 w-5 text-mint-500" />
-                  <span className="font-medium">Two-factor auth</span>
+                  <span className="font-medium">Role-based access</span>
                 </div>
               </div>
             </div>
@@ -376,10 +439,10 @@ export default function Home() {
               <div className="absolute inset-0 bg-gradient-to-r from-lavender-500 to-peach-500 rounded-4xl blur-2xl opacity-20"></div>
               <div className="relative bg-gradient-to-br from-navy-800 to-navy-900 rounded-4xl p-10 sm:p-16 shadow-glass-lg">
                 <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-                  Start Coordinating Today
+                  Stay Connected to Their Care
                 </h2>
                 <p className="text-lg text-navy-200 mb-10">
-                  Set up your Care Circle in minutes. Your family will thank you.
+                  Set up your care circle in minutes. Your family will thank you.
                 </p>
                 <button
                   onClick={() => setActiveTab('home')}
@@ -401,8 +464,8 @@ export default function Home() {
                 <Heart className="h-5 w-5 text-lavender-600" />
               </div>
             </div>
-            <p className="text-navy-600 font-medium">Gather</p>
-            <p className="mt-1 text-navy-500 text-sm">One secure place for your family</p>
+            <p className="text-navy-600 font-medium">GatherIn</p>
+            <p className="mt-1 text-navy-500 text-sm">Stay connected to your loved one's care</p>
             <p className="mt-4 text-navy-400 text-xs">Demo version for portfolio showcase</p>
           </div>
         </footer>
@@ -418,20 +481,109 @@ export default function Home() {
         <div className="absolute bottom-20 -left-20 w-72 h-72 blob-peach rounded-full opacity-40"></div>
       </div>
 
-      <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+      {/* Navigation with Notification Bell */}
+      <nav className="glass-strong sticky top-0 z-50 border-b border-white/40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+
+            {/* Notification Bell */}
+            <div className="flex items-center">
+              <NotificationCenter
+                notifications={notifications}
+                currentUserId={currentUserId}
+                onMarkAsRead={handleMarkAsRead}
+                onMarkAllAsRead={handleMarkAllAsRead}
+                onNavigate={(sourceType, sourceId) => {
+                  if (sourceType === 'log_entry') setActiveTab('log')
+                  else if (sourceType === 'visit') { setActiveTab('home'); setHomeSubTab('visits') }
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </nav>
 
       <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Demo role switcher */}
+        <div className="mb-4 flex items-center gap-3">
+          <span className="text-sm text-navy-500">Viewing as:</span>
+          <div className="flex gap-1 bg-cream-100 rounded-xl p-1">
+            {(['admin', 'nurse', 'family'] as UserRole[]).map((role) => (
+              <button
+                key={role}
+                onClick={() => setDemoRole(role)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  demoRole === role
+                    ? 'bg-white text-navy-900 shadow-sm'
+                    : 'text-navy-500 hover:text-navy-700'
+                }`}
+              >
+                {role === 'admin' ? 'Admin' : role === 'nurse' ? 'Nurse' : 'Family'}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {activeTab === 'home' && (
-          <HomeFeed
-            posts={posts}
-            members={members}
-            currentUserId={currentUserId}
-            onAddPost={handleAddPost}
-            onLikePost={handleLikePost}
-            onAddComment={handleAddPostComment}
-            onViewGift={handleViewGift}
-          />
+          <div className="space-y-6">
+            {/* Patient Summary Dashboard */}
+            <PatientSummary
+              patient={demoPatient}
+              logEntries={logEntries}
+              events={events}
+              visits={visits}
+              onClaimVisit={(eventId) => handleClaimEvent(eventId, currentUserName)}
+            />
+
+            {/* Home Sub-tabs */}
+            <div className="flex gap-2 border-b border-lavender-100 pb-2">
+              {[
+                { id: 'feed' as const, label: 'Feed' },
+                { id: 'digest' as const, label: 'Daily Digest' },
+                { id: 'visits' as const, label: 'Visits' },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setHomeSubTab(tab.id)}
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                    homeSubTab === tab.id
+                      ? 'bg-lavender-100 text-lavender-700 shadow-soft'
+                      : 'text-navy-600 hover:bg-cream-100'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {homeSubTab === 'feed' && (
+              <HomeFeed
+                posts={posts}
+                members={members}
+                currentUserId={currentUserId}
+                onAddPost={handleAddPost}
+                onLikePost={handleLikePost}
+                onAddComment={handleAddPostComment}
+              />
+            )}
+
+            {homeSubTab === 'digest' && (
+              <DailyDigest logEntries={logEntries} visits={visits} />
+            )}
+
+            {homeSubTab === 'visits' && (
+              <VisitTracker
+                visits={visits}
+                currentUserId={currentUserId}
+                currentUserName={currentUserName}
+                onCheckIn={handleCheckIn}
+                onCheckOut={handleCheckOut}
+              />
+            )}
+          </div>
         )}
+
         {activeTab === 'calendar' && (
           <CareCalendar
             events={events}
@@ -439,25 +591,63 @@ export default function Home() {
             onAddEvent={handleAddEvent}
           />
         )}
+
+        {activeTab === 'log' && (
+          <div className="space-y-6">
+            {/* Quick Actions for Nurses */}
+            {(demoRole === 'nurse' || demoRole === 'admin') && (
+              <QuickActions
+                medications={vault.medications}
+                currentUserId={currentUserId}
+                currentUserName={currentUserName}
+                onAddLogEntry={handleAddLogEntry}
+              />
+            )}
+
+            {/* Log Sub-tabs */}
+            <div className="flex gap-2 border-b border-lavender-100 pb-2">
+              {[
+                { id: 'timeline' as const, label: 'Timeline' },
+                { id: 'vitals' as const, label: 'Vitals Trends' },
+                { id: 'wellness' as const, label: 'Wellness' },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setLogSubTab(tab.id)}
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                    logSubTab === tab.id
+                      ? 'bg-lavender-100 text-lavender-700 shadow-soft'
+                      : 'text-navy-600 hover:bg-cream-100'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {logSubTab === 'timeline' && (
+              <CareLog
+                logEntries={logEntries}
+                currentUserRole={demoRole}
+                currentUserId={currentUserId}
+                currentUserName={currentUserName}
+                onAddLogEntry={handleAddLogEntry}
+                onAddComment={handleAddLogComment}
+              />
+            )}
+
+            {logSubTab === 'vitals' && <VitalsTrends logEntries={logEntries} />}
+
+            {logSubTab === 'wellness' && <WellnessTrends days={demoWellnessDays} />}
+          </div>
+        )}
+
         {activeTab === 'circle' && (
           <CareCircle members={members} onAddMember={handleAddMember} />
         )}
-        {activeTab === 'fun' && (
-          <FamilyFun
-            gifts={gifts}
-            members={members}
-            currentUserId={currentUserId}
-            isAdmin={members.find(m => m.id === currentUserId)?.role === 'admin'}
-            onAddGift={handleAddGift}
-            onRsvp={handleRsvp}
-            onAddComment={handleAddGiftComment}
-          />
-        )}
+
         {activeTab === 'vault' && (
           <VaultComponent vault={vault} onUpdateVault={setVault} />
-        )}
-        {activeTab === 'log' && (
-          <IncidentFeed incidents={incidents} onAddIncident={handleAddIncident} />
         )}
       </main>
 
@@ -488,7 +678,7 @@ export default function Home() {
         isOpen={showExportModal}
         onClose={() => setShowExportModal(false)}
         vault={vault}
-        incidents={incidents}
+        logEntries={logEntries}
         events={events}
       />
     </div>

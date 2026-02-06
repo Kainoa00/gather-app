@@ -15,6 +15,7 @@ import DailyDigest from '@/components/DailyDigest'
 import WellnessTrends from '@/components/WellnessTrends'
 import VitalsTrends from '@/components/VitalsTrends'
 import QuickActions from '@/components/QuickActions'
+import ChatBot from '@/components/ChatBot'
 import { demoMembers, demoEvents, demoVault, demoLogEntries, demoPosts, demoPatient, demoVisits, demoNotifications, demoWellnessDays } from '@/lib/demo-data'
 import { CareCircleMember, CalendarEvent, Vault, LogEntry, FeedPost, UserRole, Visit, Notification } from '@/types'
 import { Heart, Shield, Calendar, Users, ClipboardList, ArrowRight, Sparkles, Download, Home as HomeIcon, Lock, CheckCircle2, Building2 } from 'lucide-react'
@@ -651,10 +652,10 @@ export default function Home() {
         )}
       </main>
 
-      {/* Export Button */}
+      {/* Export Button - positioned above chatbot */}
       <button
         onClick={() => setShowExportModal(true)}
-        className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 p-3.5 bg-gradient-to-br from-lavender-500 to-lavender-600 text-white rounded-2xl shadow-float hover:shadow-float hover:-translate-y-0.5 transition-all duration-300"
+        className="fixed bottom-24 right-6 p-3.5 bg-gradient-to-br from-navy-600 to-navy-700 text-white rounded-2xl shadow-float hover:shadow-float hover:-translate-y-0.5 transition-all duration-300 z-30"
         title="Export & Share"
       >
         <Download className="h-5 w-5" />
@@ -680,6 +681,15 @@ export default function Home() {
         vault={vault}
         logEntries={logEntries}
         events={events}
+      />
+
+      {/* AI Chat Assistant */}
+      <ChatBot
+        patientInfo={demoPatient}
+        logEntries={logEntries}
+        events={events}
+        vault={vault}
+        visits={visits}
       />
     </div>
   )

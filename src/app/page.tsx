@@ -6,228 +6,426 @@ import CareCircle from '@/components/CareCircle'
 import CareCalendar from '@/components/CareCalendar'
 import VaultComponent from '@/components/Vault'
 import CareLog from '@/components/CareLog'
-import HomeFeed from '@/components/HomeFeed'
 import ExportModal from '@/components/ExportModal'
-import PatientSummary from '@/components/PatientSummary'
 import NotificationCenter from '@/components/NotificationCenter'
 import VisitTracker from '@/components/VisitTracker'
-import DailyDigest from '@/components/DailyDigest'
 import WellnessTrends from '@/components/WellnessTrends'
 import VitalsTrends from '@/components/VitalsTrends'
 import QuickActions from '@/components/QuickActions'
 import ChatBot from '@/components/ChatBot'
-import { demoMembers, demoEvents, demoVault, demoLogEntries, demoPosts, demoPatient, demoVisits, demoNotifications, demoWellnessDays } from '@/lib/demo-data'
+import LoginScreen from '@/components/LoginScreen'
+import HomeView from '@/components/HomeView'
+import { isDemoMode, DEMO_PATIENT_ID } from '@/lib/supabase'
+import {
+  usePatient,
+  useMembers,
+  useEvents,
+  useLogEntries,
+  usePosts,
+  useVisits,
+  useNotifications,
+  useVault,
+  useWellnessDays,
+} from '@/lib/hooks/useSupabaseData'
+import {
+  addMemberToDb,
+  addEventToDb,
+  claimEventInDb,
+  addLogEntryToDb,
+  addLogCommentToDb,
+  addPostToDb,
+  likePostInDb,
+  addPostCommentToDb,
+  checkInToDb,
+  checkOutInDb,
+  createNotificationInDb,
+  markNotificationReadInDb,
+  markAllNotificationsReadInDb,
+} from '@/lib/api/mutations'
 import { CareCircleMember, CalendarEvent, Vault, LogEntry, FeedPost, UserRole, Visit, Notification } from '@/types'
-import { Heart, Shield, Calendar, Users, ClipboardList, ArrowRight, Sparkles, Download, Home as HomeIcon, Lock, CheckCircle2, Building2 } from 'lucide-react'
+import { Heart, Shield, Calendar, Users, ClipboardList, ArrowRight, Sparkles, Download, Lock, CheckCircle2, Building2, Link2, MessageSquare, Phone, PhoneOff, TrendingUp, Star } from 'lucide-react'
+import {
+  canUseQuickActions,
+  canViewMedications,
+  getVisibleCalendarEventTypes,
+  getVisibleNotificationTypes,
+  getVisibleLogCategories,
+} from '@/lib/permissions'
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('landing')
-  const [members, setMembers] = useState<CareCircleMember[]>(demoMembers)
-  const [events, setEvents] = useState<CalendarEvent[]>(demoEvents)
-  const [vault, setVault] = useState<Vault>(demoVault)
-  const [logEntries, setLogEntries] = useState<LogEntry[]>(demoLogEntries)
-  const [posts, setPosts] = useState<FeedPost[]>(demoPosts)
-  const [visits, setVisits] = useState<Visit[]>(demoVisits)
-  const [notifications, setNotifications] = useState<Notification[]>(demoNotifications)
   const [showExportModal, setShowExportModal] = useState(false)
 
-  // Demo: Sarah is the current user (admin/family)
-  const currentUserId = '1'
-  const currentUserName = 'Sarah Johnson'
-  const currentUserRole: UserRole = 'admin'
+  // Current user state (set by login screen)
+  const [currentUser, setCurrentUser] = useState<{
+    id: string
+    name: string
+    role: UserRole
+    relationship: string
+  } | null>(null)
 
-  // Simulate nurse view toggle for demo
-  const [demoRole, setDemoRole] = useState<UserRole>('admin')
+  // Derive user info from state (fallback for safety)
+  const currentUserId = currentUser?.id || '1'
+  const currentUserName = currentUser?.name || 'Toshio Shintaku'
+  const currentUserRole: UserRole = currentUser?.role || 'primary'
 
   // Sub-tab states
-  const [homeSubTab, setHomeSubTab] = useState<'feed' | 'digest' | 'visits'>('feed')
   const [logSubTab, setLogSubTab] = useState<'timeline' | 'trends' | 'vitals' | 'wellness'>('timeline')
 
-  const handleAddMember = (member: Omit<CareCircleMember, 'id' | 'joinedAt'>) => {
-    const newMember: CareCircleMember = {
-      ...member,
-      id: String(members.length + 1),
-      joinedAt: new Date(),
+  // Supabase data hooks (fall back to demo data when isDemoMode)
+  const { patient } = usePatient(DEMO_PATIENT_ID)
+  const { members, setMembers, refetch: refetchMembers } = useMembers(DEMO_PATIENT_ID)
+  const { events, setEvents, refetch: refetchEvents } = useEvents(DEMO_PATIENT_ID)
+  const { logEntries, setLogEntries, refetch: refetchLogs } = useLogEntries(DEMO_PATIENT_ID)
+  const { posts, setPosts, refetch: refetchPosts } = usePosts(DEMO_PATIENT_ID)
+  const { visits, setVisits, refetch: refetchVisits } = useVisits(DEMO_PATIENT_ID)
+  const { notifications, setNotifications, refetch: refetchNotifications } = useNotifications(DEMO_PATIENT_ID)
+  const { vault, setVault, refetch: refetchVault } = useVault(DEMO_PATIENT_ID)
+  const { wellnessDays } = useWellnessDays(DEMO_PATIENT_ID)
+
+  // ==========================================
+  // Handler functions (demo mode = local state, Supabase mode = DB + refetch)
+  // ==========================================
+
+  const handleAddMember = async (member: Omit<CareCircleMember, 'id' | 'joinedAt'>) => {
+    if (isDemoMode) {
+      const newMember: CareCircleMember = {
+        ...member,
+        id: String(members.length + 1),
+        joinedAt: new Date(),
+      }
+      setMembers([...members, newMember])
+    } else {
+      try {
+        await addMemberToDb(member, DEMO_PATIENT_ID)
+        refetchMembers()
+      } catch (error) {
+        console.error('Error adding member:', error)
+      }
     }
-    setMembers([...members, newMember])
   }
 
-  const handleClaimEvent = (eventId: string, userName: string) => {
-    setEvents(
-      events.map((event) =>
-        event.id === eventId
-          ? { ...event, claimedBy: currentUserId, claimedByName: userName }
-          : event
+  const handleClaimEvent = async (eventId: string, userName: string) => {
+    if (isDemoMode) {
+      setEvents(
+        events.map((event) =>
+          event.id === eventId
+            ? { ...event, claimedBy: currentUserId, claimedByName: userName }
+            : event
+        )
       )
-    )
+    } else {
+      try {
+        await claimEventInDb(eventId, currentUserId, userName)
+        refetchEvents()
+      } catch (error) {
+        console.error('Error claiming event:', error)
+      }
+    }
   }
 
-  const handleAddEvent = (event: Omit<CalendarEvent, 'id' | 'createdAt' | 'createdBy'>) => {
-    const newEvent: CalendarEvent = {
-      ...event,
-      id: String(events.length + 1),
-      createdAt: new Date(),
-      createdBy: currentUserId,
+  const handleAddEvent = async (event: Omit<CalendarEvent, 'id' | 'createdAt' | 'createdBy'>) => {
+    if (isDemoMode) {
+      const newEvent: CalendarEvent = {
+        ...event,
+        id: String(events.length + 1),
+        createdAt: new Date(),
+        createdBy: currentUserId,
+      }
+      setEvents([...events, newEvent])
+    } else {
+      try {
+        await addEventToDb(event, currentUserId, DEMO_PATIENT_ID)
+        refetchEvents()
+      } catch (error) {
+        console.error('Error adding event:', error)
+      }
     }
-    setEvents([...events, newEvent])
   }
 
   // Care Log handlers
-  const handleAddLogEntry = (entry: Omit<LogEntry, 'id' | 'createdAt' | 'comments'>) => {
-    const newEntry: LogEntry = {
-      ...entry,
-      id: `log-${logEntries.length + 1}`,
-      createdAt: new Date(),
-      comments: [],
-    }
-    setLogEntries([newEntry, ...logEntries])
+  const handleAddLogEntry = async (entry: Omit<LogEntry, 'id' | 'createdAt' | 'comments'>) => {
+    if (isDemoMode) {
+      const newEntry: LogEntry = {
+        ...entry,
+        id: `log-${logEntries.length + 1}`,
+        createdAt: new Date(),
+        comments: [],
+      }
+      setLogEntries([newEntry, ...logEntries])
 
-    // Auto-generate notification
-    const notifTypeMap: Record<string, Notification['type']> = {
-      vitals: 'vitals',
-      medication: 'medication',
-      mood: 'mood',
-      incident: 'incident',
-      activity: 'general',
+      // Auto-generate notification
+      const notifTypeMap: Record<string, Notification['type']> = {
+        vitals: 'vitals',
+        medication: 'medication',
+        mood: 'mood',
+        incident: 'incident',
+        activity: 'general',
+      }
+      const newNotification: Notification = {
+        id: `notif-${Date.now()}`,
+        type: notifTypeMap[entry.category] || 'general',
+        title: entry.title,
+        message: entry.notes || 'New entry logged',
+        sourceId: newEntry.id,
+        sourceType: 'log_entry',
+        createdAt: new Date(),
+        readBy: [],
+      }
+      setNotifications([newNotification, ...notifications])
+    } else {
+      try {
+        const logData = await addLogEntryToDb(entry, DEMO_PATIENT_ID)
+        // Create notification in DB too
+        const notifTypeMap: Record<string, Notification['type']> = {
+          vitals: 'vitals',
+          medication: 'medication',
+          mood: 'mood',
+          incident: 'incident',
+          activity: 'general',
+        }
+        await createNotificationInDb({
+          type: notifTypeMap[entry.category] || 'general',
+          title: entry.title,
+          message: entry.notes || 'New entry logged',
+          sourceId: logData.id,
+          sourceType: 'log_entry',
+        }, DEMO_PATIENT_ID)
+        refetchLogs()
+        refetchNotifications()
+      } catch (error) {
+        console.error('Error adding log entry:', error)
+      }
     }
-    const newNotification: Notification = {
-      id: `notif-${Date.now()}`,
-      type: notifTypeMap[entry.category] || 'general',
-      title: entry.title,
-      message: entry.notes || 'New entry logged',
-      sourceId: newEntry.id,
-      sourceType: 'log_entry',
-      createdAt: new Date(),
-      readBy: [],
-    }
-    setNotifications([newNotification, ...notifications])
   }
 
-  const handleAddLogComment = (entryId: string, content: string) => {
+  const handleAddLogComment = async (entryId: string, content: string) => {
     const currentMember = members.find(m => m.id === currentUserId)
-    setLogEntries(logEntries.map(entry => {
-      if (entry.id === entryId) {
-        return {
-          ...entry,
-          comments: [...entry.comments, {
-            id: `lc-${Date.now()}`,
-            authorId: currentUserId,
-            authorName: currentMember?.name || 'You',
-            content,
-            createdAt: new Date(),
-          }],
+    if (isDemoMode) {
+      setLogEntries(logEntries.map(entry => {
+        if (entry.id === entryId) {
+          return {
+            ...entry,
+            comments: [...entry.comments, {
+              id: `lc-${Date.now()}`,
+              authorId: currentUserId,
+              authorName: currentMember?.name || 'You',
+              content,
+              createdAt: new Date(),
+            }],
+          }
         }
+        return entry
+      }))
+    } else {
+      try {
+        await addLogCommentToDb(entryId, currentUserId, currentMember?.name || 'You', content)
+        refetchLogs()
+      } catch (error) {
+        console.error('Error adding log comment:', error)
       }
-      return entry
-    }))
+    }
   }
 
   // Home Feed handlers
-  const handleAddPost = (post: Omit<FeedPost, 'id' | 'createdAt' | 'likes' | 'comments'>) => {
-    const newPost: FeedPost = {
-      ...post,
-      id: String(posts.length + 1),
-      createdAt: new Date(),
-      likes: [],
-      comments: [],
+  const handleAddPost = async (post: Omit<FeedPost, 'id' | 'createdAt' | 'likes' | 'comments'>) => {
+    if (isDemoMode) {
+      const newPost: FeedPost = {
+        ...post,
+        id: String(posts.length + 1),
+        createdAt: new Date(),
+        likes: [],
+        comments: [],
+      }
+      setPosts([newPost, ...posts])
+    } else {
+      try {
+        await addPostToDb(post, DEMO_PATIENT_ID)
+        refetchPosts()
+      } catch (error) {
+        console.error('Error adding post:', error)
+      }
     }
-    setPosts([newPost, ...posts])
   }
 
-  const handleLikePost = (postId: string) => {
-    setPosts(posts.map(post => {
-      if (post.id === postId) {
-        const isLiked = post.likes.includes(currentUserId)
-        return {
-          ...post,
-          likes: isLiked
-            ? post.likes.filter(id => id !== currentUserId)
-            : [...post.likes, currentUserId],
+  const handleLikePost = async (postId: string) => {
+    if (isDemoMode) {
+      setPosts(posts.map(post => {
+        if (post.id === postId) {
+          const isLiked = post.likes.includes(currentUserId)
+          return {
+            ...post,
+            likes: isLiked
+              ? post.likes.filter(id => id !== currentUserId)
+              : [...post.likes, currentUserId],
+          }
         }
+        return post
+      }))
+    } else {
+      try {
+        await likePostInDb(postId, currentUserId)
+        refetchPosts()
+      } catch (error) {
+        console.error('Error liking post:', error)
       }
-      return post
-    }))
+    }
   }
 
-  const handleAddPostComment = (postId: string, content: string) => {
+  const handleAddPostComment = async (postId: string, content: string) => {
     const currentMember = members.find(m => m.id === currentUserId)
-    setPosts(posts.map(post => {
-      if (post.id === postId) {
-        return {
-          ...post,
-          comments: [...post.comments, {
-            id: `c${Date.now()}`,
-            authorId: currentUserId,
-            authorName: currentMember?.name || 'You',
-            content,
-            createdAt: new Date(),
-          }],
+    if (isDemoMode) {
+      setPosts(posts.map(post => {
+        if (post.id === postId) {
+          return {
+            ...post,
+            comments: [...post.comments, {
+              id: `c${Date.now()}`,
+              authorId: currentUserId,
+              authorName: currentMember?.name || 'You',
+              content,
+              createdAt: new Date(),
+            }],
+          }
         }
+        return post
+      }))
+    } else {
+      try {
+        await addPostCommentToDb(postId, currentUserId, currentMember?.name || 'You', content)
+        refetchPosts()
+      } catch (error) {
+        console.error('Error adding post comment:', error)
       }
-      return post
-    }))
+    }
   }
 
   // Visit handlers
-  const handleCheckIn = () => {
+  const handleCheckIn = async () => {
     const currentMember = members.find(m => m.id === currentUserId)
-    const newVisit: Visit = {
-      id: `v-${Date.now()}`,
-      visitorId: currentUserId,
-      visitorName: currentMember?.name || currentUserName,
-      visitorRelationship: currentMember?.relationship,
-      checkInTime: new Date(),
+    if (isDemoMode) {
+      const newVisit: Visit = {
+        id: `v-${Date.now()}`,
+        visitorId: currentUserId,
+        visitorName: currentMember?.name || currentUserName,
+        visitorRelationship: currentMember?.relationship,
+        checkInTime: new Date(),
+      }
+      setVisits([newVisit, ...visits])
+    } else {
+      try {
+        await checkInToDb(
+          currentUserId,
+          currentMember?.name || currentUserName,
+          currentMember?.relationship,
+          DEMO_PATIENT_ID
+        )
+        refetchVisits()
+      } catch (error) {
+        console.error('Error checking in:', error)
+      }
     }
-    setVisits([newVisit, ...visits])
   }
 
-  const handleCheckOut = (mood: string, note: string) => {
-    setVisits(visits.map(visit => {
-      if (visit.visitorId === currentUserId && !visit.checkOutTime) {
-        const checkOutTime = new Date()
-        const duration = Math.round((checkOutTime.getTime() - new Date(visit.checkInTime).getTime()) / 60000)
-        return {
-          ...visit,
-          checkOutTime,
-          duration,
-          mood: mood as Visit['mood'],
-          note: note || undefined,
+  const handleCheckOut = async (mood: string, note: string) => {
+    if (isDemoMode) {
+      setVisits(visits.map(visit => {
+        if (visit.visitorId === currentUserId && !visit.checkOutTime) {
+          const checkOutTime = new Date()
+          const duration = Math.round((checkOutTime.getTime() - new Date(visit.checkInTime).getTime()) / 60000)
+          return {
+            ...visit,
+            checkOutTime,
+            duration,
+            mood: mood as Visit['mood'],
+            note: note || undefined,
+          }
         }
-      }
-      return visit
-    }))
+        return visit
+      }))
 
-    // Create a notification for the visit
-    const newNotification: Notification = {
-      id: `notif-visit-${Date.now()}`,
-      type: 'visit',
-      title: `${currentUserName} Visited`,
-      message: note || 'Family visit completed',
-      sourceId: `v-${Date.now()}`,
-      sourceType: 'visit',
-      createdAt: new Date(),
-      readBy: [],
+      // Create a notification for the visit
+      const newNotification: Notification = {
+        id: `notif-visit-${Date.now()}`,
+        type: 'visit',
+        title: `${currentUserName} Visited`,
+        message: note || 'Family visit completed',
+        sourceId: `v-${Date.now()}`,
+        sourceType: 'visit',
+        createdAt: new Date(),
+        readBy: [],
+      }
+      setNotifications([newNotification, ...notifications])
+    } else {
+      try {
+        // Find current active visit
+        const activeVisit = visits.find(v => v.visitorId === currentUserId && !v.checkOutTime)
+        if (activeVisit) {
+          const duration = Math.round((new Date().getTime() - new Date(activeVisit.checkInTime).getTime()) / 60000)
+          await checkOutInDb(activeVisit.id, mood, note, duration)
+          await createNotificationInDb({
+            type: 'visit',
+            title: `${currentUserName} Visited`,
+            message: note || 'Family visit completed',
+            sourceId: activeVisit.id,
+            sourceType: 'visit',
+          }, DEMO_PATIENT_ID)
+          refetchVisits()
+          refetchNotifications()
+        }
+      } catch (error) {
+        console.error('Error checking out:', error)
+      }
     }
-    setNotifications([newNotification, ...notifications])
   }
 
   // Notification handlers
-  const handleMarkAsRead = (notificationId: string) => {
-    setNotifications(notifications.map(n => {
-      if (n.id === notificationId && !n.readBy.includes(currentUserId)) {
-        return { ...n, readBy: [...n.readBy, currentUserId] }
+  const handleMarkAsRead = async (notificationId: string) => {
+    if (isDemoMode) {
+      setNotifications(notifications.map(n => {
+        if (n.id === notificationId && !n.readBy.includes(currentUserId)) {
+          return { ...n, readBy: [...n.readBy, currentUserId] }
+        }
+        return n
+      }))
+    } else {
+      try {
+        await markNotificationReadInDb(notificationId, currentUserId)
+        refetchNotifications()
+      } catch (error) {
+        console.error('Error marking notification as read:', error)
       }
-      return n
-    }))
+    }
   }
 
-  const handleMarkAllAsRead = () => {
-    setNotifications(notifications.map(n => {
-      if (!n.readBy.includes(currentUserId)) {
-        return { ...n, readBy: [...n.readBy, currentUserId] }
+  const handleMarkAllAsRead = async () => {
+    if (isDemoMode) {
+      setNotifications(notifications.map(n => {
+        if (!n.readBy.includes(currentUserId)) {
+          return { ...n, readBy: [...n.readBy, currentUserId] }
+        }
+        return n
+      }))
+    } else {
+      try {
+        await markAllNotificationsReadInDb(DEMO_PATIENT_ID, currentUserId)
+        refetchNotifications()
+      } catch (error) {
+        console.error('Error marking all notifications as read:', error)
       }
-      return n
-    }))
+    }
+  }
+
+  // Login screen
+  if (activeTab === 'login') {
+    return (
+      <LoginScreen
+        onLogin={(user) => {
+          setCurrentUser(user)
+          setActiveTab('home')
+        }}
+      />
+    )
   }
 
   // Landing page
@@ -248,28 +446,29 @@ export default function Home() {
               {/* Logo */}
               <div className="flex justify-center mb-8 animate-slide-up">
                 <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-br from-lavender-400 to-peach-400 rounded-3xl blur-xl opacity-50 animate-pulse-soft"></div>
+                  <div className="absolute inset-0 bg-gradient-to-br from-lavender-400 to-lavender-600 rounded-3xl blur-xl opacity-50 animate-pulse-soft"></div>
                   <div className="relative p-5 bg-gradient-to-br from-lavender-500 to-lavender-600 rounded-3xl shadow-float">
-                    <Heart className="h-10 w-10 text-white" />
+                    <Link2 className="h-10 w-10 text-white" />
                   </div>
                 </div>
               </div>
 
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight animate-slide-up" style={{ animationDelay: '100ms' }}>
-                <span className="gradient-text">GatherIn</span>
+                <span className="gradient-text">CareBridge</span>
+                <span className="text-navy-400 text-3xl sm:text-4xl lg:text-5xl ml-3">Connect</span>
               </h1>
 
               <p className="mt-6 text-xl sm:text-2xl text-navy-600 leading-relaxed animate-slide-up" style={{ animationDelay: '200ms' }}>
-                Stay connected to your loved one's care journey.
+                Peace of mind for families. Less burden for staff.
               </p>
 
               <p className="mt-3 text-lg text-navy-500 animate-slide-up" style={{ animationDelay: '250ms' }}>
-                A family portal for skilled nursing facilities.
+                A HIPAA-compliant communication bridge between care teams and families.
               </p>
 
               <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center animate-slide-up" style={{ animationDelay: '300ms' }}>
                 <button
-                  onClick={() => setActiveTab('home')}
+                  onClick={() => setActiveTab('login')}
                   className="btn-primary inline-flex items-center justify-center gap-2 text-lg"
                 >
                   Get Started
@@ -286,21 +485,81 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Quick Hook Banner */}
+        {/* Problem Statement Banner */}
         <div className="relative">
           <div className="max-w-4xl mx-auto px-4">
             <div className="card-glass p-6 sm:p-8 text-center animate-slide-up" style={{ animationDelay: '400ms' }}>
               <div className="flex justify-center mb-4">
                 <div className="p-3 bg-peach-100 rounded-2xl">
-                  <Building2 className="h-6 w-6 text-peach-600" />
+                  <Phone className="h-6 w-6 text-peach-600" />
                 </div>
               </div>
               <p className="text-lg text-navy-700">
-                <strong className="text-navy-900">When your loved one is in a skilled nursing facility,</strong> staying informed shouldn't be a guessing game.
+                <strong className="text-navy-900">Healthcare already documents everything &mdash; but families still feel blind.</strong>
               </p>
-              <p className="mt-2 text-peach-600 font-medium">
-                GatherIn gives your family real-time care updates, visit coordination, and peace of mind.
+              <p className="mt-2 text-lavender-700 font-medium">
+                CareBridge Connect translates documented care into plain-English updates families can trust.
               </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Impact Stats */}
+        <div className="py-16 sm:py-20">
+          <div className="max-w-5xl mx-auto px-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              <div className="card-glass p-6 text-center animate-slide-up opacity-0" style={{ animationFillMode: 'forwards' }}>
+                <div className="flex justify-center mb-3">
+                  <div className="p-3 bg-red-50 rounded-2xl">
+                    <PhoneOff className="h-6 w-6 text-red-500" />
+                  </div>
+                </div>
+                <p className="text-3xl font-bold text-navy-900">2-3 hrs</p>
+                <p className="text-sm text-navy-500 mt-1">per nurse shift spent on family calls</p>
+              </div>
+              <div className="card-glass p-6 text-center animate-slide-up opacity-0" style={{ animationFillMode: 'forwards', animationDelay: '100ms' }}>
+                <div className="flex justify-center mb-3">
+                  <div className="p-3 bg-peach-100 rounded-2xl">
+                    <TrendingUp className="h-6 w-6 text-peach-600" />
+                  </div>
+                </div>
+                <p className="text-3xl font-bold text-navy-900">27%</p>
+                <p className="text-sm text-navy-500 mt-1">of families dissatisfied with communication</p>
+              </div>
+              <div className="card-glass p-6 text-center animate-slide-up opacity-0" style={{ animationFillMode: 'forwards', animationDelay: '200ms' }}>
+                <div className="flex justify-center mb-3">
+                  <div className="p-3 bg-lavender-100 rounded-2xl">
+                    <Star className="h-6 w-6 text-lavender-600" />
+                  </div>
+                </div>
+                <p className="text-3xl font-bold text-navy-900">Only 29%</p>
+                <p className="text-sm text-navy-500 mt-1">of families report being informed of changes</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* How It Works */}
+        <div className="py-12 sm:py-16">
+          <div className="max-w-5xl mx-auto px-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-navy-900 text-center mb-4">How It Works</h2>
+            <p className="text-lg text-navy-500 text-center mb-12 max-w-2xl mx-auto">Zero extra work for staff. Automatic peace of mind for families.</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="card-glass p-6 text-center animate-slide-up opacity-0" style={{ animationFillMode: 'forwards' }}>
+                <div className="w-12 h-12 rounded-2xl bg-lavender-100 text-lavender-700 flex items-center justify-center mx-auto mb-4 text-xl font-bold">1</div>
+                <h3 className="font-bold text-navy-900 mb-2">Staff Documents Care</h3>
+                <p className="text-sm text-navy-600">Care teams continue using their existing systems like PointClickCare. No new workflows.</p>
+              </div>
+              <div className="card-glass p-6 text-center animate-slide-up opacity-0" style={{ animationFillMode: 'forwards', animationDelay: '100ms' }}>
+                <div className="w-12 h-12 rounded-2xl bg-peach-100 text-peach-700 flex items-center justify-center mx-auto mb-4 text-xl font-bold">2</div>
+                <h3 className="font-bold text-navy-900 mb-2">We Translate It</h3>
+                <p className="text-sm text-navy-600">Approved data points are translated into plain-English updates, timelines, and progress summaries.</p>
+              </div>
+              <div className="card-glass p-6 text-center animate-slide-up opacity-0" style={{ animationFillMode: 'forwards', animationDelay: '200ms' }}>
+                <div className="w-12 h-12 rounded-2xl bg-mint-100 text-mint-700 flex items-center justify-center mx-auto mb-4 text-xl font-bold">3</div>
+                <h3 className="font-bold text-navy-900 mb-2">Families Feel Informed</h3>
+                <p className="text-sm text-navy-600">Families stop calling, feel informed, trust the facility more, and leave positive reviews.</p>
+              </div>
             </div>
           </div>
         </div>
@@ -310,25 +569,25 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16 animate-slide-up">
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-navy-900">
-                Everything Your Family Needs
+                Everything Families Need to Feel Connected
               </h2>
               <p className="mt-4 text-lg text-navy-600 max-w-2xl mx-auto">
-                Stay informed about your loved one's daily care. No more wondering how Mom is doing today.
+                Real-time visibility into your loved one&apos;s day-to-day care &mdash; without adding work for staff.
               </p>
             </div>
 
             {/* Bento Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {/* Feature 1 - Care Log (Star Feature - Large) */}
+              {/* Feature 1 - Care Timeline (Star Feature - Large) */}
               <div className="bento-item md:col-span-2 lg:col-span-2 card-glass p-8 animate-slide-up opacity-0" style={{ animationFillMode: 'forwards' }}>
                 <div className="flex flex-col sm:flex-row gap-6 items-start">
                   <div className="p-4 bg-gradient-to-br from-lavender-100 to-peach-100 rounded-2xl shrink-0">
                     <ClipboardList className="h-8 w-8 text-lavender-600" />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold text-navy-900 mb-2">Daily Care Log</h3>
+                    <h3 className="text-2xl font-bold text-navy-900 mb-2">Event-Based Care Timeline</h3>
                     <p className="text-navy-600 text-lg leading-relaxed">
-                      Nurses log vitals, medications, activities, and mood throughout the day. Family members see a real-time timeline with the ability to comment and ask questions.
+                      Time-stamped updates like &quot;Medication administered at 7:02 AM,&quot; &quot;PT session completed (30 min),&quot; and &quot;Breakfast consumed (75%).&quot; Read-only for families &mdash; huge for liability control.
                     </p>
                     <div className="mt-4 flex flex-wrap gap-2">
                       <span className="px-3 py-1 bg-red-50 text-red-700 text-sm font-medium rounded-full">Vitals</span>
@@ -341,25 +600,25 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Feature 2 - Calendar */}
+              {/* Feature 2 - Progress Summaries */}
               <div className="bento-item card-glass p-6 animate-slide-up opacity-0" style={{ animationFillMode: 'forwards' }}>
                 <div className="p-3 bg-mint-100 rounded-2xl w-fit mb-4">
-                  <Calendar className="h-6 w-6 text-mint-600" />
+                  <TrendingUp className="h-6 w-6 text-mint-600" />
                 </div>
-                <h3 className="text-xl font-bold text-navy-900 mb-2">Visit Calendar</h3>
+                <h3 className="text-xl font-bold text-navy-900 mb-2">Progress Summaries</h3>
                 <p className="text-navy-600">
-                  See the best times to visit, how your loved one is feeling, and coordinate with family and facility events.
+                  Daily and weekly summaries highlighting trends &mdash; mobility improving, pain decreasing, appetite consistency &mdash; not just raw events.
                 </p>
               </div>
 
-              {/* Feature 3 - Home Feed */}
+              {/* Feature 3 - AI Chat */}
               <div className="bento-item card-glass p-6 animate-slide-up opacity-0" style={{ animationFillMode: 'forwards' }}>
                 <div className="p-3 bg-peach-100 rounded-2xl w-fit mb-4">
-                  <Heart className="h-6 w-6 text-peach-600" />
+                  <MessageSquare className="h-6 w-6 text-peach-600" />
                 </div>
-                <h3 className="text-xl font-bold text-navy-900 mb-2">Moments Feed</h3>
+                <h3 className="text-xl font-bold text-navy-900 mb-2">Guardrailed AI Chat</h3>
                 <p className="text-navy-600">
-                  Joyful moments, visit recaps, activity photos, and milestones shared by staff and family.
+                  &quot;When did she last eat?&quot; &mdash; Families ask simple questions. The bot only queries documented facts, never interprets or advises.
                 </p>
               </div>
 
@@ -368,9 +627,9 @@ export default function Home() {
                 <div className="p-3 bg-lavender-100 rounded-2xl w-fit mb-4">
                   <Users className="h-6 w-6 text-lavender-600" />
                 </div>
-                <h3 className="text-xl font-bold text-navy-900 mb-2">Care Circle</h3>
+                <h3 className="text-xl font-bold text-navy-900 mb-2">Permissioned Access</h3>
                 <p className="text-navy-600">
-                  Family and staff contact directory. Everyone who's part of your loved one's care, in one place.
+                  Patient opts in. Facility controls who sees what. Family members verified. HIPAA-safe by design.
                 </p>
               </div>
 
@@ -383,7 +642,7 @@ export default function Home() {
                   <div>
                     <h3 className="text-2xl font-bold text-navy-900 mb-2">The Vault</h3>
                     <p className="text-navy-600 text-lg leading-relaxed">
-                      Facility info, room number, visiting hours, insurance cards, medications, and care team contacts. Everything you need in one secure, accessible place.
+                      Facility info, visiting hours, insurance cards, medications, and care team contacts. Everything families need in one secure, accessible place &mdash; with role-based access controls.
                     </p>
                     <div className="mt-4 flex flex-wrap gap-2">
                       <span className="px-3 py-1 bg-mint-100 text-mint-700 text-sm font-medium rounded-full">Facility Info</span>
@@ -398,6 +657,28 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Facility Benefits */}
+        <div className="py-16 sm:py-20">
+          <div className="max-w-5xl mx-auto px-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-navy-900 text-center mb-4">Why Facilities Choose CareBridge</h2>
+            <p className="text-lg text-navy-500 text-center mb-12 max-w-2xl mx-auto">Facilities don&apos;t buy software for families &mdash; they buy it because it solves real operational problems.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                { icon: PhoneOff, label: 'Reduced call volume', desc: 'Fewer routine calls to nursing staff' },
+                { icon: Heart, label: 'Better satisfaction', desc: 'Families calmer, staff less interrupted' },
+                { icon: Star, label: 'Stronger reviews', desc: 'Informed families leave better reviews' },
+                { icon: TrendingUp, label: 'Higher census', desc: 'Positive reputation drives occupancy' },
+              ].map((item, i) => (
+                <div key={i} className="card-glass p-5 text-center animate-slide-up opacity-0" style={{ animationFillMode: 'forwards', animationDelay: `${i * 80}ms` }}>
+                  <item.icon className="h-6 w-6 text-lavender-600 mx-auto mb-3" />
+                  <p className="font-semibold text-navy-900 text-sm">{item.label}</p>
+                  <p className="text-xs text-navy-500 mt-1">{item.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
         {/* Trust Section */}
         <div className="py-20 sm:py-28">
           <div className="max-w-4xl mx-auto px-4">
@@ -408,12 +689,11 @@ export default function Home() {
                 </div>
               </div>
               <h2 className="text-3xl sm:text-4xl font-bold text-navy-900 mb-4">
-                Built for Trust
+                HIPAA-Compliant by Design
               </h2>
               <p className="text-lg text-navy-600 mb-10 max-w-2xl mx-auto">
-                Your family's health information deserves the highest protection.
-                GatherIn uses encryption at rest and in transit, with
-                role-based access control for sensitive data.
+                We never show raw clinical notes. Only approved, structured data translated into family-friendly language.
+                Role-based access ensures each person sees only what they&apos;re authorized to view.
               </p>
               <div className="flex flex-wrap justify-center gap-6">
                 <div className="flex items-center gap-2 text-navy-700">
@@ -428,6 +708,10 @@ export default function Home() {
                   <CheckCircle2 className="h-5 w-5 text-mint-500" />
                   <span className="font-medium">Role-based access</span>
                 </div>
+                <div className="flex items-center gap-2 text-navy-700">
+                  <CheckCircle2 className="h-5 w-5 text-mint-500" />
+                  <span className="font-medium">Opt-in only</span>
+                </div>
               </div>
             </div>
           </div>
@@ -437,16 +721,16 @@ export default function Home() {
         <div className="py-20 sm:py-28">
           <div className="max-w-4xl mx-auto px-4 text-center">
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-lavender-500 to-peach-500 rounded-4xl blur-2xl opacity-20"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-lavender-500 to-lavender-700 rounded-4xl blur-2xl opacity-20"></div>
               <div className="relative bg-gradient-to-br from-navy-800 to-navy-900 rounded-4xl p-10 sm:p-16 shadow-glass-lg">
                 <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-                  Stay Connected to Their Care
+                  Families Never Have to Wonder Again
                 </h2>
-                <p className="text-lg text-navy-200 mb-10">
-                  Set up your care circle in minutes. Your family will thank you.
+                <p className="text-lg text-navy-200 mb-10 max-w-2xl mx-auto">
+                  CareBridge Connect exists to ensure that families never have to wonder how their loved one is doing during moments when reassurance matters most.
                 </p>
                 <button
-                  onClick={() => setActiveTab('home')}
+                  onClick={() => setActiveTab('login')}
                   className="btn-accent inline-flex items-center justify-center gap-2 text-lg px-8 py-4"
                 >
                   Try the Demo
@@ -462,12 +746,12 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 text-center">
             <div className="flex justify-center mb-4">
               <div className="p-2 bg-lavender-100 rounded-xl">
-                <Heart className="h-5 w-5 text-lavender-600" />
+                <Link2 className="h-5 w-5 text-lavender-600" />
               </div>
             </div>
-            <p className="text-navy-600 font-medium">GatherIn</p>
-            <p className="mt-1 text-navy-500 text-sm">Stay connected to your loved one's care</p>
-            <p className="mt-4 text-navy-400 text-xs">Demo version for portfolio showcase</p>
+            <p className="text-navy-600 font-medium">CareBridge Connect</p>
+            <p className="mt-1 text-navy-500 text-sm">A HIPAA-safe communication bridge between care teams and families</p>
+            <p className="mt-4 text-navy-400 text-xs">&copy; 2026 CareBridge Connect LLC. All rights reserved.</p>
           </div>
         </footer>
       </div>
@@ -491,13 +775,13 @@ export default function Home() {
             {/* Notification Bell */}
             <div className="flex items-center">
               <NotificationCenter
-                notifications={notifications}
+                notifications={notifications.filter(n => getVisibleNotificationTypes(currentUserRole).includes(n.type))}
                 currentUserId={currentUserId}
                 onMarkAsRead={handleMarkAsRead}
                 onMarkAllAsRead={handleMarkAllAsRead}
                 onNavigate={(sourceType, sourceId) => {
                   if (sourceType === 'log_entry') setActiveTab('log')
-                  else if (sourceType === 'visit') { setActiveTab('home'); setHomeSubTab('visits') }
+                  else if (sourceType === 'visit') { setActiveTab('home') }
                 }}
               />
             </div>
@@ -506,88 +790,61 @@ export default function Home() {
       </nav>
 
       <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Demo role switcher */}
-        <div className="mb-4 flex items-center gap-3">
+        {/* Role switcher + user banner */}
+        <div className="mb-4 flex items-center gap-3 flex-wrap">
           <span className="text-sm text-navy-500">Viewing as:</span>
+          <span className="text-sm font-semibold text-navy-800">{currentUserName}</span>
           <div className="flex gap-1 bg-cream-100 rounded-xl p-1">
-            {(['admin', 'nurse', 'family'] as UserRole[]).map((role) => (
+            {(['primary', 'admin', 'nurse', 'family'] as UserRole[]).map((role) => (
               <button
                 key={role}
-                onClick={() => setDemoRole(role)}
+                onClick={() => {
+                  const roleMap: Record<UserRole, { id: string; name: string; role: UserRole; relationship: string }> = {
+                    primary: { id: '1', name: 'Toshio Shintaku', role: 'primary', relationship: 'Brother (Healthcare POA)' },
+                    admin: { id: 'a1', name: 'Mary Wilson', role: 'admin', relationship: 'Facility Administrator' },
+                    nurse: { id: 'n1', name: 'Jane Doe', role: 'nurse', relationship: 'Primary Nurse' },
+                    family: { id: '2', name: 'Kainoa Shintaku', role: 'family', relationship: 'Nephew' },
+                  }
+                  setCurrentUser(roleMap[role])
+                }}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  demoRole === role
+                  currentUserRole === role
                     ? 'bg-white text-navy-900 shadow-sm'
                     : 'text-navy-500 hover:text-navy-700'
                 }`}
               >
-                {role === 'admin' ? 'Admin' : role === 'nurse' ? 'Nurse' : 'Family'}
+                {role === 'primary' ? 'Primary' : role === 'admin' ? 'Admin' : role === 'nurse' ? 'Nurse' : 'Family'}
               </button>
             ))}
           </div>
+          {!isDemoMode && (
+            <span className="text-xs text-mint-600 font-medium px-2 py-1 bg-mint-50 rounded-lg">
+              Connected to Supabase
+            </span>
+          )}
         </div>
 
         {activeTab === 'home' && (
-          <div className="space-y-6">
-            {/* Patient Summary Dashboard */}
-            <PatientSummary
-              patient={demoPatient}
-              logEntries={logEntries}
-              events={events}
-              visits={visits}
-              onClaimVisit={(eventId) => handleClaimEvent(eventId, currentUserName)}
-            />
-
-            {/* Home Sub-tabs */}
-            <div className="flex gap-2 border-b border-lavender-100 pb-2">
-              {[
-                { id: 'feed' as const, label: 'Feed' },
-                { id: 'digest' as const, label: 'Daily Digest' },
-                { id: 'visits' as const, label: 'Visits' },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setHomeSubTab(tab.id)}
-                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                    homeSubTab === tab.id
-                      ? 'bg-lavender-100 text-lavender-700 shadow-soft'
-                      : 'text-navy-600 hover:bg-cream-100'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-
-            {homeSubTab === 'feed' && (
-              <HomeFeed
-                posts={posts}
-                members={members}
-                currentUserId={currentUserId}
-                onAddPost={handleAddPost}
-                onLikePost={handleLikePost}
-                onAddComment={handleAddPostComment}
-              />
-            )}
-
-            {homeSubTab === 'digest' && (
-              <DailyDigest logEntries={logEntries} visits={visits} />
-            )}
-
-            {homeSubTab === 'visits' && (
-              <VisitTracker
-                visits={visits}
-                currentUserId={currentUserId}
-                currentUserName={currentUserName}
-                onCheckIn={handleCheckIn}
-                onCheckOut={handleCheckOut}
-              />
-            )}
-          </div>
+          <HomeView
+            patient={patient}
+            logEntries={logEntries}
+            events={events}
+            visits={visits}
+            posts={posts}
+            members={members}
+            currentUserId={currentUserId}
+            currentUserName={currentUserName}
+            currentUserRole={currentUserRole}
+            onClaimVisit={(eventId) => handleClaimEvent(eventId, currentUserName)}
+            onAddPost={handleAddPost}
+            onLikePost={handleLikePost}
+            onAddComment={handleAddPostComment}
+          />
         )}
 
         {activeTab === 'calendar' && (
           <CareCalendar
-            events={events}
+            events={events.filter(e => getVisibleCalendarEventTypes(currentUserRole).includes(e.type))}
             onClaimEvent={handleClaimEvent}
             onAddEvent={handleAddEvent}
           />
@@ -596,7 +853,7 @@ export default function Home() {
         {activeTab === 'log' && (
           <div className="space-y-6">
             {/* Quick Actions for Nurses */}
-            {(demoRole === 'nurse' || demoRole === 'admin') && (
+            {canUseQuickActions(currentUserRole) && (
               <QuickActions
                 medications={vault.medications}
                 currentUserId={currentUserId}
@@ -629,7 +886,7 @@ export default function Home() {
             {logSubTab === 'timeline' && (
               <CareLog
                 logEntries={logEntries}
-                currentUserRole={demoRole}
+                currentUserRole={currentUserRole}
                 currentUserId={currentUserId}
                 currentUserName={currentUserName}
                 onAddLogEntry={handleAddLogEntry}
@@ -639,16 +896,16 @@ export default function Home() {
 
             {logSubTab === 'vitals' && <VitalsTrends logEntries={logEntries} />}
 
-            {logSubTab === 'wellness' && <WellnessTrends days={demoWellnessDays} />}
+            {logSubTab === 'wellness' && <WellnessTrends days={wellnessDays} />}
           </div>
         )}
 
         {activeTab === 'circle' && (
-          <CareCircle members={members} onAddMember={handleAddMember} />
+          <CareCircle members={members} currentUserRole={currentUserRole} onAddMember={handleAddMember} />
         )}
 
         {activeTab === 'vault' && (
-          <VaultComponent vault={vault} onUpdateVault={setVault} />
+          <VaultComponent vault={vault} onUpdateVault={setVault} currentUserRole={currentUserRole} />
         )}
       </main>
 
@@ -664,12 +921,12 @@ export default function Home() {
       {/* Demo Notice */}
       <div className="fixed bottom-4 left-4 right-20 sm:left-auto sm:right-20 sm:w-auto">
         <div className="glass-dark text-white px-4 py-3 rounded-2xl shadow-glass-lg flex items-center gap-3">
-          <div className="p-2 bg-lavender-500 rounded-xl">
+          <div className={`p-2 ${isDemoMode ? 'bg-lavender-500' : 'bg-mint-500'} rounded-xl`}>
             <Sparkles className="h-4 w-4" />
           </div>
           <div className="text-sm">
-            <p className="font-medium">Demo Mode</p>
-            <p className="text-navy-200 text-xs">Data stored locally</p>
+            <p className="font-medium">{isDemoMode ? 'Demo Mode' : 'Live Mode'}</p>
+            <p className="text-navy-200 text-xs">{isDemoMode ? 'Data stored locally' : 'Connected to Supabase'}</p>
           </div>
         </div>
       </div>
@@ -678,17 +935,17 @@ export default function Home() {
       <ExportModal
         isOpen={showExportModal}
         onClose={() => setShowExportModal(false)}
-        vault={vault}
-        logEntries={logEntries}
-        events={events}
+        vault={canViewMedications(currentUserRole) ? vault : { ...vault, medications: [], providers: [], insuranceCards: [] }}
+        logEntries={logEntries.filter(e => getVisibleLogCategories(currentUserRole).includes(e.category))}
+        events={events.filter(e => getVisibleCalendarEventTypes(currentUserRole).includes(e.type))}
       />
 
       {/* AI Chat Assistant */}
       <ChatBot
-        patientInfo={demoPatient}
-        logEntries={logEntries}
-        events={events}
-        vault={vault}
+        patientInfo={patient}
+        logEntries={logEntries.filter(e => getVisibleLogCategories(currentUserRole).includes(e.category))}
+        events={events.filter(e => getVisibleCalendarEventTypes(currentUserRole).includes(e.type))}
+        vault={canViewMedications(currentUserRole) ? vault : { ...vault, medications: [], providers: [], insuranceCards: [] }}
         visits={visits}
       />
     </div>

@@ -11,6 +11,7 @@ import {
   Heart,
   Home,
   ClipboardList,
+  Link2,
 } from 'lucide-react'
 
 interface NavigationProps {
@@ -40,14 +41,19 @@ export default function Navigation({ activeTab, onTabChange }: NavigationProps) 
               className="flex items-center gap-3 hover:opacity-90 transition-opacity group"
             >
               <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-lavender-400 to-peach-400 rounded-2xl blur-md opacity-50 group-hover:opacity-70 transition-opacity"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-lavender-400 to-lavender-600 rounded-2xl blur-md opacity-50 group-hover:opacity-70 transition-opacity"></div>
                 <div className="relative p-2.5 bg-gradient-to-br from-lavender-500 to-lavender-600 rounded-2xl shadow-float">
-                  <Heart className="h-5 w-5 text-white" />
+                  <Link2 className="h-5 w-5 text-white" />
                 </div>
               </div>
-              <span className="text-xl font-bold gradient-text">
-                GatherIn
-              </span>
+              <div className="flex items-baseline gap-1">
+                <span className="text-xl font-bold gradient-text">
+                  CareBridge
+                </span>
+                <span className="text-sm font-semibold text-navy-400">
+                  Connect
+                </span>
+              </div>
             </button>
           </div>
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Shield,
   CreditCard,
@@ -20,11 +20,13 @@ import {
   Download,
   Trash2,
 } from 'lucide-react'
-import { Vault as VaultType, VaultDocument } from '@/types'
+import { Vault as VaultType, VaultDocument, UserRole } from '@/types'
+import { getVisibleVaultTabs, getVisibleDocumentCategories, canUploadDocuments } from '@/lib/permissions'
 
 interface VaultProps {
   vault: VaultType
   onUpdateVault: (vault: VaultType) => void
+  currentUserRole: UserRole
 }
 
 const tabs = [
@@ -48,14 +50,24 @@ const formatFileSize = (bytes: number) => {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
-export default function VaultComponent({ vault, onUpdateVault }: VaultProps) {
-  const [activeTab, setActiveTab] = useState('facility')
+export default function VaultComponent({ vault, onUpdateVault, currentUserRole }: VaultProps) {
+  const visibleTabs = getVisibleVaultTabs(currentUserRole)
+  const visibleDocCategories = getVisibleDocumentCategories(currentUserRole)
+  const filteredTabs = tabs.filter(t => visibleTabs.includes(t.id))
+  const [activeTab, setActiveTab] = useState(filteredTabs[0]?.id || 'facility')
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [showWifiPassword, setShowWifiPassword] = useState(false)
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [newDocName, setNewDocName] = useState('')
   const [newDocCategory, setNewDocCategory] = useState<VaultDocument['category']>('other')
   const [newDocNotes, setNewDocNotes] = useState('')
+
+  // Reset active tab when role changes (visible tabs differ per role)
+  useEffect(() => {
+    if (!visibleTabs.includes(activeTab)) {
+      setActiveTab(filteredTabs[0]?.id || 'facility')
+    }
+  }, [currentUserRole, visibleTabs, activeTab, filteredTabs])
 
   const copyToClipboard = (text: string, id: string) => {
     navigator.clipboard.writeText(text)
@@ -79,7 +91,7 @@ export default function VaultComponent({ vault, onUpdateVault }: VaultProps) {
 
       {/* Tabs */}
       <div className="flex flex-wrap gap-2 border-b border-lavender-100 pb-2">
-        {tabs.map((tab) => {
+        {filteredTabs.map((tab) => {
           const Icon = tab.icon
           return (
             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
@@ -290,18 +302,20 @@ export default function VaultComponent({ vault, onUpdateVault }: VaultProps) {
           <div className="p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-navy-900">Important Documents</h3>
-              <button
-                onClick={() => setShowUploadModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-lavender-500 to-lavender-600 text-white rounded-xl hover:from-lavender-600 hover:to-lavender-700 transition-all duration-200 shadow-sm font-medium text-sm"
-              >
-                <Upload className="h-4 w-4" />
-                Upload
-              </button>
+              {canUploadDocuments(currentUserRole) && (
+                <button
+                  onClick={() => setShowUploadModal(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-lavender-500 to-lavender-600 text-white rounded-xl hover:from-lavender-600 hover:to-lavender-700 transition-all duration-200 shadow-sm font-medium text-sm"
+                >
+                  <Upload className="h-4 w-4" />
+                  Upload
+                </button>
+              )}
             </div>
 
             {/* Document cards grid */}
             <div className="grid gap-4 md:grid-cols-2">
-              {vault.documents.map((doc) => (
+              {vault.documents.filter(doc => visibleDocCategories.includes(doc.category)).map((doc) => (
                 <div
                   key={doc.id}
                   className="border border-lavender-100 rounded-2xl p-4 hover:border-lavender-300 hover:shadow-soft transition-all duration-200"
@@ -349,15 +363,17 @@ export default function VaultComponent({ vault, onUpdateVault }: VaultProps) {
             </div>
 
             {/* Empty upload placeholder card */}
-            <button
-              onClick={() => setShowUploadModal(true)}
-              className="mt-4 w-full border-2 border-dashed border-lavender-200 rounded-2xl p-8 flex flex-col items-center justify-center gap-2 hover:border-lavender-400 hover:bg-lavender-50/30 transition-all duration-200 cursor-pointer"
-            >
-              <Upload className="h-8 w-8 text-lavender-300" />
-              <span className="text-sm font-medium text-navy-700">Upload Document</span>
-              <span className="text-xs text-navy-400">Drag &amp; drop or click to browse</span>
-              <span className="text-xs text-navy-400">PDF, JPG, PNG &middot; Max 10MB</span>
-            </button>
+            {canUploadDocuments(currentUserRole) && (
+              <button
+                onClick={() => setShowUploadModal(true)}
+                className="mt-4 w-full border-2 border-dashed border-lavender-200 rounded-2xl p-8 flex flex-col items-center justify-center gap-2 hover:border-lavender-400 hover:bg-lavender-50/30 transition-all duration-200 cursor-pointer"
+              >
+                <Upload className="h-8 w-8 text-lavender-300" />
+                <span className="text-sm font-medium text-navy-700">Upload Document</span>
+                <span className="text-xs text-navy-400">Drag &amp; drop or click to browse</span>
+                <span className="text-xs text-navy-400">PDF, JPG, PNG &middot; Max 10MB</span>
+              </button>
+            )}
           </div>
         )}
       </div>

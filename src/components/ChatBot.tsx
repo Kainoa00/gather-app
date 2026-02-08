@@ -40,7 +40,7 @@ export default function ChatBot({
     {
       id: '1',
       role: 'assistant',
-      content: `Hi! I'm your GatherIn assistant. I can help you with questions about ${patientInfo.name}'s care, the facility, medications, upcoming appointments, or anything else you'd like to know. How can I help you today?`,
+      content: `Hi! I'm your CareBridge Connect assistant. I can help you with questions about ${patientInfo.name}'s care, the facility, medications, upcoming appointments, or anything else you'd like to know. How can I help you today?`,
       timestamp: new Date(),
     },
   ])
@@ -106,85 +106,97 @@ export default function ChatBot({
     }
   }, [patientInfo, logEntries, events, vault, visits])
 
-  // Generate a contextual response (mock AI - replace with real API)
-  const generateResponse = useCallback(
-    async (userMessage: string): Promise<string> => {
+  // Fallback mock response when API is unavailable
+  const fallbackResponse = useCallback(
+    (userMessage: string): string => {
       const context = buildPatientContext()
       const lowerMessage = userMessage.toLowerCase()
 
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 1000 + Math.random() * 1000))
-
-      // Mock responses based on keywords - replace with actual AI API call
       if (lowerMessage.includes('vital') || lowerMessage.includes('blood pressure') || lowerMessage.includes('heart rate')) {
         if (context.latestVitals) {
           const v = context.latestVitals
-          return `Here are ${context.patient.name}'s most recent vitals:\n\n• Blood Pressure: ${v.bloodPressureSystolic || '--'}/${v.bloodPressureDiastolic || '--'} mmHg\n• Heart Rate: ${v.heartRate || '--'} bpm\n• Temperature: ${v.temperature?.toFixed(1) || '--'}°F\n• O2 Saturation: ${v.oxygenSaturation || '--'}%\n• Weight: ${v.weight || '--'} lbs\n\nWould you like me to explain what any of these readings mean?`
+          return `Here are ${context.patient.name}'s most recent vitals:\n\n• Blood Pressure: ${v.bloodPressureSystolic || '--'}/${v.bloodPressureDiastolic || '--'} mmHg\n• Heart Rate: ${v.heartRate || '--'} bpm\n• Temperature: ${v.temperature?.toFixed(1) || '--'}°F\n• O2 Saturation: ${v.oxygenSaturation || '--'}%\n\nWould you like me to explain what any of these readings mean?`
         }
-        return `I don't see any recent vitals recorded for ${context.patient.name}. The nursing staff typically records vitals during their regular rounds. Would you like me to help you understand what vitals are normally tracked?`
+        return `I don't see any recent vitals recorded for ${context.patient.name}. The nursing staff typically records vitals during their regular rounds.`
       }
 
       if (lowerMessage.includes('mood') || lowerMessage.includes('feeling') || lowerMessage.includes('how is')) {
         if (context.latestMood) {
           const m = context.latestMood
-          return `Based on the most recent mood check, ${context.patient.name} is feeling ${m.mood}. Their alertness level is ${m.alertness}, and appetite has been ${m.appetite}.${m.painLevel !== undefined ? ` Pain level reported as ${m.painLevel}/10.` : ''}\n\nIs there anything specific about their wellbeing you'd like to know more about?`
+          return `Based on the most recent mood check, ${context.patient.name} is feeling ${m.mood}. Alertness: ${m.alertness}. Appetite: ${m.appetite}.${m.painLevel !== undefined ? ` Pain level: ${m.painLevel}/10.` : ''}`
         }
-        return `I don't have a recent mood update for ${context.patient.name}. The care team regularly checks in on residents' emotional wellbeing. Is there something specific you're concerned about?`
+        return `I don't have a recent mood update for ${context.patient.name}. Is there something specific you're concerned about?`
       }
 
-      if (lowerMessage.includes('medication') || lowerMessage.includes('medicine') || lowerMessage.includes('drug')) {
+      if (lowerMessage.includes('medication') || lowerMessage.includes('medicine')) {
         if (context.medications.length > 0) {
-          const medList = context.medications
-            .slice(0, 5)
-            .map((m) => `• ${m.name} (${m.dosage}) - ${m.frequency}`)
-            .join('\n')
-          return `Here are ${context.patient.name}'s current medications:\n\n${medList}${context.medications.length > 5 ? `\n\n...and ${context.medications.length - 5} more. You can view the complete list in the Vault section.` : ''}\n\nWould you like more details about any specific medication?`
+          const medList = context.medications.slice(0, 5).map((m) => `• ${m.name} (${m.dosage}) - ${m.frequency}`).join('\n')
+          return `Here are ${context.patient.name}'s current medications:\n\n${medList}`
         }
-        return `I don't see any medications listed in the system. You can add medication information in the Vault section, or ask the nursing staff for the current medication list.`
-      }
-
-      if (lowerMessage.includes('visit') || lowerMessage.includes('visiting') || lowerMessage.includes('hours')) {
-        const info = context.facilityInfo
-        return `**Visiting Hours at ${info.facilityName}:**\n\n${info.visitingHours}\n\n**Location:** Room ${info.roomNumber}, ${info.wing} Wing, Floor ${info.floor}\n\n**Parking:** ${info.parkingInfo || 'Check with the front desk for parking information.'}\n\nYou can check in when you arrive using the "I'm Here" button on the Visits tab!`
-      }
-
-      if (lowerMessage.includes('appointment') || lowerMessage.includes('schedule') || lowerMessage.includes('upcoming') || lowerMessage.includes('calendar')) {
-        if (context.upcomingEvents.length > 0) {
-          const eventList = context.upcomingEvents
-            .map((e) => {
-              const date = new Date(e.date)
-              return `• ${e.title} - ${date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}${e.time ? ` at ${e.time}` : ''}`
-            })
-            .join('\n')
-          return `Here are the upcoming events for ${context.patient.name}:\n\n${eventList}\n\nYou can claim a visit slot on the Calendar tab to coordinate with other family members.`
-        }
-        return `There are no upcoming appointments or events scheduled. You can add events through the Calendar tab, or check with the facility about therapy and activity schedules.`
-      }
-
-      if (lowerMessage.includes('doctor') || lowerMessage.includes('provider') || lowerMessage.includes('contact')) {
-        if (context.providers.length > 0) {
-          const providerList = context.providers
-            .slice(0, 3)
-            .map((p) => `• **${p.name}** (${p.specialty})\n  ${p.phone}`)
-            .join('\n\n')
-          return `Here are ${context.patient.name}'s healthcare providers:\n\n${providerList}\n\nYou can find all provider contacts in the Vault section.`
-        }
-        return `I don't see any providers listed yet. You can add healthcare provider information in the Vault section.`
-      }
-
-      if (lowerMessage.includes('facility') || lowerMessage.includes('nursing home') || lowerMessage.includes('where')) {
-        const info = context.facilityInfo
-        return `**${info.facilityName}**\n\n📍 ${info.facilityAddress}\n📞 ${context.patient.facility ? '' : info.nurseStation}\n\n**Room:** ${info.roomNumber} (${info.wing} Wing, Floor ${info.floor})\n**Nurse Station:** ${info.nurseStation}\n\n${info.wifiNetwork ? `**WiFi:** ${info.wifiNetwork} (Password: ${info.wifiPassword})` : ''}`
+        return `No medications listed yet. Check the Vault section.`
       }
 
       if (lowerMessage.includes('help') || lowerMessage.includes('what can you')) {
-        return `I can help you with:\n\n• **Vitals & Health** - Check recent blood pressure, heart rate, temperature\n• **Mood & Wellbeing** - See how ${context.patient.name} is feeling\n• **Medications** - Review current prescriptions\n• **Appointments** - View upcoming events and visits\n• **Facility Info** - Visiting hours, parking, WiFi, contacts\n• **Care Team** - Find doctor and provider information\n\nJust ask me anything about ${context.patient.name}'s care!`
+        return `I can help you with:\n\n• **Vitals & Health** - Recent vital signs\n• **Mood & Wellbeing** - How ${context.patient.name} is feeling\n• **Medications** - Current prescriptions\n• **Appointments** - Upcoming events\n• **Facility Info** - Visiting hours, contacts\n\nJust ask me anything!`
       }
 
-      // Default response
-      return `I understand you're asking about "${userMessage}". While I'm here to help with questions about ${context.patient.name}'s care at ${context.facilityInfo.facilityName}, I want to make sure I give you accurate information.\n\nCould you try asking about:\n• Recent vitals or health updates\n• Current medications\n• Upcoming appointments\n• Visiting hours and facility info\n• How ${context.patient.name} is feeling\n\nOr if you have an urgent concern, please contact the nurse station directly at ${context.facilityInfo.nurseStation}.`
+      return `I'd be happy to help with questions about ${context.patient.name}'s care. Try asking about vitals, mood, medications, appointments, or facility info.\n\nFor urgent concerns, contact the nurse station at ${context.facilityInfo.nurseStation}.`
     },
-    [buildPatientContext]
+    [buildPatientContext],
+  )
+
+  // Generate response: try real AI API first, fall back to mock
+  const generateResponse = useCallback(
+    async (userMessage: string): Promise<string> => {
+      const context = buildPatientContext()
+
+      // Build message history for the API (last 10 messages)
+      const apiMessages = messages
+        .slice(-10)
+        .map((m) => ({ role: m.role, content: m.content }))
+      apiMessages.push({ role: 'user' as const, content: userMessage })
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messages: apiMessages,
+            patientContext: {
+              patientName: context.patient.name,
+              roomNumber: context.patient.room,
+              facilityName: context.patient.facility,
+              diagnosis: context.patient.diagnosis,
+              admissionDate: context.patient.admissionDate,
+              latestVitals: context.latestVitals,
+              latestMood: context.latestMood,
+              medications: context.medications,
+              providers: context.providers,
+              facilityInfo: context.facilityInfo,
+              recentLogs: context.recentLogs,
+              upcomingEvents: context.upcomingEvents,
+            },
+          }),
+        })
+
+        const data = await response.json()
+
+        if (response.status === 503) {
+          // API key not configured — use fallback
+          return fallbackResponse(userMessage)
+        }
+
+        if (!response.ok) {
+          return data.content || fallbackResponse(userMessage)
+        }
+
+        return data.content
+      } catch {
+        // Network error or API down — use fallback
+        return fallbackResponse(userMessage)
+      }
+    },
+    [buildPatientContext, messages, fallbackResponse],
   )
 
   const handleSend = async () => {
@@ -262,7 +274,7 @@ export default function ChatBot({
                 <Bot className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h3 className="font-semibold text-white">GatherIn Assistant</h3>
+                <h3 className="font-semibold text-white">CareBridge Assistant</h3>
                 <p className="text-xs text-lavender-100">Ask me anything</p>
               </div>
             </div>

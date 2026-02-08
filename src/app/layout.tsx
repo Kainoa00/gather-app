@@ -9,8 +9,8 @@ const outfit = Outfit({
 })
 
 export const metadata: Metadata = {
-  title: 'GatherIn - Stay Connected to Your Loved One\'s Care',
-  description: 'A family portal for skilled nursing facilities. Real-time care logs, visit coordination, and secure health information sharing.',
+  title: 'CareBridge Connect - Peace of Mind for Families, Less Burden for Staff',
+  description: 'A HIPAA-compliant family communication platform for skilled nursing facilities. Real-time care updates, progress summaries, and secure information sharing.',
 }
 
 export default function RootLayout({

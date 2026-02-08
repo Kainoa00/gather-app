@@ -14,13 +14,22 @@ import {
   Shield,
 } from 'lucide-react'
 import { CareCircleMember, UserRole } from '@/types'
+import { canAddCareCircleMembers } from '@/lib/permissions'
+import { ShieldCheck } from 'lucide-react'
 
 interface CareCircleProps {
   members: CareCircleMember[]
+  currentUserRole: UserRole
   onAddMember: (member: Omit<CareCircleMember, 'id' | 'joinedAt'>) => void
 }
 
-const roleConfig = {
+const roleConfig: Record<UserRole, { label: string; color: string; gradient: string; icon: typeof Shield }> = {
+  primary: {
+    label: 'Primary',
+    color: 'bg-navy-100 text-navy-700',
+    gradient: 'from-navy-400 to-navy-600',
+    icon: ShieldCheck,
+  },
   admin: {
     label: 'Admin',
     color: 'bg-lavender-100 text-lavender-700',
@@ -41,7 +50,7 @@ const roleConfig = {
   },
 }
 
-export default function CareCircle({ members, onAddMember }: CareCircleProps) {
+export default function CareCircle({ members, currentUserRole, onAddMember }: CareCircleProps) {
   const [showInviteModal, setShowInviteModal] = useState(false)
   const [inviteLink, setInviteLink] = useState('')
   const [copied, setCopied] = useState(false)
@@ -53,11 +62,11 @@ export default function CareCircle({ members, onAddMember }: CareCircleProps) {
     relationship: '',
   })
 
-  const familyMembers = members.filter((m) => m.role !== 'nurse')
-  const staffMembers = members.filter((m) => m.role === 'nurse')
+  const familyMembers = members.filter((m) => m.role !== 'nurse' && m.role !== 'admin')
+  const staffMembers = members.filter((m) => m.role === 'nurse' || m.role === 'admin')
 
   const generateInviteLink = () => {
-    const link = `https://gatherin.app/invite/${Math.random().toString(36).substring(7)}`
+    const link = `https://carebridge.app/invite/${Math.random().toString(36).substring(7)}`
     setInviteLink(link)
   }
 
@@ -126,13 +135,15 @@ export default function CareCircle({ members, onAddMember }: CareCircleProps) {
           <h2 className="text-2xl font-bold text-navy-900">Care Circle</h2>
           <p className="text-navy-600 mt-1">Family and staff contact directory</p>
         </div>
-        <button
-          onClick={() => { setShowInviteModal(true); generateInviteLink() }}
-          className="flex items-center px-5 py-2.5 bg-gradient-to-r from-lavender-500 to-lavender-600 text-white rounded-2xl hover:from-lavender-600 hover:to-lavender-700 transition-all duration-200 shadow-float hover:-translate-y-0.5"
-        >
-          <UserPlus className="h-5 w-5 mr-2" />
-          Add Contact
-        </button>
+        {canAddCareCircleMembers(currentUserRole) && (
+          <button
+            onClick={() => { setShowInviteModal(true); generateInviteLink() }}
+            className="flex items-center px-5 py-2.5 bg-gradient-to-r from-lavender-500 to-lavender-600 text-white rounded-2xl hover:from-lavender-600 hover:to-lavender-700 transition-all duration-200 shadow-float hover:-translate-y-0.5"
+          >
+            <UserPlus className="h-5 w-5 mr-2" />
+            Add Contact
+          </button>
+        )}
       </div>
 
       {/* Family Members */}

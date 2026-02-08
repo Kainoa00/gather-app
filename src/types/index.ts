@@ -1,4 +1,4 @@
-export type UserRole = 'admin' | 'nurse' | 'family'
+export type UserRole = 'primary' | 'admin' | 'nurse' | 'family'
 
 export interface CareCircleMember {
   id: string

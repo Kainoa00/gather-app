@@ -26,6 +26,14 @@ import {
 } from 'lucide-react'
 import { LogEntry, LogEntryCategory, UserRole, LogComment } from '@/types'
 import { formatDistanceToNow, format } from 'date-fns'
+import {
+  canCreateLogEntries,
+  canViewExactVitals,
+  canViewIncidentDetails,
+  canViewIncidentSummary,
+  canViewMoodDetails,
+  getVisibleLogCategories,
+} from '@/lib/permissions'
 
 interface CareLogProps {
   logEntries: LogEntry[]
@@ -150,17 +158,23 @@ export default function CareLog({
   const [physicianNotified, setPhysicianNotified] = useState(false)
   const [familyNotified, setFamilyNotified] = useState(false)
 
-  const isNurse = currentUserRole === 'nurse' || currentUserRole === 'admin'
+  const isNurse = canCreateLogEntries(currentUserRole)
+  const visibleCategories = getVisibleLogCategories(currentUserRole)
+  const showExactVitals = canViewExactVitals(currentUserRole)
+  const showIncidentDetails = canViewIncidentDetails(currentUserRole)
+  const showIncidentSummary = canViewIncidentSummary(currentUserRole)
+  const showMoodDetails = canViewMoodDetails(currentUserRole)
 
   const filteredEntries = logEntries
     .filter((entry) => {
+      const matchesRole = visibleCategories.includes(entry.category)
       const matchesSearch =
         searchQuery === '' ||
         entry.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         entry.notes?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         entry.enteredByName.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesCategory = filterCategory === 'all' || entry.category === filterCategory
-      return matchesSearch && matchesCategory
+      return matchesRole && matchesSearch && matchesCategory
     })
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
@@ -333,7 +347,7 @@ export default function CareLog({
           >
             All
           </button>
-          {(Object.keys(categoryConfig) as LogEntryCategory[]).map((cat) => {
+          {(Object.keys(categoryConfig) as LogEntryCategory[]).filter(cat => visibleCategories.includes(cat)).map((cat) => {
             const config = categoryConfig[cat]
             const Icon = config.icon
             return (
@@ -420,7 +434,7 @@ export default function CareLog({
                             {isExpanded && (
                               <div className="mt-4 space-y-3">
                                 {/* Vitals */}
-                                {entry.vitals && (
+                                {entry.vitals && showExactVitals && (
                                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                                     {entry.vitals.bloodPressureSystolic && (
                                       <div className="bg-cream-50 rounded-xl p-3">
@@ -468,6 +482,11 @@ export default function CareLog({
                                         <div className="font-semibold text-navy-900">{entry.vitals.weight} lbs</div>
                                       </div>
                                     )}
+                                  </div>
+                                )}
+                                {entry.vitals && !showExactVitals && (
+                                  <div className="bg-cream-50 rounded-xl p-3">
+                                    <p className="text-sm text-navy-600">Vitals recorded — within expected range. Contact nursing staff for details.</p>
                                   </div>
                                 )}
 
@@ -532,29 +551,33 @@ export default function CareLog({
                                         <div className="text-sm font-medium text-navy-900 capitalize">{entry.moodLog.mood}</div>
                                         <div className="text-xs text-navy-500">Mood</div>
                                       </div>
-                                      <div className="text-center p-3 bg-white rounded-xl">
-                                        <div className="text-sm font-medium text-navy-900">{alertnessLabels[entry.moodLog.alertness]}</div>
-                                        <div className="text-xs text-navy-500">Alertness</div>
-                                      </div>
-                                      <div className="text-center p-3 bg-white rounded-xl">
-                                        <div className="text-sm font-medium text-navy-900 capitalize">{entry.moodLog.appetite}</div>
-                                        <div className="text-xs text-navy-500">Appetite</div>
-                                      </div>
-                                      {entry.moodLog.painLevel !== undefined && (
+                                      {showMoodDetails && (
+                                        <div className="text-center p-3 bg-white rounded-xl">
+                                          <div className="text-sm font-medium text-navy-900">{alertnessLabels[entry.moodLog.alertness]}</div>
+                                          <div className="text-xs text-navy-500">Alertness</div>
+                                        </div>
+                                      )}
+                                      {showMoodDetails && (
+                                        <div className="text-center p-3 bg-white rounded-xl">
+                                          <div className="text-sm font-medium text-navy-900 capitalize">{entry.moodLog.appetite}</div>
+                                          <div className="text-xs text-navy-500">Appetite</div>
+                                        </div>
+                                      )}
+                                      {showMoodDetails && entry.moodLog.painLevel !== undefined && (
                                         <div className="text-center p-3 bg-white rounded-xl">
                                           <div className="text-sm font-medium text-navy-900">{entry.moodLog.painLevel}/10</div>
                                           <div className="text-xs text-navy-500">Pain Level</div>
                                         </div>
                                       )}
                                     </div>
-                                    {entry.moodLog.notes && (
+                                    {showMoodDetails && entry.moodLog.notes && (
                                       <p className="text-sm text-navy-600 mt-3">{entry.moodLog.notes}</p>
                                     )}
                                   </div>
                                 )}
 
-                                {/* Incident */}
-                                {entry.incidentLog && (
+                                {/* Incident — full detail for primary/nurse */}
+                                {entry.incidentLog && showIncidentDetails && (
                                   <div className="bg-amber-50/50 rounded-xl p-4 space-y-2">
                                     <div className="flex justify-between items-center">
                                       <span className="text-sm text-navy-500">Type</span>
@@ -594,6 +617,24 @@ export default function CareLog({
                                         </span>
                                       )}
                                     </div>
+                                  </div>
+                                )}
+                                {/* Incident — title + severity only for admin */}
+                                {entry.incidentLog && showIncidentSummary && (
+                                  <div className="bg-amber-50/50 rounded-xl p-4 space-y-2">
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-sm text-navy-600 font-medium">{entry.title}</span>
+                                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${
+                                        entry.incidentLog.severity === 'high'
+                                          ? 'bg-red-100 text-red-700'
+                                          : entry.incidentLog.severity === 'moderate'
+                                          ? 'bg-amber-100 text-amber-700'
+                                          : 'bg-green-100 text-green-700'
+                                      }`}>
+                                        {entry.incidentLog.severity}
+                                      </span>
+                                    </div>
+                                    <p className="text-xs text-navy-500">Full details available to Primary contact and nursing staff.</p>
                                   </div>
                                 )}
                               </div>

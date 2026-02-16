@@ -60,8 +60,8 @@ const notificationTypeConfig: Record<
   },
   visit: {
     icon: Users,
-    colorClass: 'text-lavender-600',
-    bgClass: 'bg-lavender-50',
+    colorClass: 'text-primary-600',
+    bgClass: 'bg-primary-50',
   },
   document: {
     icon: FileText,
@@ -228,13 +228,13 @@ export default function NotificationCenter({
           aria-label="Notification center"
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-lavender-100/50">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-primary-100/50">
             <h2 className="text-lg font-bold text-navy-900">Notifications</h2>
             <div className="flex items-center gap-1">
               {unreadCount > 0 && (
                 <button
                   onClick={handleMarkAllAsRead}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-lavender-600 hover:bg-lavender-50 rounded-xl transition-all duration-300"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-primary-600 hover:bg-primary-50 rounded-xl transition-all duration-300"
                   title="Mark all as read"
                 >
                   <Check className="h-3.5 w-3.5" />
@@ -252,7 +252,7 @@ export default function NotificationCenter({
           </div>
 
           {/* Filter Tabs */}
-          <div className="flex items-center gap-1 px-5 py-3 border-b border-lavender-100/50">
+          <div className="flex items-center gap-1 px-5 py-3 border-b border-primary-100/50">
             <Filter className="h-3.5 w-3.5 text-navy-400 mr-1" />
             {(
               [
@@ -266,7 +266,7 @@ export default function NotificationCenter({
                 onClick={() => setActiveFilter(tab.key)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-300 ${
                   activeFilter === tab.key
-                    ? 'bg-lavender-100 text-lavender-700 shadow-soft'
+                    ? 'bg-primary-100 text-primary-700 shadow-soft'
                     : 'text-navy-500 hover:bg-cream-100 hover:text-navy-700'
                 }`}
               >
@@ -309,8 +309,8 @@ export default function NotificationCenter({
                       <button
                         key={notification.id}
                         onClick={() => handleNotificationClick(notification)}
-                        className={`w-full text-left flex items-start gap-3 px-5 py-3.5 transition-all duration-200 hover:bg-lavender-50/60 ${
-                          unread ? 'bg-lavender-50/30' : ''
+                        className={`w-full text-left flex items-start gap-3 px-5 py-3.5 transition-all duration-200 hover:bg-primary-50/60 ${
+                          unread ? 'bg-primary-50/30' : ''
                         }`}
                       >
                         {/* Unread Indicator */}
@@ -347,7 +347,7 @@ export default function NotificationCenter({
                           </p>
                           <div className="flex items-center gap-2 mt-1.5">
                             {notification.sourceType && (
-                              <span className="text-[11px] font-medium text-lavender-500 capitalize">
+                              <span className="text-[11px] font-medium text-primary-500 capitalize">
                                 {notification.sourceType.replace('_', ' ')}
                               </span>
                             )}
@@ -374,10 +374,10 @@ export default function NotificationCenter({
 
           {/* Footer */}
           {unreadCount > 0 && grouped.length > 0 && (
-            <div className="border-t border-lavender-100/50 px-5 py-3">
+            <div className="border-t border-primary-100/50 px-5 py-3">
               <button
                 onClick={handleMarkAllAsRead}
-                className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-lavender-600 hover:text-lavender-700 hover:bg-lavender-50 rounded-xl transition-all duration-300"
+                className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-primary-600 hover:text-primary-700 hover:bg-primary-50 rounded-xl transition-all duration-300"
               >
                 <Check className="h-4 w-4" />
                 Mark all as read

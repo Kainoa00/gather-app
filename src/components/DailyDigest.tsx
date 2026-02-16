@@ -427,8 +427,8 @@ export default function DailyDigest({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-2xl bg-lavender-100">
-            <ClipboardList className="h-6 w-6 text-lavender-600" />
+          <div className="p-2.5 rounded-2xl bg-primary-100">
+            <ClipboardList className="h-6 w-6 text-primary-600" />
           </div>
           <div>
             <h2 className="text-2xl font-bold text-navy-900">Daily Digest</h2>
@@ -447,7 +447,7 @@ export default function DailyDigest({
           </button>
           <button
             onClick={() => setCurrentDate(new Date())}
-            className="px-3 py-1.5 text-sm font-medium text-lavender-600 hover:bg-lavender-50 rounded-xl transition-colors"
+            className="px-3 py-1.5 text-sm font-medium text-primary-600 hover:bg-primary-50 rounded-xl transition-colors"
           >
             Today
           </button>
@@ -464,7 +464,7 @@ export default function DailyDigest({
       {/* Empty State */}
       {!hasData && (
         <div className="card-glass text-center py-16 px-6">
-          <Calendar className="h-14 w-14 text-lavender-300 mx-auto mb-4" />
+          <Calendar className="h-14 w-14 text-primary-300 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-navy-700 mb-2">No entries for this day</h3>
           <p className="text-navy-500 text-sm max-w-sm mx-auto">
             There are no care log entries or visits recorded for{' '}
@@ -505,7 +505,7 @@ export default function DailyDigest({
             {/* Progress bar */}
             <div className="w-full bg-cream-200 rounded-full h-3 mb-3 overflow-hidden">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-lavender-400 to-mint-400 transition-all duration-700 ease-out"
+                className="h-full rounded-full bg-gradient-to-r from-primary-400 to-mint-400 transition-all duration-700 ease-out"
                 style={{ width: `${rating * 10}%` }}
               />
             </div>
@@ -539,12 +539,12 @@ export default function DailyDigest({
                     className="w-full flex items-center justify-between p-5 hover:bg-cream-50/30 transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="h-2.5 w-2.5 rounded-full bg-gradient-to-r from-lavender-400 to-peach-400" />
+                      <div className="h-2.5 w-2.5 rounded-full bg-gradient-to-r from-primary-400 to-accent-400" />
                       <h3 className="text-lg font-semibold text-navy-800">
                         {section.label}
                       </h3>
                       <span className="text-sm text-navy-400">{section.range}</span>
-                      <span className="px-2 py-0.5 rounded-full bg-lavender-100 text-lavender-700 text-xs font-medium">
+                      <span className="px-2 py-0.5 rounded-full bg-primary-100 text-primary-700 text-xs font-medium">
                         {totalItems} {totalItems === 1 ? 'item' : 'items'}
                       </span>
                     </div>
@@ -557,7 +557,7 @@ export default function DailyDigest({
 
                   {/* Section content */}
                   {isExpanded && (
-                    <div className="px-5 pb-5 border-t border-lavender-100/50">
+                    <div className="px-5 pb-5 border-t border-primary-100/50">
                       <div className="divide-y divide-cream-100">
                         {sectionEntries.map(renderTimelineEntry)}
                         {sectionVisits.map(renderTimelineVisit)}
@@ -595,7 +595,7 @@ export default function DailyDigest({
                       <h3 className="text-lg font-semibold text-navy-800">
                         Overnight / Early Morning
                       </h3>
-                      <span className="px-2 py-0.5 rounded-full bg-lavender-100 text-lavender-700 text-xs font-medium">
+                      <span className="px-2 py-0.5 rounded-full bg-primary-100 text-primary-700 text-xs font-medium">
                         {totalOutside} {totalOutside === 1 ? 'item' : 'items'}
                       </span>
                     </div>
@@ -607,7 +607,7 @@ export default function DailyDigest({
                   </button>
 
                   {isExpanded && (
-                    <div className="px-5 pb-5 border-t border-lavender-100/50">
+                    <div className="px-5 pb-5 border-t border-primary-100/50">
                       <div className="divide-y divide-cream-100">
                         {outsideEntries.map(renderTimelineEntry)}
                         {outsideVisits.map(renderTimelineVisit)}
@@ -622,7 +622,7 @@ export default function DailyDigest({
           {/* Day Summary Stats */}
           <div>
             <h3 className="text-lg font-semibold text-navy-800 mb-4 flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-gradient-to-r from-mint-400 to-lavender-400" />
+              <div className="h-2 w-2 rounded-full bg-gradient-to-r from-mint-400 to-primary-400" />
               Day Summary
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -679,8 +679,8 @@ export default function DailyDigest({
               {/* Meals Card */}
               <div className="card-glass p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="p-2 rounded-xl bg-peach-50">
-                    <Smile className="h-5 w-5 text-peach-500" />
+                  <div className="p-2 rounded-xl bg-accent-50">
+                    <Smile className="h-5 w-5 text-accent-500" />
                   </div>
                   <span className="text-lg">
                     {stats.mealsCount >= 3

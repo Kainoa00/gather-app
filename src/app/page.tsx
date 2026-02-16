@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import Navigation from '@/components/Navigation'
 import CareCircle from '@/components/CareCircle'
 import CareCalendar from '@/components/CareCalendar'
@@ -434,9 +435,9 @@ export default function Home() {
       <div className="min-h-screen gradient-mesh-bg">
         {/* Decorative blobs */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-96 h-96 blob-lavender rounded-full animate-blob"></div>
-          <div className="absolute top-1/3 -left-20 w-72 h-72 blob-peach rounded-full animate-blob" style={{ animationDelay: '2s' }}></div>
-          <div className="absolute bottom-20 right-1/4 w-64 h-64 blob-lavender rounded-full animate-blob" style={{ animationDelay: '4s' }}></div>
+          <div className="absolute -top-40 -right-40 w-96 h-96 blob-primary rounded-full animate-blob"></div>
+          <div className="absolute top-1/3 -left-20 w-72 h-72 blob-accent rounded-full animate-blob" style={{ animationDelay: '2s' }}></div>
+          <div className="absolute bottom-20 right-1/4 w-64 h-64 blob-primary rounded-full animate-blob" style={{ animationDelay: '4s' }}></div>
         </div>
 
         {/* Hero Section */}
@@ -444,19 +445,16 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-20 sm:pt-24 sm:pb-28">
             <div className="text-center max-w-3xl mx-auto">
               {/* Logo */}
-              <div className="flex justify-center mb-8 animate-slide-up">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-br from-lavender-400 to-lavender-600 rounded-3xl blur-xl opacity-50 animate-pulse-soft"></div>
-                  <div className="relative p-5 bg-gradient-to-br from-lavender-500 to-lavender-600 rounded-3xl shadow-float">
-                    <Link2 className="h-10 w-10 text-white" />
-                  </div>
-                </div>
+              <div className="flex justify-center mb-10 animate-slide-up">
+                <Image
+                  src="/logos/Logo 1 (color).png"
+                  alt="CareBridge Connect"
+                  width={600}
+                  height={180}
+                  className="h-32 sm:h-40 lg:h-48 w-auto"
+                  priority
+                />
               </div>
-
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight animate-slide-up" style={{ animationDelay: '100ms' }}>
-                <span className="gradient-text">CareBridge</span>
-                <span className="text-navy-400 text-3xl sm:text-4xl lg:text-5xl ml-3">Connect</span>
-              </h1>
 
               <p className="mt-6 text-xl sm:text-2xl text-navy-600 leading-relaxed animate-slide-up" style={{ animationDelay: '200ms' }}>
                 Peace of mind for families. Less burden for staff.
@@ -490,14 +488,14 @@ export default function Home() {
           <div className="max-w-4xl mx-auto px-4">
             <div className="card-glass p-6 sm:p-8 text-center animate-slide-up" style={{ animationDelay: '400ms' }}>
               <div className="flex justify-center mb-4">
-                <div className="p-3 bg-peach-100 rounded-2xl">
-                  <Phone className="h-6 w-6 text-peach-600" />
+                <div className="p-3 bg-accent-100 rounded-2xl">
+                  <Phone className="h-6 w-6 text-accent-600" />
                 </div>
               </div>
               <p className="text-lg text-navy-700">
                 <strong className="text-navy-900">Healthcare already documents everything &mdash; but families still feel blind.</strong>
               </p>
-              <p className="mt-2 text-lavender-700 font-medium">
+              <p className="mt-2 text-primary-700 font-medium">
                 CareBridge Connect translates documented care into plain-English updates families can trust.
               </p>
             </div>
@@ -519,8 +517,8 @@ export default function Home() {
               </div>
               <div className="card-glass p-6 text-center animate-slide-up opacity-0" style={{ animationFillMode: 'forwards', animationDelay: '100ms' }}>
                 <div className="flex justify-center mb-3">
-                  <div className="p-3 bg-peach-100 rounded-2xl">
-                    <TrendingUp className="h-6 w-6 text-peach-600" />
+                  <div className="p-3 bg-accent-100 rounded-2xl">
+                    <TrendingUp className="h-6 w-6 text-accent-600" />
                   </div>
                 </div>
                 <p className="text-3xl font-bold text-navy-900">27%</p>
@@ -528,8 +526,8 @@ export default function Home() {
               </div>
               <div className="card-glass p-6 text-center animate-slide-up opacity-0" style={{ animationFillMode: 'forwards', animationDelay: '200ms' }}>
                 <div className="flex justify-center mb-3">
-                  <div className="p-3 bg-lavender-100 rounded-2xl">
-                    <Star className="h-6 w-6 text-lavender-600" />
+                  <div className="p-3 bg-primary-100 rounded-2xl">
+                    <Star className="h-6 w-6 text-primary-600" />
                   </div>
                 </div>
                 <p className="text-3xl font-bold text-navy-900">Only 29%</p>
@@ -546,12 +544,12 @@ export default function Home() {
             <p className="text-lg text-navy-500 text-center mb-12 max-w-2xl mx-auto">Zero extra work for staff. Automatic peace of mind for families.</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="card-glass p-6 text-center animate-slide-up opacity-0" style={{ animationFillMode: 'forwards' }}>
-                <div className="w-12 h-12 rounded-2xl bg-lavender-100 text-lavender-700 flex items-center justify-center mx-auto mb-4 text-xl font-bold">1</div>
+                <div className="w-12 h-12 rounded-2xl bg-primary-100 text-primary-700 flex items-center justify-center mx-auto mb-4 text-xl font-bold">1</div>
                 <h3 className="font-bold text-navy-900 mb-2">Staff Documents Care</h3>
                 <p className="text-sm text-navy-600">Care teams continue using their existing systems like PointClickCare. No new workflows.</p>
               </div>
               <div className="card-glass p-6 text-center animate-slide-up opacity-0" style={{ animationFillMode: 'forwards', animationDelay: '100ms' }}>
-                <div className="w-12 h-12 rounded-2xl bg-peach-100 text-peach-700 flex items-center justify-center mx-auto mb-4 text-xl font-bold">2</div>
+                <div className="w-12 h-12 rounded-2xl bg-accent-100 text-accent-700 flex items-center justify-center mx-auto mb-4 text-xl font-bold">2</div>
                 <h3 className="font-bold text-navy-900 mb-2">We Translate It</h3>
                 <p className="text-sm text-navy-600">Approved data points are translated into plain-English updates, timelines, and progress summaries.</p>
               </div>
@@ -581,8 +579,8 @@ export default function Home() {
               {/* Feature 1 - Care Timeline (Star Feature - Large) */}
               <div className="bento-item md:col-span-2 lg:col-span-2 card-glass p-8 animate-slide-up opacity-0" style={{ animationFillMode: 'forwards' }}>
                 <div className="flex flex-col sm:flex-row gap-6 items-start">
-                  <div className="p-4 bg-gradient-to-br from-lavender-100 to-peach-100 rounded-2xl shrink-0">
-                    <ClipboardList className="h-8 w-8 text-lavender-600" />
+                  <div className="p-4 bg-gradient-to-br from-primary-100 to-accent-100 rounded-2xl shrink-0">
+                    <ClipboardList className="h-8 w-8 text-primary-600" />
                   </div>
                   <div>
                     <h3 className="text-2xl font-bold text-navy-900 mb-2">Event-Based Care Timeline</h3>
@@ -613,8 +611,8 @@ export default function Home() {
 
               {/* Feature 3 - AI Chat */}
               <div className="bento-item card-glass p-6 animate-slide-up opacity-0" style={{ animationFillMode: 'forwards' }}>
-                <div className="p-3 bg-peach-100 rounded-2xl w-fit mb-4">
-                  <MessageSquare className="h-6 w-6 text-peach-600" />
+                <div className="p-3 bg-accent-100 rounded-2xl w-fit mb-4">
+                  <MessageSquare className="h-6 w-6 text-accent-600" />
                 </div>
                 <h3 className="text-xl font-bold text-navy-900 mb-2">Guardrailed AI Chat</h3>
                 <p className="text-navy-600">
@@ -624,8 +622,8 @@ export default function Home() {
 
               {/* Feature 4 - Care Circle */}
               <div className="bento-item card-glass p-6 animate-slide-up opacity-0" style={{ animationFillMode: 'forwards' }}>
-                <div className="p-3 bg-lavender-100 rounded-2xl w-fit mb-4">
-                  <Users className="h-6 w-6 text-lavender-600" />
+                <div className="p-3 bg-primary-100 rounded-2xl w-fit mb-4">
+                  <Users className="h-6 w-6 text-primary-600" />
                 </div>
                 <h3 className="text-xl font-bold text-navy-900 mb-2">Permissioned Access</h3>
                 <p className="text-navy-600">
@@ -670,7 +668,7 @@ export default function Home() {
                 { icon: TrendingUp, label: 'Higher census', desc: 'Positive reputation drives occupancy' },
               ].map((item, i) => (
                 <div key={i} className="card-glass p-5 text-center animate-slide-up opacity-0" style={{ animationFillMode: 'forwards', animationDelay: `${i * 80}ms` }}>
-                  <item.icon className="h-6 w-6 text-lavender-600 mx-auto mb-3" />
+                  <item.icon className="h-6 w-6 text-primary-600 mx-auto mb-3" />
                   <p className="font-semibold text-navy-900 text-sm">{item.label}</p>
                   <p className="text-xs text-navy-500 mt-1">{item.desc}</p>
                 </div>
@@ -721,7 +719,7 @@ export default function Home() {
         <div className="py-20 sm:py-28">
           <div className="max-w-4xl mx-auto px-4 text-center">
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-lavender-500 to-lavender-700 rounded-4xl blur-2xl opacity-20"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-primary-500 to-primary-700 rounded-4xl blur-2xl opacity-20"></div>
               <div className="relative bg-gradient-to-br from-navy-800 to-navy-900 rounded-4xl p-10 sm:p-16 shadow-glass-lg">
                 <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
                   Families Never Have to Wonder Again
@@ -742,14 +740,17 @@ export default function Home() {
         </div>
 
         {/* Footer */}
-        <footer className="py-10 border-t border-lavender-100/50">
+        <footer className="py-10 border-t border-primary-100/50">
           <div className="max-w-7xl mx-auto px-4 text-center">
             <div className="flex justify-center mb-4">
-              <div className="p-2 bg-lavender-100 rounded-xl">
-                <Link2 className="h-5 w-5 text-lavender-600" />
-              </div>
+              <Image
+                src="/logos/Logo 1 (color).png"
+                alt="CareBridge Connect"
+                width={200}
+                height={60}
+                className="h-12 w-auto"
+              />
             </div>
-            <p className="text-navy-600 font-medium">CareBridge Connect</p>
             <p className="mt-1 text-navy-500 text-sm">A HIPAA-safe communication bridge between care teams and families</p>
             <p className="mt-4 text-navy-400 text-xs">&copy; 2026 CareBridge Connect LLC. All rights reserved.</p>
           </div>
@@ -762,8 +763,8 @@ export default function Home() {
     <div className="min-h-screen gradient-mesh-bg">
       {/* Decorative blobs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-96 h-96 blob-lavender rounded-full opacity-50"></div>
-        <div className="absolute bottom-20 -left-20 w-72 h-72 blob-peach rounded-full opacity-40"></div>
+        <div className="absolute -top-40 -right-40 w-96 h-96 blob-primary rounded-full opacity-50"></div>
+        <div className="absolute bottom-20 -left-20 w-72 h-72 blob-accent rounded-full opacity-40"></div>
       </div>
 
       {/* Navigation with Notification Bell */}
@@ -863,7 +864,7 @@ export default function Home() {
             )}
 
             {/* Log Sub-tabs */}
-            <div className="flex gap-2 border-b border-lavender-100 pb-2">
+            <div className="flex gap-2 border-b border-primary-100 pb-2">
               {[
                 { id: 'timeline' as const, label: 'Timeline' },
                 { id: 'vitals' as const, label: 'Vitals Trends' },
@@ -874,7 +875,7 @@ export default function Home() {
                   onClick={() => setLogSubTab(tab.id)}
                   className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                     logSubTab === tab.id
-                      ? 'bg-lavender-100 text-lavender-700 shadow-soft'
+                      ? 'bg-primary-100 text-primary-700 shadow-soft'
                       : 'text-navy-600 hover:bg-cream-100'
                   }`}
                 >
@@ -921,7 +922,7 @@ export default function Home() {
       {/* Demo Notice */}
       <div className="fixed bottom-4 left-4 right-20 sm:left-auto sm:right-20 sm:w-auto">
         <div className="glass-dark text-white px-4 py-3 rounded-2xl shadow-glass-lg flex items-center gap-3">
-          <div className={`p-2 ${isDemoMode ? 'bg-lavender-500' : 'bg-mint-500'} rounded-xl`}>
+          <div className={`p-2 ${isDemoMode ? 'bg-primary-500' : 'bg-mint-500'} rounded-xl`}>
             <Sparkles className="h-4 w-4" />
           </div>
           <div className="text-sm">

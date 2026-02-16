@@ -32,8 +32,8 @@ const roleConfig: Record<UserRole, { label: string; color: string; gradient: str
   },
   admin: {
     label: 'Admin',
-    color: 'bg-lavender-100 text-lavender-700',
-    gradient: 'from-lavender-400 to-peach-400',
+    color: 'bg-primary-100 text-primary-700',
+    gradient: 'from-primary-400 to-accent-400',
     icon: Shield,
   },
   nurse: {
@@ -44,8 +44,8 @@ const roleConfig: Record<UserRole, { label: string; color: string; gradient: str
   },
   family: {
     label: 'Family',
-    color: 'bg-peach-100 text-peach-700',
-    gradient: 'from-lavender-400 to-lavender-500',
+    color: 'bg-accent-100 text-accent-700',
+    gradient: 'from-primary-400 to-primary-500',
     icon: Heart,
   },
 }
@@ -109,13 +109,13 @@ export default function CareCircle({ members, currentUserRole, onAddMember }: Ca
             )}
             <div className="mt-3 space-y-1.5">
               <a href={`mailto:${member.email}`}
-                className="flex items-center text-sm text-navy-600 hover:text-lavender-600 transition-colors">
+                className="flex items-center text-sm text-navy-600 hover:text-primary-600 transition-colors">
                 <Mail className="h-4 w-4 mr-2 flex-shrink-0" />
                 {member.email}
               </a>
               {member.phone && (
                 <a href={`tel:${member.phone}`}
-                  className="flex items-center text-sm text-navy-600 hover:text-lavender-600 transition-colors">
+                  className="flex items-center text-sm text-navy-600 hover:text-primary-600 transition-colors">
                   <Phone className="h-4 w-4 mr-2 flex-shrink-0" />
                   {member.phone}
                 </a>
@@ -138,7 +138,7 @@ export default function CareCircle({ members, currentUserRole, onAddMember }: Ca
         {canAddCareCircleMembers(currentUserRole) && (
           <button
             onClick={() => { setShowInviteModal(true); generateInviteLink() }}
-            className="flex items-center px-5 py-2.5 bg-gradient-to-r from-lavender-500 to-lavender-600 text-white rounded-2xl hover:from-lavender-600 hover:to-lavender-700 transition-all duration-200 shadow-float hover:-translate-y-0.5"
+            className="flex items-center px-5 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-2xl hover:from-primary-600 hover:to-primary-700 transition-all duration-200 shadow-float hover:-translate-y-0.5"
           >
             <UserPlus className="h-5 w-5 mr-2" />
             Add Contact
@@ -149,7 +149,7 @@ export default function CareCircle({ members, currentUserRole, onAddMember }: Ca
       {/* Family Members */}
       <div>
         <h3 className="text-lg font-semibold text-navy-800 mb-3 flex items-center gap-2">
-          <Heart className="h-5 w-5 text-peach-500" />
+          <Heart className="h-5 w-5 text-accent-500" />
           Family ({familyMembers.length})
         </h3>
         <div className="grid gap-4 md:grid-cols-2">
@@ -185,25 +185,25 @@ export default function CareCircle({ members, currentUserRole, onAddMember }: Ca
               <div>
                 <label className="block text-sm font-medium text-navy-700 mb-1">Name</label>
                 <input type="text" value={newMember.name} onChange={(e) => setNewMember({ ...newMember, name: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-lavender-200 rounded-xl focus:ring-2 focus:ring-lavender-400 focus:border-transparent" placeholder="Enter name" />
+                  className="w-full px-3 py-2.5 border border-primary-200 rounded-xl focus:ring-2 focus:ring-primary-400 focus:border-transparent" placeholder="Enter name" />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-navy-700 mb-1">Relationship</label>
                 <input type="text" value={newMember.relationship} onChange={(e) => setNewMember({ ...newMember, relationship: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-lavender-200 rounded-xl focus:ring-2 focus:ring-lavender-400 focus:border-transparent" placeholder="e.g., Son, Granddaughter, Friend" />
+                  className="w-full px-3 py-2.5 border border-primary-200 rounded-xl focus:ring-2 focus:ring-primary-400 focus:border-transparent" placeholder="e.g., Son, Granddaughter, Friend" />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-navy-700 mb-1">Email</label>
                 <input type="email" value={newMember.email} onChange={(e) => setNewMember({ ...newMember, email: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-lavender-200 rounded-xl focus:ring-2 focus:ring-lavender-400 focus:border-transparent" placeholder="Enter email" />
+                  className="w-full px-3 py-2.5 border border-primary-200 rounded-xl focus:ring-2 focus:ring-primary-400 focus:border-transparent" placeholder="Enter email" />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-navy-700 mb-1">Phone (optional)</label>
                 <input type="tel" value={newMember.phone} onChange={(e) => setNewMember({ ...newMember, phone: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-lavender-200 rounded-xl focus:ring-2 focus:ring-lavender-400 focus:border-transparent" placeholder="(555) 123-4567" />
+                  className="w-full px-3 py-2.5 border border-primary-200 rounded-xl focus:ring-2 focus:ring-primary-400 focus:border-transparent" placeholder="(555) 123-4567" />
               </div>
 
               {/* Invite Link */}
@@ -211,9 +211,9 @@ export default function CareCircle({ members, currentUserRole, onAddMember }: Ca
                 <label className="block text-sm font-medium text-navy-700 mb-2">Or share invite link</label>
                 <div className="flex items-center gap-2">
                   <input type="text" value={inviteLink} readOnly
-                    className="flex-1 px-3 py-2.5 bg-white border border-lavender-200 rounded-xl text-sm text-navy-600" />
+                    className="flex-1 px-3 py-2.5 bg-white border border-primary-200 rounded-xl text-sm text-navy-600" />
                   <button onClick={copyToClipboard}
-                    className="p-2.5 bg-lavender-100 text-lavender-700 rounded-xl hover:bg-lavender-200 transition-colors">
+                    className="p-2.5 bg-primary-100 text-primary-700 rounded-xl hover:bg-primary-200 transition-colors">
                     {copied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
                   </button>
                 </div>
@@ -222,11 +222,11 @@ export default function CareCircle({ members, currentUserRole, onAddMember }: Ca
 
             <div className="mt-6 flex gap-3">
               <button onClick={() => setShowInviteModal(false)}
-                className="flex-1 px-4 py-2.5 border border-lavender-200 text-navy-700 rounded-xl hover:bg-cream-50 transition-colors">
+                className="flex-1 px-4 py-2.5 border border-primary-200 text-navy-700 rounded-xl hover:bg-cream-50 transition-colors">
                 Cancel
               </button>
               <button onClick={handleInvite}
-                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-lavender-500 to-lavender-600 text-white rounded-xl hover:from-lavender-600 hover:to-lavender-700 transition-all duration-200 shadow-soft">
+                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-200 shadow-soft">
                 Add Contact
               </button>
             </div>

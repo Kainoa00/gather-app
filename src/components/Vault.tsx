@@ -38,9 +38,9 @@ const tabs = [
 ]
 
 const categoryColors: Record<VaultDocument['category'], string> = {
-  legal: 'bg-lavender-100 text-lavender-700',
+  legal: 'bg-primary-100 text-primary-700',
   medical: 'bg-mint-100 text-mint-700',
-  insurance: 'bg-peach-100 text-peach-700',
+  insurance: 'bg-accent-100 text-accent-700',
   other: 'bg-cream-200 text-navy-700',
 }
 
@@ -90,14 +90,14 @@ export default function VaultComponent({ vault, onUpdateVault, currentUserRole }
       </div>
 
       {/* Tabs */}
-      <div className="flex flex-wrap gap-2 border-b border-lavender-100 pb-2">
+      <div className="flex flex-wrap gap-2 border-b border-primary-100 pb-2">
         {filteredTabs.map((tab) => {
           const Icon = tab.icon
           return (
             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
               className={`flex items-center px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                 activeTab === tab.id
-                  ? 'bg-lavender-100 text-lavender-700 shadow-sm'
+                  ? 'bg-primary-100 text-primary-700 shadow-sm'
                   : 'text-navy-600 hover:bg-cream-100'
               }`}>
               <Icon className="h-4 w-4 mr-2" />
@@ -115,7 +115,7 @@ export default function VaultComponent({ vault, onUpdateVault, currentUserRole }
             <h3 className="font-semibold text-navy-900 text-lg">{vault.facilityInfo.facilityName}</h3>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="bg-lavender-50/50 rounded-xl p-4">
+              <div className="bg-primary-50/50 rounded-xl p-4">
                 <div className="text-xs text-navy-500 mb-1 flex items-center gap-1">
                   <Building2 className="h-3 w-3" /> Room
                 </div>
@@ -134,7 +134,7 @@ export default function VaultComponent({ vault, onUpdateVault, currentUserRole }
                 <div className="font-semibold text-navy-900">{vault.facilityInfo.visitingHours}</div>
               </div>
 
-              <div className="bg-peach-50/50 rounded-xl p-4">
+              <div className="bg-accent-50/50 rounded-xl p-4">
                 <div className="text-xs text-navy-500 mb-1 flex items-center gap-1">
                   <Phone className="h-3 w-3" /> Nurse Station
                 </div>
@@ -145,7 +145,7 @@ export default function VaultComponent({ vault, onUpdateVault, currentUserRole }
                 <div className="text-xs text-navy-500 mb-1 flex items-center gap-1">
                   <Phone className="h-3 w-3" /> Main Number
                 </div>
-                <a href={`tel:${vault.facilityInfo.facilityPhone}`} className="text-sm font-medium text-lavender-600 hover:text-lavender-700">
+                <a href={`tel:${vault.facilityInfo.facilityPhone}`} className="text-sm font-medium text-primary-600 hover:text-primary-700">
                   {vault.facilityInfo.facilityPhone}
                 </a>
               </div>
@@ -204,13 +204,13 @@ export default function VaultComponent({ vault, onUpdateVault, currentUserRole }
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               {vault.insuranceCards.map((card) => (
-                <div key={card.id} className="border border-lavender-100 rounded-2xl p-4 hover:border-lavender-300 hover:shadow-soft transition-all duration-200">
+                <div key={card.id} className="border border-primary-100 rounded-2xl p-4 hover:border-primary-300 hover:shadow-soft transition-all duration-200">
                   <div className="flex items-start justify-between">
                     <div>
                       <h4 className="font-medium text-navy-900">{card.name}</h4>
                       {card.notes && <span className="text-xs text-navy-500">{card.notes}</span>}
                     </div>
-                    <CreditCard className="h-5 w-5 text-lavender-300" />
+                    <CreditCard className="h-5 w-5 text-primary-300" />
                   </div>
                   <div className="mt-4 space-y-2">
                     <div className="flex items-center justify-between">
@@ -245,14 +245,14 @@ export default function VaultComponent({ vault, onUpdateVault, currentUserRole }
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="text-left text-sm text-navy-500 border-b border-lavender-100">
+                  <tr className="text-left text-sm text-navy-500 border-b border-primary-100">
                     <th className="pb-3 font-medium">Medication</th>
                     <th className="pb-3 font-medium">Dosage</th>
                     <th className="pb-3 font-medium">Frequency</th>
                     <th className="pb-3 font-medium">Prescribed By</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-lavender-50">
+                <tbody className="divide-y divide-primary-50">
                   {vault.medications.map((med) => (
                     <tr key={med.id} className="hover:bg-cream-50 transition-colors">
                       <td className="py-3">
@@ -280,14 +280,14 @@ export default function VaultComponent({ vault, onUpdateVault, currentUserRole }
             </div>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {vault.providers.map((provider) => (
-                <div key={provider.id} className="border border-lavender-100 rounded-2xl p-4 hover:border-lavender-300 hover:shadow-soft transition-all duration-200">
+                <div key={provider.id} className="border border-primary-100 rounded-2xl p-4 hover:border-primary-300 hover:shadow-soft transition-all duration-200">
                   <div>
                     <h4 className="font-medium text-navy-900">{provider.name}</h4>
-                    <span className="text-sm text-lavender-600">{provider.specialty}</span>
+                    <span className="text-sm text-primary-600">{provider.specialty}</span>
                   </div>
                   {provider.address && <p className="text-sm text-navy-500 mt-2">{provider.address}</p>}
                   <a href={`tel:${provider.phone}`}
-                    className="mt-4 flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-lavender-50 text-lavender-700 rounded-xl hover:bg-lavender-100 transition-colors font-medium">
+                    className="mt-4 flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-primary-50 text-primary-700 rounded-xl hover:bg-primary-100 transition-colors font-medium">
                     <Phone className="h-4 w-4" />
                     {provider.phone}
                   </a>
@@ -305,7 +305,7 @@ export default function VaultComponent({ vault, onUpdateVault, currentUserRole }
               {canUploadDocuments(currentUserRole) && (
                 <button
                   onClick={() => setShowUploadModal(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-lavender-500 to-lavender-600 text-white rounded-xl hover:from-lavender-600 hover:to-lavender-700 transition-all duration-200 shadow-sm font-medium text-sm"
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-200 shadow-sm font-medium text-sm"
                 >
                   <Upload className="h-4 w-4" />
                   Upload
@@ -318,11 +318,11 @@ export default function VaultComponent({ vault, onUpdateVault, currentUserRole }
               {vault.documents.filter(doc => visibleDocCategories.includes(doc.category)).map((doc) => (
                 <div
                   key={doc.id}
-                  className="border border-lavender-100 rounded-2xl p-4 hover:border-lavender-300 hover:shadow-soft transition-all duration-200"
+                  className="border border-primary-100 rounded-2xl p-4 hover:border-primary-300 hover:shadow-soft transition-all duration-200"
                 >
                   <div className="flex items-start gap-3">
-                    <div className="p-2 bg-lavender-50 rounded-xl flex-shrink-0">
-                      <FileText className="h-5 w-5 text-lavender-500" />
+                    <div className="p-2 bg-primary-50 rounded-xl flex-shrink-0">
+                      <FileText className="h-5 w-5 text-primary-500" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="font-medium text-navy-900 truncate">{doc.name}</h4>
@@ -348,12 +348,12 @@ export default function VaultComponent({ vault, onUpdateVault, currentUserRole }
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 mt-4 pt-3 border-t border-lavender-50">
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-lavender-700 hover:bg-lavender-50 rounded-lg transition-colors font-medium">
+                  <div className="flex items-center gap-2 mt-4 pt-3 border-t border-primary-50">
+                    <button className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-primary-700 hover:bg-primary-50 rounded-lg transition-colors font-medium">
                       <Eye className="h-3.5 w-3.5" />
                       View
                     </button>
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-lavender-700 hover:bg-lavender-50 rounded-lg transition-colors font-medium">
+                    <button className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-primary-700 hover:bg-primary-50 rounded-lg transition-colors font-medium">
                       <Download className="h-3.5 w-3.5" />
                       Download
                     </button>
@@ -366,9 +366,9 @@ export default function VaultComponent({ vault, onUpdateVault, currentUserRole }
             {canUploadDocuments(currentUserRole) && (
               <button
                 onClick={() => setShowUploadModal(true)}
-                className="mt-4 w-full border-2 border-dashed border-lavender-200 rounded-2xl p-8 flex flex-col items-center justify-center gap-2 hover:border-lavender-400 hover:bg-lavender-50/30 transition-all duration-200 cursor-pointer"
+                className="mt-4 w-full border-2 border-dashed border-primary-200 rounded-2xl p-8 flex flex-col items-center justify-center gap-2 hover:border-primary-400 hover:bg-primary-50/30 transition-all duration-200 cursor-pointer"
               >
-                <Upload className="h-8 w-8 text-lavender-300" />
+                <Upload className="h-8 w-8 text-primary-300" />
                 <span className="text-sm font-medium text-navy-700">Upload Document</span>
                 <span className="text-xs text-navy-400">Drag &amp; drop or click to browse</span>
                 <span className="text-xs text-navy-400">PDF, JPG, PNG &middot; Max 10MB</span>
@@ -398,8 +398,8 @@ export default function VaultComponent({ vault, onUpdateVault, currentUserRole }
               <h3 className="text-lg font-semibold text-navy-900 mb-4">Upload Document</h3>
 
               {/* Drop zone */}
-              <div className="border-2 border-dashed border-lavender-200 rounded-2xl p-8 flex flex-col items-center justify-center gap-2 hover:border-lavender-400 hover:bg-lavender-50/30 transition-all duration-200 cursor-pointer mb-5">
-                <Upload className="h-8 w-8 text-lavender-300" />
+              <div className="border-2 border-dashed border-primary-200 rounded-2xl p-8 flex flex-col items-center justify-center gap-2 hover:border-primary-400 hover:bg-primary-50/30 transition-all duration-200 cursor-pointer mb-5">
+                <Upload className="h-8 w-8 text-primary-300" />
                 <span className="text-sm font-medium text-navy-700">Drag &amp; drop your file here</span>
                 <span className="text-xs text-navy-400">or click to browse</span>
                 <span className="text-xs text-navy-400">PDF, JPG, PNG &middot; Max 10MB</span>
@@ -413,7 +413,7 @@ export default function VaultComponent({ vault, onUpdateVault, currentUserRole }
                   value={newDocName}
                   onChange={(e) => setNewDocName(e.target.value)}
                   placeholder="e.g., Power of Attorney"
-                  className="w-full px-4 py-2.5 border border-lavender-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-lavender-300 focus:border-transparent text-sm text-navy-900 placeholder:text-navy-400"
+                  className="w-full px-4 py-2.5 border border-primary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent text-sm text-navy-900 placeholder:text-navy-400"
                 />
               </div>
 
@@ -423,7 +423,7 @@ export default function VaultComponent({ vault, onUpdateVault, currentUserRole }
                 <select
                   value={newDocCategory}
                   onChange={(e) => setNewDocCategory(e.target.value as VaultDocument['category'])}
-                  className="w-full px-4 py-2.5 border border-lavender-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-lavender-300 focus:border-transparent text-sm text-navy-900 bg-white"
+                  className="w-full px-4 py-2.5 border border-primary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent text-sm text-navy-900 bg-white"
                 >
                   <option value="legal">Legal</option>
                   <option value="medical">Medical</option>
@@ -440,7 +440,7 @@ export default function VaultComponent({ vault, onUpdateVault, currentUserRole }
                   onChange={(e) => setNewDocNotes(e.target.value)}
                   placeholder="Add any relevant notes about this document..."
                   rows={3}
-                  className="w-full px-4 py-2.5 border border-lavender-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-lavender-300 focus:border-transparent text-sm text-navy-900 placeholder:text-navy-400 resize-none"
+                  className="w-full px-4 py-2.5 border border-primary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent text-sm text-navy-900 placeholder:text-navy-400 resize-none"
                 />
               </div>
 
@@ -458,7 +458,7 @@ export default function VaultComponent({ vault, onUpdateVault, currentUserRole }
                   Cancel
                 </button>
                 <button
-                  className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-lavender-500 to-lavender-600 text-white rounded-xl hover:from-lavender-600 hover:to-lavender-700 transition-all duration-200 shadow-sm font-medium text-sm"
+                  className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-200 shadow-sm font-medium text-sm"
                 >
                   <Upload className="h-4 w-4" />
                   Upload

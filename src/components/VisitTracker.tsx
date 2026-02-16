@@ -39,12 +39,12 @@ const moodOptions: Record<MoodOption, MoodConfig> = {
 }
 
 const avatarGradients = [
-  'from-lavender-400 to-lavender-600',
-  'from-peach-400 to-peach-600',
+  'from-primary-400 to-primary-600',
+  'from-accent-400 to-accent-600',
   'from-mint-400 to-mint-600',
-  'from-lavender-500 to-peach-400',
-  'from-mint-400 to-lavender-500',
-  'from-peach-400 to-lavender-400',
+  'from-primary-500 to-accent-400',
+  'from-mint-400 to-primary-500',
+  'from-accent-400 to-primary-400',
 ]
 
 function getAvatarGradient(name: string): string {
@@ -302,7 +302,7 @@ export default function VisitTracker({
       {!activeVisit && (
         <button
           onClick={onCheckIn}
-          className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-lavender-500 to-lavender-600 text-white font-semibold rounded-2xl hover:from-lavender-600 hover:to-lavender-700 transition-all duration-200 shadow-float hover:-translate-y-0.5 animate-slide-up"
+          className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-2xl hover:from-primary-600 hover:to-primary-700 transition-all duration-200 shadow-float hover:-translate-y-0.5 animate-slide-up"
         >
           <MapPin className="h-5 w-5" />
           I&apos;m Here
@@ -314,7 +314,7 @@ export default function VisitTracker({
         {/* Section Header with Weekly Summary */}
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-navy-800 flex items-center gap-2">
-            <Users className="h-5 w-5 text-lavender-500" />
+            <Users className="h-5 w-5 text-primary-500" />
             Recent Visits
           </h3>
           <span className="text-sm text-navy-500">
@@ -327,7 +327,7 @@ export default function VisitTracker({
         {groupedVisits.thisWeek.length > 0 && (
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <div className="h-2 w-2 rounded-full bg-gradient-to-r from-lavender-400 to-peach-400" />
+              <div className="h-2 w-2 rounded-full bg-gradient-to-r from-primary-400 to-accent-400" />
               <h4 className="text-sm font-semibold text-navy-700">This Week</h4>
               <span className="text-xs text-navy-400">
                 ({groupedVisits.thisWeek.length})
@@ -358,7 +358,7 @@ export default function VisitTracker({
         {/* Empty State */}
         {groupedVisits.thisWeek.length === 0 && groupedVisits.lastWeek.length === 0 && (
           <div className="text-center py-12 card-glass">
-            <Users className="h-12 w-12 text-lavender-300 mx-auto mb-3" />
+            <Users className="h-12 w-12 text-primary-300 mx-auto mb-3" />
             <p className="text-navy-500 font-medium">No recent visits</p>
             <p className="text-navy-400 text-sm mt-1">
               Check in when you arrive to start tracking visits
@@ -372,7 +372,7 @@ export default function VisitTracker({
         <div className="fixed inset-0 bg-navy-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
           <div className="bg-white rounded-3xl max-w-md w-full shadow-glass-lg animate-scale-in">
             {/* Modal Header */}
-            <div className="p-5 border-b border-lavender-100/50 flex items-center justify-between">
+            <div className="p-5 border-b border-primary-100/50 flex items-center justify-between">
               <h3 className="text-xl font-bold text-navy-900">Check Out</h3>
               <button
                 onClick={handleCloseCheckOut}
@@ -408,7 +408,7 @@ export default function VisitTracker({
                         onClick={() => setSelectedMood(key)}
                         className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl transition-all duration-200 border-2 ${
                           selectedMood === key
-                            ? 'border-lavender-400 bg-lavender-50 shadow-soft'
+                            ? 'border-primary-400 bg-primary-50 shadow-soft'
                             : 'border-cream-200 hover:bg-cream-50 hover:border-cream-300'
                         }`}
                       >
@@ -432,24 +432,24 @@ export default function VisitTracker({
                   value={checkOutNote}
                   onChange={(e) => setCheckOutNote(e.target.value)}
                   placeholder="How was Mom doing today? Anything to share with the care circle..."
-                  className="w-full px-4 py-3 bg-cream-50 border border-cream-200 rounded-2xl text-sm text-navy-800 placeholder:text-navy-400 focus:outline-none focus:ring-2 focus:ring-lavender-300 focus:border-transparent resize-none transition-all"
+                  className="w-full px-4 py-3 bg-cream-50 border border-cream-200 rounded-2xl text-sm text-navy-800 placeholder:text-navy-400 focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent resize-none transition-all"
                   rows={3}
                 />
               </div>
             </div>
 
             {/* Modal Footer */}
-            <div className="p-5 border-t border-lavender-100/50 flex gap-3">
+            <div className="p-5 border-t border-primary-100/50 flex gap-3">
               <button
                 onClick={handleCloseCheckOut}
-                className="flex-1 px-4 py-2.5 border border-lavender-200 text-navy-700 font-medium rounded-xl hover:bg-cream-50 transition-colors"
+                className="flex-1 px-4 py-2.5 border border-primary-200 text-navy-700 font-medium rounded-xl hover:bg-cream-50 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleCheckOut}
                 disabled={!selectedMood}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-lavender-500 to-lavender-600 text-white font-medium rounded-xl hover:from-lavender-600 hover:to-lavender-700 transition-all duration-200 shadow-soft disabled:opacity-50 disabled:cursor-not-allowed disabled:from-cream-200 disabled:to-cream-200 disabled:text-navy-400 disabled:shadow-none"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-medium rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-200 shadow-soft disabled:opacity-50 disabled:cursor-not-allowed disabled:from-cream-200 disabled:to-cream-200 disabled:text-navy-400 disabled:shadow-none"
               >
                 <LogOut className="h-4 w-4" />
                 Check Out

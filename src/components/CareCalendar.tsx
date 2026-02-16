@@ -51,8 +51,8 @@ const eventTypeConfig = {
   family_visit: {
     label: 'Family Visit',
     icon: Users,
-    color: 'bg-lavender-100 text-lavender-700 border-lavender-200',
-    bgColor: 'bg-lavender-50',
+    color: 'bg-primary-100 text-primary-700 border-primary-200',
+    bgColor: 'bg-primary-50',
   },
 }
 
@@ -124,7 +124,7 @@ export default function CareCalendar({ events, onClaimEvent, onAddEvent }: CareC
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="flex items-center px-5 py-2.5 bg-gradient-to-r from-lavender-500 to-lavender-600 text-white rounded-2xl hover:from-lavender-600 hover:to-lavender-700 transition-all duration-200 shadow-float hover:-translate-y-0.5"
+          className="flex items-center px-5 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-2xl hover:from-primary-600 hover:to-primary-700 transition-all duration-200 shadow-float hover:-translate-y-0.5"
         >
           <Plus className="h-5 w-5 mr-2" />
           Schedule Visit
@@ -133,14 +133,14 @@ export default function CareCalendar({ events, onClaimEvent, onAddEvent }: CareC
 
       {/* Visit Windows Banner */}
       {visitWindows.length > 0 && (
-        <div className="card-glass p-5 border-l-4 border-lavender-400">
+        <div className="card-glass p-5 border-l-4 border-primary-400">
           <h3 className="font-semibold text-navy-900 mb-3 flex items-center gap-2">
-            <Heart className="h-5 w-5 text-lavender-500" />
+            <Heart className="h-5 w-5 text-primary-500" />
             Best Times to Visit
           </h3>
           <div className="grid gap-3 sm:grid-cols-2">
             {visitWindows.map((window) => (
-              <div key={window.id} className="flex items-center gap-3 bg-lavender-50/50 rounded-xl p-3">
+              <div key={window.id} className="flex items-center gap-3 bg-primary-50/50 rounded-xl p-3">
                 <div className="text-center min-w-[60px]">
                   <div className="text-sm font-semibold text-navy-900">{getDateLabel(new Date(window.date))}</div>
                   <div className="text-xs text-navy-500">{window.time}{window.endTime ? ` - ${window.endTime}` : ''}</div>
@@ -153,7 +153,7 @@ export default function CareCalendar({ events, onClaimEvent, onAddEvent }: CareC
                 {!window.claimedBy && (
                   <button
                     onClick={() => onClaimEvent(window.id, 'Sarah')}
-                    className="ml-auto px-3 py-1.5 bg-lavender-500 text-white rounded-lg text-xs font-medium hover:bg-lavender-600 transition-colors"
+                    className="ml-auto px-3 py-1.5 bg-primary-500 text-white rounded-lg text-xs font-medium hover:bg-primary-600 transition-colors"
                   >
                     I'll Visit
                   </button>
@@ -182,8 +182,8 @@ export default function CareCalendar({ events, onClaimEvent, onAddEvent }: CareC
             onClick={() => setFilter(f.id as typeof filter)}
             className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
               filter === f.id
-                ? 'bg-lavender-100 text-lavender-700 shadow-sm'
-                : 'bg-white text-navy-600 hover:bg-cream-100 border border-lavender-200'
+                ? 'bg-primary-100 text-primary-700 shadow-sm'
+                : 'bg-white text-navy-600 hover:bg-cream-100 border border-primary-200'
             }`}
           >
             {f.label}
@@ -208,7 +208,7 @@ export default function CareCalendar({ events, onClaimEvent, onAddEvent }: CareC
       <div className="space-y-4">
         {filteredEvents.length === 0 ? (
           <div className="text-center py-12 card-glass">
-            <Calendar className="h-12 w-12 text-lavender-300 mx-auto mb-3" />
+            <Calendar className="h-12 w-12 text-primary-300 mx-auto mb-3" />
             <p className="text-navy-500">No events found</p>
           </div>
         ) : (
@@ -220,7 +220,7 @@ export default function CareCalendar({ events, onClaimEvent, onAddEvent }: CareC
             return (
               <div key={event.id}
                 className={`card-glass p-5 hover:shadow-float transition-all duration-200 ${
-                  event.visitWindow ? 'ring-2 ring-lavender-200' : ''
+                  event.visitWindow ? 'ring-2 ring-primary-200' : ''
                 }`}>
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4">
@@ -239,7 +239,7 @@ export default function CareCalendar({ events, onClaimEvent, onAddEvent }: CareC
                           </span>
                         )}
                         {event.visitWindow && (
-                          <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-lavender-100 text-lavender-700">
+                          <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-700">
                             Visit Window
                           </span>
                         )}
@@ -262,7 +262,7 @@ export default function CareCalendar({ events, onClaimEvent, onAddEvent }: CareC
                           </span>
                         )}
                         {event.reminder && (
-                          <span className="flex items-center text-lavender-600">
+                          <span className="flex items-center text-primary-600">
                             <Bell className="h-4 w-4 mr-1" />
                             {formatReminderTime(event.reminder)}
                           </span>
@@ -283,7 +283,7 @@ export default function CareCalendar({ events, onClaimEvent, onAddEvent }: CareC
                       ) : (
                         <button
                           onClick={() => onClaimEvent(event.id, 'Sarah')}
-                          className="flex items-center px-4 py-2.5 bg-gradient-to-r from-lavender-500 to-lavender-600 text-white rounded-xl hover:from-lavender-600 hover:to-lavender-700 transition-all duration-200 font-medium shadow-soft"
+                          className="flex items-center px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-200 font-medium shadow-soft"
                         >
                           <User className="h-4 w-4 mr-2" />
                           I'll Visit
@@ -313,7 +313,7 @@ export default function CareCalendar({ events, onClaimEvent, onAddEvent }: CareC
               <div>
                 <label className="block text-sm font-medium text-navy-700 mb-1">Event Type</label>
                 <select value={newEvent.type} onChange={(e) => setNewEvent({ ...newEvent, type: e.target.value as EventType })}
-                  className="w-full px-3 py-2.5 border border-lavender-200 rounded-xl focus:ring-2 focus:ring-lavender-400 focus:border-transparent">
+                  className="w-full px-3 py-2.5 border border-primary-200 rounded-xl focus:ring-2 focus:ring-primary-400 focus:border-transparent">
                   {Object.entries(eventTypeConfig).map(([key, config]) => (
                     <option key={key} value={key}>{config.label}</option>
                   ))}
@@ -323,33 +323,33 @@ export default function CareCalendar({ events, onClaimEvent, onAddEvent }: CareC
               <div>
                 <label className="block text-sm font-medium text-navy-700 mb-1">Title</label>
                 <input type="text" value={newEvent.title} onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-lavender-200 rounded-xl focus:ring-2 focus:ring-lavender-400 focus:border-transparent"
+                  className="w-full px-3 py-2.5 border border-primary-200 rounded-xl focus:ring-2 focus:ring-primary-400 focus:border-transparent"
                   placeholder="e.g., Family Visit" />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-navy-700 mb-1">Description (optional)</label>
                 <textarea value={newEvent.description} onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-lavender-200 rounded-xl focus:ring-2 focus:ring-lavender-400 focus:border-transparent" rows={2} />
+                  className="w-full px-3 py-2.5 border border-primary-200 rounded-xl focus:ring-2 focus:ring-primary-400 focus:border-transparent" rows={2} />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-navy-700 mb-1">Date</label>
                   <input type="date" value={newEvent.date} onChange={(e) => setNewEvent({ ...newEvent, date: e.target.value })}
-                    className="w-full px-3 py-2.5 border border-lavender-200 rounded-xl focus:ring-2 focus:ring-lavender-400 focus:border-transparent" />
+                    className="w-full px-3 py-2.5 border border-primary-200 rounded-xl focus:ring-2 focus:ring-primary-400 focus:border-transparent" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-navy-700 mb-1">Start Time</label>
                   <input type="time" value={newEvent.time} onChange={(e) => setNewEvent({ ...newEvent, time: e.target.value })}
-                    className="w-full px-3 py-2.5 border border-lavender-200 rounded-xl focus:ring-2 focus:ring-lavender-400 focus:border-transparent" />
+                    className="w-full px-3 py-2.5 border border-primary-200 rounded-xl focus:ring-2 focus:ring-primary-400 focus:border-transparent" />
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-navy-700 mb-1">Location (optional)</label>
                 <input type="text" value={newEvent.location} onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-lavender-200 rounded-xl focus:ring-2 focus:ring-lavender-400 focus:border-transparent"
+                  className="w-full px-3 py-2.5 border border-primary-200 rounded-xl focus:ring-2 focus:ring-primary-400 focus:border-transparent"
                   placeholder="e.g., Room 214B" />
               </div>
 
@@ -358,11 +358,11 @@ export default function CareCalendar({ events, onClaimEvent, onAddEvent }: CareC
 
             <div className="mt-6 flex gap-3">
               <button onClick={() => setShowAddModal(false)}
-                className="flex-1 px-4 py-2.5 border border-lavender-200 text-navy-700 rounded-xl hover:bg-cream-50 transition-colors">
+                className="flex-1 px-4 py-2.5 border border-primary-200 text-navy-700 rounded-xl hover:bg-cream-50 transition-colors">
                 Cancel
               </button>
               <button onClick={handleAddEvent}
-                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-lavender-500 to-lavender-600 text-white rounded-xl hover:from-lavender-600 hover:to-lavender-700 transition-all duration-200 shadow-soft">
+                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-200 shadow-soft">
                 Add Event
               </button>
             </div>

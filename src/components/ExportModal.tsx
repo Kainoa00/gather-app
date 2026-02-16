@@ -177,13 +177,13 @@ export default function ExportModal({
         <div className="flex gap-2 mb-6">
           <button onClick={() => setActiveTab('export')}
             className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-              activeTab === 'export' ? 'bg-lavender-100 text-lavender-700' : 'text-navy-600 hover:bg-cream-100'
+              activeTab === 'export' ? 'bg-primary-100 text-primary-700' : 'text-navy-600 hover:bg-cream-100'
             }`}>
             <Download className="h-4 w-4" /> Export
           </button>
           <button onClick={() => setActiveTab('share')}
             className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-              activeTab === 'share' ? 'bg-lavender-100 text-lavender-700' : 'text-navy-600 hover:bg-cream-100'
+              activeTab === 'share' ? 'bg-primary-100 text-primary-700' : 'text-navy-600 hover:bg-cream-100'
             }`}>
             <Share2 className="h-4 w-4" /> Share
           </button>
@@ -198,9 +198,9 @@ export default function ExportModal({
         {activeTab === 'export' && (
           <div className="space-y-3">
             <button onClick={exportCareSummaryPDF}
-              className="w-full flex items-center gap-4 p-4 border border-lavender-100 rounded-2xl hover:border-lavender-300 hover:bg-cream-50 transition-all duration-200 text-left">
-              <div className="p-3 bg-lavender-100 rounded-xl">
-                <FileText className="h-6 w-6 text-lavender-600" />
+              className="w-full flex items-center gap-4 p-4 border border-primary-100 rounded-2xl hover:border-primary-300 hover:bg-cream-50 transition-all duration-200 text-left">
+              <div className="p-3 bg-primary-100 rounded-xl">
+                <FileText className="h-6 w-6 text-primary-600" />
               </div>
               <div>
                 <h4 className="font-medium text-navy-900">Care Summary</h4>
@@ -208,7 +208,7 @@ export default function ExportModal({
               </div>
             </button>
             <button onClick={exportMedicationsCSV}
-              className="w-full flex items-center gap-4 p-4 border border-lavender-100 rounded-2xl hover:border-lavender-300 hover:bg-cream-50 transition-all duration-200 text-left">
+              className="w-full flex items-center gap-4 p-4 border border-primary-100 rounded-2xl hover:border-primary-300 hover:bg-cream-50 transition-all duration-200 text-left">
               <div className="p-3 bg-mint-100 rounded-xl">
                 <Table className="h-6 w-6 text-mint-600" />
               </div>
@@ -218,9 +218,9 @@ export default function ExportModal({
               </div>
             </button>
             <button onClick={exportLogCSV}
-              className="w-full flex items-center gap-4 p-4 border border-lavender-100 rounded-2xl hover:border-lavender-300 hover:bg-cream-50 transition-all duration-200 text-left">
-              <div className="p-3 bg-peach-100 rounded-xl">
-                <Table className="h-6 w-6 text-peach-600" />
+              className="w-full flex items-center gap-4 p-4 border border-primary-100 rounded-2xl hover:border-primary-300 hover:bg-cream-50 transition-all duration-200 text-left">
+              <div className="p-3 bg-accent-100 rounded-xl">
+                <Table className="h-6 w-6 text-accent-600" />
               </div>
               <div>
                 <h4 className="font-medium text-navy-900">Care Log (CSV)</h4>
@@ -236,21 +236,21 @@ export default function ExportModal({
               <label className="block text-sm font-medium text-navy-700 mb-2">Share Link (View Only)</label>
               <div className="flex gap-2">
                 <input type="text" value={shareLink} readOnly
-                  className="flex-1 px-3 py-2.5 bg-cream-50 border border-lavender-200 rounded-xl text-sm text-navy-600" />
+                  className="flex-1 px-3 py-2.5 bg-cream-50 border border-primary-200 rounded-xl text-sm text-navy-600" />
                 <button onClick={copyLink}
-                  className="px-4 py-2.5 bg-lavender-100 text-lavender-700 rounded-xl hover:bg-lavender-200 transition-colors">
+                  className="px-4 py-2.5 bg-primary-100 text-primary-700 rounded-xl hover:bg-primary-200 transition-colors">
                   {copied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
                 </button>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <button onClick={() => window.open(`mailto:?subject=CareBridge Connect Care Updates&body=View care updates: ${encodeURIComponent(shareLink)}`)}
-                className="flex items-center justify-center gap-2 p-4 border border-lavender-100 rounded-2xl hover:border-lavender-300 hover:bg-cream-50 transition-all duration-200">
+                className="flex items-center justify-center gap-2 p-4 border border-primary-100 rounded-2xl hover:border-primary-300 hover:bg-cream-50 transition-all duration-200">
                 <Mail className="h-5 w-5 text-navy-600" />
                 <span className="font-medium text-navy-700">Email</span>
               </button>
               <button onClick={copyLink}
-                className="flex items-center justify-center gap-2 p-4 border border-lavender-100 rounded-2xl hover:border-lavender-300 hover:bg-cream-50 transition-all duration-200">
+                className="flex items-center justify-center gap-2 p-4 border border-primary-100 rounded-2xl hover:border-primary-300 hover:bg-cream-50 transition-all duration-200">
                 <Link className="h-5 w-5 text-navy-600" />
                 <span className="font-medium text-navy-700">Copy Link</span>
               </button>
@@ -259,7 +259,7 @@ export default function ExportModal({
         )}
 
         <button onClick={onClose}
-          className="w-full mt-6 px-4 py-2.5 border border-lavender-200 text-navy-700 rounded-xl hover:bg-cream-50 transition-colors">
+          className="w-full mt-6 px-4 py-2.5 border border-primary-200 text-navy-700 rounded-xl hover:bg-cream-50 transition-colors">
           Close
         </button>
       </div>

@@ -157,7 +157,7 @@ export default function PatientSummary({
               className="h-14 w-14 rounded-2xl object-cover shadow-soft"
             />
           ) : (
-            <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-lavender-400 to-peach-400 flex items-center justify-center shadow-soft flex-shrink-0">
+            <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-primary-400 to-accent-400 flex items-center justify-center shadow-soft flex-shrink-0">
               <span className="text-white font-bold text-xl leading-none">
                 {getInitials(patient.name)}
               </span>
@@ -169,7 +169,7 @@ export default function PatientSummary({
             <h2 className="text-xl font-bold text-navy-900 truncate">{patient.name}</h2>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-sm text-navy-500">
               <span className="flex items-center gap-1">
-                <MapPin className="h-3.5 w-3.5 text-lavender-400" />
+                <MapPin className="h-3.5 w-3.5 text-primary-400" />
                 Room {patient.roomNumber}
               </span>
               <span className="hidden sm:inline">·</span>
@@ -179,7 +179,7 @@ export default function PatientSummary({
 
           {/* Diagnosis Badge */}
           {patient.primaryDiagnosis && (
-            <span className="hidden sm:inline-flex items-center px-3 py-1.5 bg-lavender-100 text-lavender-700 text-xs font-medium rounded-full whitespace-nowrap">
+            <span className="hidden sm:inline-flex items-center px-3 py-1.5 bg-primary-100 text-primary-700 text-xs font-medium rounded-full whitespace-nowrap">
               {patient.primaryDiagnosis}
             </span>
           )}
@@ -188,7 +188,7 @@ export default function PatientSummary({
         {/* Mobile diagnosis badge */}
         {patient.primaryDiagnosis && (
           <div className="mt-3 sm:hidden">
-            <span className="inline-flex items-center px-3 py-1.5 bg-lavender-100 text-lavender-700 text-xs font-medium rounded-full">
+            <span className="inline-flex items-center px-3 py-1.5 bg-primary-100 text-primary-700 text-xs font-medium rounded-full">
               {patient.primaryDiagnosis}
             </span>
           </div>
@@ -352,8 +352,8 @@ export default function PatientSummary({
         {/* ---- Card 4: Next Visit ---- */}
         <div className="card-glass p-4 flex flex-col gap-3 hover:shadow-float transition-all duration-300">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-lavender-50">
-              <Users className="h-4 w-4 text-lavender-500" />
+            <div className="p-2 rounded-xl bg-primary-50">
+              <Users className="h-4 w-4 text-primary-500" />
             </div>
             <h3 className="text-sm font-semibold text-navy-900">Next Visit</h3>
           </div>
@@ -377,7 +377,7 @@ export default function PatientSummary({
               ) : onClaimVisit ? (
                 <button
                   onClick={() => onClaimVisit(nextVisit.id)}
-                  className="mt-auto w-full px-3 py-2 text-xs font-semibold text-white bg-gradient-to-r from-lavender-500 to-lavender-600 rounded-xl hover:from-lavender-600 hover:to-lavender-700 transition-all duration-200 shadow-soft hover:-translate-y-0.5"
+                  className="mt-auto w-full px-3 py-2 text-xs font-semibold text-white bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-200 shadow-soft hover:-translate-y-0.5"
                 >
                   I'll Visit
                 </button>
@@ -396,7 +396,7 @@ export default function PatientSummary({
       {/* ----------------------------------------------------------------- */}
       <div className="card-glass px-5 py-3 flex flex-wrap items-center justify-between gap-2 text-sm text-navy-500">
         <div className="flex items-center gap-1.5">
-          <Activity className="h-4 w-4 text-lavender-400" />
+          <Activity className="h-4 w-4 text-primary-400" />
           <span>
             <span className="font-semibold text-navy-700">{todayEntryCount}</span> log{' '}
             {todayEntryCount === 1 ? 'entry' : 'entries'} today

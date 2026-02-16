@@ -247,7 +247,7 @@ export default function ChatBot({
       {/* Floating Chat Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-lavender-500 to-lavender-600 text-white shadow-float hover:shadow-glow hover:scale-105 transition-all duration-300 flex items-center justify-center ${
+        className={`fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-float hover:shadow-glow hover:scale-105 transition-all duration-300 flex items-center justify-center ${
           isOpen ? 'scale-0 opacity-0' : 'scale-100 opacity-100'
         }`}
         aria-label="Open chat assistant"
@@ -268,14 +268,14 @@ export default function ChatBot({
       >
         <div className="bg-white rounded-3xl shadow-float overflow-hidden border border-cream-200 flex flex-col max-h-[600px]">
           {/* Header */}
-          <div className="bg-gradient-to-r from-lavender-500 to-lavender-600 px-5 py-4 flex items-center justify-between">
+          <div className="bg-gradient-to-r from-primary-500 to-primary-600 px-5 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
                 <Bot className="h-5 w-5 text-white" />
               </div>
               <div>
                 <h3 className="font-semibold text-white">CareBridge Assistant</h3>
-                <p className="text-xs text-lavender-100">Ask me anything</p>
+                <p className="text-xs text-primary-100">Ask me anything</p>
               </div>
             </div>
             <div className="flex items-center gap-1">
@@ -308,8 +308,8 @@ export default function ChatBot({
                 <div
                   className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${
                     message.role === 'user'
-                      ? 'bg-peach-100 text-peach-600'
-                      : 'bg-lavender-100 text-lavender-600'
+                      ? 'bg-accent-100 text-accent-600'
+                      : 'bg-primary-100 text-primary-600'
                   }`}
                 >
                   {message.role === 'user' ? (
@@ -321,7 +321,7 @@ export default function ChatBot({
                 <div
                   className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                     message.role === 'user'
-                      ? 'bg-peach-500 text-white rounded-tr-md'
+                      ? 'bg-accent-500 text-white rounded-tr-md'
                       : 'bg-white shadow-soft border border-cream-100 text-navy-800 rounded-tl-md'
                   }`}
                 >
@@ -353,7 +353,7 @@ export default function ChatBot({
                   <p
                     className={`text-xs mt-2 ${
                       message.role === 'user'
-                        ? 'text-peach-100'
+                        ? 'text-accent-100'
                         : 'text-navy-400'
                     }`}
                   >
@@ -368,7 +368,7 @@ export default function ChatBot({
 
             {isLoading && (
               <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-xl bg-lavender-100 text-lavender-600 flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 rounded-xl bg-primary-100 text-primary-600 flex items-center justify-center flex-shrink-0">
                   <Bot className="h-4 w-4" />
                 </div>
                 <div className="bg-white shadow-soft border border-cream-100 rounded-2xl rounded-tl-md px-4 py-3">
@@ -393,13 +393,13 @@ export default function ChatBot({
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Ask about vitals, visits, medications..."
-                className="flex-1 px-4 py-3 rounded-xl bg-cream-50 border border-cream-200 text-navy-900 placeholder-navy-400 text-sm focus:outline-none focus:ring-2 focus:ring-lavender-300 focus:border-transparent transition-all"
+                className="flex-1 px-4 py-3 rounded-xl bg-cream-50 border border-cream-200 text-navy-900 placeholder-navy-400 text-sm focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-all"
                 disabled={isLoading}
               />
               <button
                 onClick={handleSend}
                 disabled={!input.trim() || isLoading}
-                className="px-4 py-3 rounded-xl bg-gradient-to-r from-lavender-500 to-lavender-600 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-soft transition-all"
+                className="px-4 py-3 rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-soft transition-all"
                 aria-label="Send message"
               >
                 <Send className="h-4 w-4" />

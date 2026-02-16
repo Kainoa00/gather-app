@@ -30,17 +30,17 @@ interface HomeFeedProps {
 }
 
 const postTypeConfig = {
-  visit_recap: { label: 'Visit Recap', color: 'bg-lavender-100 text-lavender-700', icon: Users },
+  visit_recap: { label: 'Visit Recap', color: 'bg-primary-100 text-primary-700', icon: Users },
   facility_moment: { label: 'Facility Moment', color: 'bg-mint-100 text-mint-700', icon: Star },
-  activity_photo: { label: 'Activity', color: 'bg-peach-100 text-peach-700', icon: Star },
+  activity_photo: { label: 'Activity', color: 'bg-accent-100 text-accent-700', icon: Star },
   milestone: { label: 'Milestone', color: 'bg-amber-100 text-amber-700', icon: Star },
   general: { label: 'Update', color: 'bg-cream-200 text-navy-700', icon: Star },
 }
 
 const roleColors: Record<string, string> = {
   nurse: 'from-mint-400 to-mint-500',
-  family: 'from-lavender-400 to-lavender-500',
-  admin: 'from-lavender-400 to-peach-400',
+  family: 'from-primary-400 to-primary-500',
+  admin: 'from-primary-400 to-accent-400',
 }
 
 export default function HomeFeed({
@@ -145,7 +145,7 @@ export default function HomeFeed({
             Share a visit, moment, or update...
           </button>
         </div>
-        <div className="flex items-center gap-2 mt-4 pt-4 border-t border-lavender-100/50">
+        <div className="flex items-center gap-2 mt-4 pt-4 border-t border-primary-100/50">
           <button
             onClick={() => { setShowCreateModal(true); setTimeout(() => fileInputRef.current?.click(), 100) }}
             className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-navy-600 hover:bg-mint-50 rounded-xl transition-all duration-300"
@@ -155,16 +155,16 @@ export default function HomeFeed({
           </button>
           <button
             onClick={() => { setShowCreateModal(true); setTimeout(() => fileInputRef.current?.click(), 100) }}
-            className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-navy-600 hover:bg-lavender-50 rounded-xl transition-all duration-300"
+            className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-navy-600 hover:bg-primary-50 rounded-xl transition-all duration-300"
           >
-            <Video className="h-5 w-5 text-lavender-500" />
+            <Video className="h-5 w-5 text-primary-500" />
             Video
           </button>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-navy-600 hover:bg-peach-50 rounded-xl transition-all duration-300"
+            className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-navy-600 hover:bg-accent-50 rounded-xl transition-all duration-300"
           >
-            <MapPin className="h-5 w-5 text-peach-500" />
+            <MapPin className="h-5 w-5 text-accent-500" />
             Location
           </button>
         </div>
@@ -187,7 +187,7 @@ export default function HomeFeed({
             >
               {/* Pinned/Milestone Banner */}
               {post.isPinned && (
-                <div className="bg-gradient-to-r from-amber-50 to-peach-50 px-5 py-3 flex items-center gap-2 border-b border-amber-100/50">
+                <div className="bg-gradient-to-r from-amber-50 to-accent-50 px-5 py-3 flex items-center gap-2 border-b border-amber-100/50">
                   <Star className="h-5 w-5 text-amber-500" />
                   <span className="text-sm font-medium text-amber-700">Milestone Update</span>
                 </div>
@@ -271,8 +271,8 @@ export default function HomeFeed({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1">
                     <button onClick={() => onLikePost(post.id)}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 ${isLiked ? 'text-peach-600 bg-peach-50' : 'text-navy-600 hover:bg-cream-100'}`}>
-                      <Heart className={`h-5 w-5 transition-all ${isLiked ? 'fill-peach-500 animate-heart-pop' : ''}`} />
+                      className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 ${isLiked ? 'text-accent-600 bg-accent-50' : 'text-navy-600 hover:bg-cream-100'}`}>
+                      <Heart className={`h-5 w-5 transition-all ${isLiked ? 'fill-accent-500 animate-heart-pop' : ''}`} />
                       <span className="font-medium">{post.likes.length}</span>
                     </button>
                     <button onClick={() => toggleComments(post.id)}
@@ -295,11 +295,11 @@ export default function HomeFeed({
 
                 {/* Comments */}
                 {(showComments || post.comments.length > 0) && (
-                  <div className="mt-4 pt-4 border-t border-lavender-100/50">
+                  <div className="mt-4 pt-4 border-t border-primary-100/50">
                     {post.comments.slice(0, showComments ? undefined : 2).map((comment) => (
                       <div key={comment.id} className="flex gap-3 mb-3">
-                        <div className="h-8 w-8 rounded-xl bg-lavender-100 flex items-center justify-center flex-shrink-0">
-                          <span className="text-lavender-700 text-xs font-medium">
+                        <div className="h-8 w-8 rounded-xl bg-primary-100 flex items-center justify-center flex-shrink-0">
+                          <span className="text-primary-700 text-xs font-medium">
                             {comment.authorName.split(' ').map((n) => n[0]).join('')}
                           </span>
                         </div>
@@ -310,13 +310,13 @@ export default function HomeFeed({
                       </div>
                     ))}
                     {!showComments && post.comments.length > 2 && (
-                      <button onClick={() => toggleComments(post.id)} className="text-sm text-lavender-600 hover:text-lavender-700 font-medium mb-3">
+                      <button onClick={() => toggleComments(post.id)} className="text-sm text-primary-600 hover:text-primary-700 font-medium mb-3">
                         View all {post.comments.length} comments
                       </button>
                     )}
                     <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-xl bg-lavender-100 flex items-center justify-center flex-shrink-0">
-                        <span className="text-lavender-700 text-xs font-medium">
+                      <div className="h-8 w-8 rounded-xl bg-primary-100 flex items-center justify-center flex-shrink-0">
+                        <span className="text-primary-700 text-xs font-medium">
                           {currentMember?.name.split(' ').map((n) => n[0]).join('') || 'Y'}
                         </span>
                       </div>
@@ -327,7 +327,7 @@ export default function HomeFeed({
                           placeholder="Add a comment..."
                           className="flex-1 bg-transparent text-sm text-navy-800 placeholder:text-navy-400 focus:outline-none" />
                         <button onClick={() => handleComment(post.id)} disabled={!commentInputs[post.id]?.trim()}
-                          className="p-1 text-lavender-500 disabled:text-navy-300 transition-colors">
+                          className="p-1 text-primary-500 disabled:text-navy-300 transition-colors">
                           <Send className="h-5 w-5" />
                         </button>
                       </div>
@@ -344,7 +344,7 @@ export default function HomeFeed({
       {showCreateModal && (
         <div className="fixed inset-0 bg-navy-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
           <div className="bg-white rounded-3xl max-w-lg w-full shadow-glass-lg animate-scale-in max-h-[90vh] overflow-y-auto">
-            <div className="p-5 border-b border-lavender-100/50 flex items-center justify-between sticky top-0 bg-white rounded-t-3xl z-10">
+            <div className="p-5 border-b border-primary-100/50 flex items-center justify-between sticky top-0 bg-white rounded-t-3xl z-10">
               <h3 className="text-xl font-bold text-navy-900">Share an Update</h3>
               <button onClick={() => setShowCreateModal(false)} className="p-2 hover:bg-cream-100 rounded-xl transition-colors">
                 <X className="h-5 w-5 text-navy-500" />
@@ -378,7 +378,7 @@ export default function HomeFeed({
 
               <textarea value={newPost.content} onChange={(e) => setNewPost((prev) => ({ ...prev, content: e.target.value }))}
                 placeholder="How was your visit? Share a moment from the facility..."
-                className="w-full h-32 px-4 py-3 bg-cream-50 border border-cream-200 rounded-2xl text-navy-800 placeholder:text-navy-400 focus:outline-none focus:ring-2 focus:ring-lavender-300 focus:border-transparent resize-none transition-all" />
+                className="w-full h-32 px-4 py-3 bg-cream-50 border border-cream-200 rounded-2xl text-navy-800 placeholder:text-navy-400 focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent resize-none transition-all" />
 
               {newPost.media.length > 0 && (
                 <div className="grid grid-cols-2 gap-3">
@@ -398,22 +398,22 @@ export default function HomeFeed({
               )}
 
               <div className="flex items-center gap-3">
-                <MapPin className="h-5 w-5 text-peach-500" />
+                <MapPin className="h-5 w-5 text-accent-500" />
                 <input type="text" value={newPost.location} onChange={(e) => setNewPost((prev) => ({ ...prev, location: e.target.value }))}
                   placeholder="Add location (optional)"
-                  className="flex-1 px-3 py-2 bg-cream-50 border border-cream-200 rounded-xl text-sm text-navy-800 placeholder:text-navy-400 focus:outline-none focus:ring-2 focus:ring-lavender-300 focus:border-transparent transition-all" />
+                  className="flex-1 px-3 py-2 bg-cream-50 border border-cream-200 rounded-xl text-sm text-navy-800 placeholder:text-navy-400 focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-all" />
               </div>
 
               <input ref={fileInputRef} type="file" accept="image/*,video/*" multiple onChange={handleMediaUpload} className="hidden" />
             </div>
 
-            <div className="p-5 border-t border-lavender-100/50 flex items-center justify-between sticky bottom-0 bg-white rounded-b-3xl">
+            <div className="p-5 border-t border-primary-100/50 flex items-center justify-between sticky bottom-0 bg-white rounded-b-3xl">
               <div className="flex items-center gap-2">
                 <button onClick={() => fileInputRef.current?.click()} className="p-3 hover:bg-mint-50 rounded-xl transition-colors">
                   <ImageIcon className="h-6 w-6 text-mint-500" />
                 </button>
-                <button onClick={() => fileInputRef.current?.click()} className="p-3 hover:bg-lavender-50 rounded-xl transition-colors">
-                  <Video className="h-6 w-6 text-lavender-500" />
+                <button onClick={() => fileInputRef.current?.click()} className="p-3 hover:bg-primary-50 rounded-xl transition-colors">
+                  <Video className="h-6 w-6 text-primary-500" />
                 </button>
               </div>
               <button onClick={handleCreatePost} disabled={!newPost.content.trim() && newPost.media.length === 0}

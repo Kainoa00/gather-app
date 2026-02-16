@@ -81,8 +81,8 @@ const ENGAGEMENT_LABELS: Record<EngagementKey, string> = {
 
 const ENGAGEMENT_COLORS: Record<EngagementKey, string> = {
   active: 'bg-mint-400',
-  moderate: 'bg-lavender-400',
-  minimal: 'bg-peach-400',
+  moderate: 'bg-primary-400',
+  minimal: 'bg-accent-400',
 }
 
 const RANGE_OPTIONS: { value: TimeRange; label: string; days: number }[] = [
@@ -454,7 +454,7 @@ export default function WellnessTrends({ days }: WellnessTrendsProps) {
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <BarChart3 className="h-6 w-6 text-lavender-500" />
+            <BarChart3 className="h-6 w-6 text-primary-500" />
             <h2 className="text-2xl font-bold text-navy-900">Wellness Trends</h2>
           </div>
           <p className="text-navy-600 text-sm">
@@ -470,8 +470,8 @@ export default function WellnessTrends({ days }: WellnessTrendsProps) {
               onClick={() => setSelectedRange(opt.value)}
               className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                 selectedRange === opt.value
-                  ? 'bg-lavender-100 text-lavender-700 shadow-sm'
-                  : 'bg-white text-navy-600 hover:bg-cream-100 border border-lavender-200'
+                  ? 'bg-primary-100 text-primary-700 shadow-sm'
+                  : 'bg-white text-navy-600 hover:bg-cream-100 border border-primary-200'
               }`}
             >
               {opt.label}
@@ -483,7 +483,7 @@ export default function WellnessTrends({ days }: WellnessTrendsProps) {
       {/* Not enough data message for non-7d ranges */}
       {!hasEnoughData && (
         <div className="card-glass p-8 text-center">
-          <Calendar className="h-10 w-10 text-lavender-300 mx-auto mb-3" />
+          <Calendar className="h-10 w-10 text-primary-300 mx-auto mb-3" />
           <p className="text-navy-600 font-medium">Not enough data</p>
           <p className="text-navy-400 text-sm mt-1">
             We need more days of recorded wellness to show {rangeConfig.label.toLowerCase()} trends.
@@ -499,8 +499,8 @@ export default function WellnessTrends({ days }: WellnessTrendsProps) {
           <div className="card-glass p-5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-lavender-100 to-mint-100">
-                  <Activity className="h-5 w-5 text-lavender-600" />
+                <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary-100 to-mint-100">
+                  <Activity className="h-5 w-5 text-primary-600" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-navy-900">Overall Wellness Score</h3>
@@ -540,10 +540,10 @@ export default function WellnessTrends({ days }: WellnessTrendsProps) {
                 const widthPercent = Math.max((day.overallScore / 10) * 100, 4)
                 const barColor =
                   day.overallScore >= 7
-                    ? 'from-lavender-400 to-mint-400'
+                    ? 'from-primary-400 to-mint-400'
                     : day.overallScore >= 5
-                    ? 'from-lavender-400 to-lavender-300'
-                    : 'from-peach-400 to-peach-300'
+                    ? 'from-primary-400 to-primary-300'
+                    : 'from-accent-400 to-accent-300'
                 return (
                   <div key={idx} className="flex items-center gap-3">
                     <span className="text-xs font-medium text-navy-600 w-10 text-right flex-shrink-0">
@@ -560,8 +560,8 @@ export default function WellnessTrends({ days }: WellnessTrendsProps) {
                         day.overallScore >= 7
                           ? 'text-mint-600'
                           : day.overallScore >= 5
-                          ? 'text-lavender-600'
-                          : 'text-peach-600'
+                          ? 'text-primary-600'
+                          : 'text-accent-600'
                       }`}
                     >
                       {day.overallScore}
@@ -577,8 +577,8 @@ export default function WellnessTrends({ days }: WellnessTrendsProps) {
           {/* ----------------------------------------------------------------- */}
           <div className="card-glass p-5">
             <div className="flex items-center gap-3 mb-5">
-              <div className="p-2.5 rounded-xl bg-lavender-100">
-                <Smile className="h-5 w-5 text-lavender-600" />
+              <div className="p-2.5 rounded-xl bg-primary-100">
+                <Smile className="h-5 w-5 text-primary-600" />
               </div>
               <div>
                 <h3 className="font-semibold text-navy-900">Mood Patterns</h3>
@@ -649,7 +649,7 @@ export default function WellnessTrends({ days }: WellnessTrendsProps) {
             </div>
 
             {/* Mood distribution */}
-            <div className="mt-5 pt-4 border-t border-lavender-100/50">
+            <div className="mt-5 pt-4 border-t border-primary-100/50">
               <p className="text-xs font-medium text-navy-500 mb-3">Mood Distribution</p>
               <div className="flex flex-wrap gap-3">
                 {(Object.keys(MOOD_EMOJI) as MoodKey[]).map((mood) => {
@@ -672,8 +672,8 @@ export default function WellnessTrends({ days }: WellnessTrendsProps) {
 
               {/* Pattern insight */}
               {bestDay && (
-                <div className="mt-3 px-3 py-2 bg-lavender-50 rounded-xl">
-                  <p className="text-xs text-lavender-700">
+                <div className="mt-3 px-3 py-2 bg-primary-50 rounded-xl">
+                  <p className="text-xs text-primary-700">
                     <span className="font-semibold">Best day:</span>{' '}
                     {format(new Date(bestDay.date), 'EEEE')} (score {bestDay.overallScore}/10)
                   </p>
@@ -690,8 +690,8 @@ export default function WellnessTrends({ days }: WellnessTrendsProps) {
             <div className="card-glass p-5">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-xl bg-peach-50">
-                    <Utensils className="h-4 w-4 text-peach-500" />
+                  <div className="p-2 rounded-xl bg-accent-50">
+                    <Utensils className="h-4 w-4 text-accent-500" />
                   </div>
                   <h4 className="text-sm font-semibold text-navy-900">Appetite</h4>
                 </div>
@@ -724,8 +724,8 @@ export default function WellnessTrends({ days }: WellnessTrendsProps) {
             <div className="card-glass p-5">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-xl bg-lavender-50">
-                    <Users className="h-4 w-4 text-lavender-500" />
+                  <div className="p-2 rounded-xl bg-primary-50">
+                    <Users className="h-4 w-4 text-primary-500" />
                   </div>
                   <h4 className="text-sm font-semibold text-navy-900">Social Engagement</h4>
                 </div>
@@ -828,8 +828,8 @@ export default function WellnessTrends({ days }: WellnessTrendsProps) {
           {weekComparison && (
             <div className="card-glass p-5">
               <div className="flex items-center gap-3 mb-5">
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-lavender-100 to-peach-100">
-                  <Calendar className="h-5 w-5 text-lavender-600" />
+                <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary-100 to-accent-100">
+                  <Calendar className="h-5 w-5 text-primary-600" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-navy-900">Period Comparison</h3>
@@ -840,7 +840,7 @@ export default function WellnessTrends({ days }: WellnessTrendsProps) {
               <div className="overflow-x-auto -mx-2">
                 <table className="w-full min-w-[380px]">
                   <thead>
-                    <tr className="border-b border-lavender-100/50">
+                    <tr className="border-b border-primary-100/50">
                       <th className="text-xs font-medium text-navy-500 text-left px-3 pb-3">
                         Metric
                       </th>
@@ -880,7 +880,7 @@ export default function WellnessTrends({ days }: WellnessTrendsProps) {
               </div>
 
               {/* Trajectory badge */}
-              <div className="mt-4 pt-4 border-t border-lavender-100/50 flex items-center justify-between">
+              <div className="mt-4 pt-4 border-t border-primary-100/50 flex items-center justify-between">
                 <span className="text-sm font-medium text-navy-700">Overall trajectory</span>
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-bold ${

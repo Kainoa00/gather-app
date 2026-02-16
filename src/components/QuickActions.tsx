@@ -241,9 +241,9 @@ export default function QuickActions({
     showSuccessToast()
   }
 
-  const inputClass = 'w-full px-3 py-2.5 border border-lavender-200 rounded-xl focus:ring-2 focus:ring-lavender-400 focus:border-transparent text-navy-900'
-  const toggleActiveClass = 'bg-lavender-100 text-lavender-700 border-lavender-300'
-  const toggleInactiveClass = 'border border-lavender-100 text-navy-600 hover:bg-cream-50'
+  const inputClass = 'w-full px-3 py-2.5 border border-primary-200 rounded-xl focus:ring-2 focus:ring-primary-400 focus:border-transparent text-navy-900'
+  const toggleActiveClass = 'bg-primary-100 text-primary-700 border-primary-300'
+  const toggleInactiveClass = 'border border-primary-100 text-navy-600 hover:bg-cream-50'
 
   return (
     <div className="space-y-4">
@@ -257,7 +257,7 @@ export default function QuickActions({
 
       {/* Quick Actions Header */}
       <div className="flex items-center gap-2 mb-2">
-        <Zap className="h-5 w-5 text-lavender-500" />
+        <Zap className="h-5 w-5 text-primary-500" />
         <h3 className="font-semibold text-navy-900">Quick Actions</h3>
       </div>
       <p className="text-sm text-navy-500 mb-4">Tap to instantly log common entries</p>
@@ -268,7 +268,7 @@ export default function QuickActions({
           <button
             key={action.id}
             onClick={() => setActiveAction(action.id)}
-            className="border border-lavender-100 rounded-2xl p-4 text-center hover:border-lavender-300 hover:shadow-soft transition-all duration-200 group"
+            className="border border-primary-100 rounded-2xl p-4 text-center hover:border-primary-300 hover:shadow-soft transition-all duration-200 group"
           >
             <span className="text-2xl block mb-1 group-hover:scale-110 transition-transform">{action.emoji}</span>
             <span className="text-sm font-medium text-navy-900 block">{action.label}</span>
@@ -372,10 +372,10 @@ export default function QuickActions({
             </div>
 
             <div className="flex gap-3 mt-6">
-              <button onClick={() => setActiveAction(null)} className="flex-1 px-4 py-2.5 border border-lavender-200 text-navy-700 rounded-xl hover:bg-cream-50">
+              <button onClick={() => setActiveAction(null)} className="flex-1 px-4 py-2.5 border border-primary-200 text-navy-700 rounded-xl hover:bg-cream-50">
                 Cancel
               </button>
-              <button onClick={handleSubmitVitals} className="flex-1 px-4 py-2.5 bg-gradient-to-r from-lavender-500 to-lavender-600 text-white rounded-xl hover:from-lavender-600 hover:to-lavender-700 flex items-center justify-center gap-2">
+              <button onClick={handleSubmitVitals} className="flex-1 px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl hover:from-primary-600 hover:to-primary-700 flex items-center justify-center gap-2">
                 <Check className="h-4 w-4" /> Log Entry
               </button>
             </div>
@@ -398,7 +398,7 @@ export default function QuickActions({
 
             <div className="space-y-3 mb-4">
               {medications.map((med) => (
-                <label key={med.id} className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${selectedMeds.includes(med.id) ? 'border-lavender-300 bg-lavender-50' : 'border-lavender-100 hover:border-lavender-200'}`}>
+                <label key={med.id} className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${selectedMeds.includes(med.id) ? 'border-primary-300 bg-primary-50' : 'border-primary-100 hover:border-primary-200'}`}>
                   <input
                     type="checkbox"
                     checked={selectedMeds.includes(med.id)}
@@ -409,7 +409,7 @@ export default function QuickActions({
                         setSelectedMeds(selectedMeds.filter((id) => id !== med.id))
                       }
                     }}
-                    className="mt-1 w-4 h-4 text-lavender-600 rounded"
+                    className="mt-1 w-4 h-4 text-primary-600 rounded"
                   />
                   <div>
                     <div className="font-medium text-navy-900">{med.name} {med.dosage}</div>
@@ -452,10 +452,10 @@ export default function QuickActions({
             </div>
 
             <div className="flex gap-3 mt-6">
-              <button onClick={() => setActiveAction(null)} className="flex-1 px-4 py-2.5 border border-lavender-200 text-navy-700 rounded-xl hover:bg-cream-50">
+              <button onClick={() => setActiveAction(null)} className="flex-1 px-4 py-2.5 border border-primary-200 text-navy-700 rounded-xl hover:bg-cream-50">
                 Cancel
               </button>
-              <button onClick={handleSubmitMeds} disabled={selectedMeds.length === 0} className="flex-1 px-4 py-2.5 bg-gradient-to-r from-lavender-500 to-lavender-600 text-white rounded-xl hover:from-lavender-600 hover:to-lavender-700 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+              <button onClick={handleSubmitMeds} disabled={selectedMeds.length === 0} className="flex-1 px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl hover:from-primary-600 hover:to-primary-700 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                 <Check className="h-4 w-4" /> Log Entry
               </button>
             </div>
@@ -469,7 +469,7 @@ export default function QuickActions({
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-glass-lg animate-scale-in">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold text-navy-900 flex items-center gap-2">
-                <Utensils className="h-5 w-5 text-peach-500" /> Meal Update
+                <Utensils className="h-5 w-5 text-accent-500" /> Meal Update
               </h3>
               <button onClick={() => setActiveAction(null)} className="p-2 hover:bg-cream-100 rounded-xl">
                 <X className="h-5 w-5 text-navy-500" />
@@ -545,10 +545,10 @@ export default function QuickActions({
             </div>
 
             <div className="flex gap-3 mt-6">
-              <button onClick={() => setActiveAction(null)} className="flex-1 px-4 py-2.5 border border-lavender-200 text-navy-700 rounded-xl hover:bg-cream-50">
+              <button onClick={() => setActiveAction(null)} className="flex-1 px-4 py-2.5 border border-primary-200 text-navy-700 rounded-xl hover:bg-cream-50">
                 Cancel
               </button>
-              <button onClick={handleSubmitMeal} className="flex-1 px-4 py-2.5 bg-gradient-to-r from-lavender-500 to-lavender-600 text-white rounded-xl hover:from-lavender-600 hover:to-lavender-700 flex items-center justify-center gap-2">
+              <button onClick={handleSubmitMeal} className="flex-1 px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl hover:from-primary-600 hover:to-primary-700 flex items-center justify-center gap-2">
                 <Check className="h-4 w-4" /> Log Entry
               </button>
             </div>
@@ -584,7 +584,7 @@ export default function QuickActions({
                     <button
                       key={opt.id}
                       onClick={() => setMood(opt.id)}
-                      className={`p-3 rounded-xl text-2xl ${mood === opt.id ? 'bg-lavender-100 ring-2 ring-lavender-400' : 'hover:bg-cream-100'}`}
+                      className={`p-3 rounded-xl text-2xl ${mood === opt.id ? 'bg-primary-100 ring-2 ring-primary-400' : 'hover:bg-cream-100'}`}
                     >
                       {opt.emoji}
                     </button>
@@ -630,7 +630,7 @@ export default function QuickActions({
                   max="10"
                   value={painLevel}
                   onChange={(e) => setPainLevel(parseInt(e.target.value))}
-                  className="w-full accent-lavender-500"
+                  className="w-full accent-primary-500"
                 />
                 <div className="flex justify-between text-xs text-navy-400">
                   <span>0 (none)</span>
@@ -647,10 +647,10 @@ export default function QuickActions({
             </div>
 
             <div className="flex gap-3 mt-6">
-              <button onClick={() => setActiveAction(null)} className="flex-1 px-4 py-2.5 border border-lavender-200 text-navy-700 rounded-xl hover:bg-cream-50">
+              <button onClick={() => setActiveAction(null)} className="flex-1 px-4 py-2.5 border border-primary-200 text-navy-700 rounded-xl hover:bg-cream-50">
                 Cancel
               </button>
-              <button onClick={handleSubmitMood} className="flex-1 px-4 py-2.5 bg-gradient-to-r from-lavender-500 to-lavender-600 text-white rounded-xl hover:from-lavender-600 hover:to-lavender-700 flex items-center justify-center gap-2">
+              <button onClick={handleSubmitMood} className="flex-1 px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl hover:from-primary-600 hover:to-primary-700 flex items-center justify-center gap-2">
                 <Check className="h-4 w-4" /> Log Entry
               </button>
             </div>
@@ -715,10 +715,10 @@ export default function QuickActions({
             </div>
 
             <div className="flex gap-3 mt-6">
-              <button onClick={() => setActiveAction(null)} className="flex-1 px-4 py-2.5 border border-lavender-200 text-navy-700 rounded-xl hover:bg-cream-50">
+              <button onClick={() => setActiveAction(null)} className="flex-1 px-4 py-2.5 border border-primary-200 text-navy-700 rounded-xl hover:bg-cream-50">
                 Cancel
               </button>
-              <button onClick={() => handleSubmitSimple(activeAction)} className="flex-1 px-4 py-2.5 bg-gradient-to-r from-lavender-500 to-lavender-600 text-white rounded-xl hover:from-lavender-600 hover:to-lavender-700 flex items-center justify-center gap-2">
+              <button onClick={() => handleSubmitSimple(activeAction)} className="flex-1 px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl hover:from-primary-600 hover:to-primary-700 flex items-center justify-center gap-2">
                 <Check className="h-4 w-4" /> Log Entry
               </button>
             </div>

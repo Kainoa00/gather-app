@@ -149,7 +149,7 @@ export default function VitalsTrends({ logEntries }: VitalsTrendsProps) {
             onClick={() => setTimeRange(range)}
             className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
               timeRange === range
-                ? 'bg-lavender-100 text-lavender-700 shadow-soft'
+                ? 'bg-primary-100 text-primary-700 shadow-soft'
                 : 'text-navy-600 hover:bg-cream-100'
             }`}
           >

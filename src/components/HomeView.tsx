@@ -252,7 +252,7 @@ export default function HomeView({
                 className="h-24 w-24 rounded-full object-cover shadow-soft border-4 border-white"
               />
             ) : (
-              <div className="h-24 w-24 rounded-full bg-gradient-to-br from-lavender-400 to-peach-400 flex items-center justify-center shadow-soft border-4 border-white mx-auto">
+              <div className="h-24 w-24 rounded-full bg-gradient-to-br from-primary-400 to-accent-400 flex items-center justify-center shadow-soft border-4 border-white mx-auto">
                 <span className="text-white font-bold text-2xl">{getInitials(patient.name)}</span>
               </div>
             )}
@@ -267,7 +267,7 @@ export default function HomeView({
 
           {/* Stay Duration Badge */}
           <div className="mt-4 inline-flex flex-col items-center">
-            <div className="px-5 py-2.5 bg-gradient-to-r from-lavender-100 to-peach-100 rounded-2xl border border-lavender-200/50">
+            <div className="px-5 py-2.5 bg-gradient-to-r from-primary-100 to-accent-100 rounded-2xl border border-primary-200/50">
               <p className="text-xs font-medium text-navy-500 uppercase tracking-wider">Stay Duration</p>
               <p className="text-2xl font-bold text-navy-900 mt-0.5">
                 {stayDuration} <span className="text-base font-medium text-navy-600">Days</span>
@@ -419,18 +419,18 @@ export default function HomeView({
         <div className="card-glass p-6">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-lavender-50">
-                <Sparkles className="h-4 w-4 text-lavender-500" />
+              <div className="p-2 rounded-xl bg-primary-50">
+                <Sparkles className="h-4 w-4 text-primary-500" />
               </div>
               <h3 className="text-sm font-bold text-navy-900">Daily Digest</h3>
             </div>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-lavender-100 text-lavender-600 text-[10px] font-semibold rounded-full uppercase tracking-wider">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary-100 text-primary-600 text-[10px] font-semibold rounded-full uppercase tracking-wider">
               <Sparkles className="h-3 w-3" />
               AI Generated · Today
             </span>
           </div>
 
-          <blockquote className="relative pl-4 border-l-3 border-lavender-300" style={{ borderLeftWidth: '3px' }}>
+          <blockquote className="relative pl-4 border-l-3 border-primary-300" style={{ borderLeftWidth: '3px' }}>
             <p className="text-navy-700 text-sm leading-relaxed italic">
               &ldquo;{digestSummary}&rdquo;
             </p>
@@ -441,8 +441,8 @@ export default function HomeView({
         <div>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-peach-50">
-                <Wifi className="h-4 w-4 text-peach-500" />
+              <div className="p-2 rounded-xl bg-accent-50">
+                <Wifi className="h-4 w-4 text-accent-500" />
               </div>
               <h3 className="text-sm font-bold text-navy-900">Resident Feed</h3>
             </div>
@@ -459,7 +459,7 @@ export default function HomeView({
                   onClick={() => setFeedFilter(tab.id)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                     feedFilter === tab.id
-                      ? 'bg-white text-lavender-700 shadow-sm'
+                      ? 'bg-white text-primary-700 shadow-sm'
                       : 'text-navy-500 hover:text-navy-700'
                   }`}
                 >

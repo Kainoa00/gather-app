@@ -316,7 +316,7 @@ export default function CareLog({
         {isNurse && (
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center px-5 py-2.5 bg-gradient-to-r from-lavender-500 to-lavender-600 text-white rounded-2xl hover:from-lavender-600 hover:to-lavender-700 transition-all duration-200 shadow-float hover:-translate-y-0.5"
+            className="flex items-center px-5 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-2xl hover:from-primary-600 hover:to-primary-700 transition-all duration-200 shadow-float hover:-translate-y-0.5"
           >
             <Plus className="h-5 w-5 mr-2" />
             New Entry
@@ -333,7 +333,7 @@ export default function CareLog({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search log entries..."
-            className="w-full pl-10 pr-4 py-2.5 border border-lavender-200 rounded-xl focus:ring-2 focus:ring-lavender-400 focus:border-transparent bg-white/80"
+            className="w-full pl-10 pr-4 py-2.5 border border-primary-200 rounded-xl focus:ring-2 focus:ring-primary-400 focus:border-transparent bg-white/80"
           />
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -341,8 +341,8 @@ export default function CareLog({
             onClick={() => setFilterCategory('all')}
             className={`px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
               filterCategory === 'all'
-                ? 'bg-lavender-100 text-lavender-700 shadow-sm'
-                : 'bg-white text-navy-600 hover:bg-cream-100 border border-lavender-200'
+                ? 'bg-primary-100 text-primary-700 shadow-sm'
+                : 'bg-white text-navy-600 hover:bg-cream-100 border border-primary-200'
             }`}
           >
             All
@@ -357,7 +357,7 @@ export default function CareLog({
                 className={`px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-1.5 ${
                   filterCategory === cat
                     ? config.color
-                    : 'bg-white text-navy-600 hover:bg-cream-100 border border-lavender-200'
+                    : 'bg-white text-navy-600 hover:bg-cream-100 border border-primary-200'
                 }`}
               >
                 <Icon className="h-3.5 w-3.5" />
@@ -372,14 +372,14 @@ export default function CareLog({
       <div className="space-y-8">
         {Object.keys(groupedEntries).length === 0 ? (
           <div className="text-center py-12 card-glass">
-            <Activity className="h-12 w-12 text-lavender-300 mx-auto mb-3" />
+            <Activity className="h-12 w-12 text-primary-300 mx-auto mb-3" />
             <p className="text-navy-500">No log entries found</p>
           </div>
         ) : (
           Object.entries(groupedEntries).map(([dateKey, entries]) => (
             <div key={dateKey}>
               <h3 className="text-lg font-semibold text-navy-800 mb-4 flex items-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-gradient-to-r from-lavender-400 to-peach-400"></div>
+                <div className="h-2 w-2 rounded-full bg-gradient-to-r from-primary-400 to-accent-400"></div>
                 {getDateLabel(dateKey)}
                 <span className="text-sm font-normal text-navy-500">
                   ({entries.length} {entries.length === 1 ? 'entry' : 'entries'})
@@ -612,7 +612,7 @@ export default function CareLog({
                                         </span>
                                       )}
                                       {entry.incidentLog.familyNotified && (
-                                        <span className="text-xs bg-lavender-100 text-lavender-700 px-2 py-1 rounded-full">
+                                        <span className="text-xs bg-primary-100 text-primary-700 px-2 py-1 rounded-full">
                                           Family Notified
                                         </span>
                                       )}
@@ -652,7 +652,7 @@ export default function CareLog({
                               </span>
                               <button
                                 onClick={() => toggleExpand(entry.id)}
-                                className="flex items-center gap-1 text-lavender-600 hover:text-lavender-700"
+                                className="flex items-center gap-1 text-primary-600 hover:text-primary-700"
                               >
                                 <MessageCircle className="h-3.5 w-3.5" />
                                 {entry.comments.length}
@@ -661,11 +661,11 @@ export default function CareLog({
 
                             {/* Comments section */}
                             {isExpanded && (
-                              <div className="mt-4 pt-4 border-t border-lavender-100/50">
+                              <div className="mt-4 pt-4 border-t border-primary-100/50">
                                 {entry.comments.map((comment) => (
                                   <div key={comment.id} className="flex gap-3 mb-3">
-                                    <div className="h-7 w-7 rounded-lg bg-lavender-100 flex items-center justify-center flex-shrink-0">
-                                      <span className="text-lavender-700 text-xs font-medium">
+                                    <div className="h-7 w-7 rounded-lg bg-primary-100 flex items-center justify-center flex-shrink-0">
+                                      <span className="text-primary-700 text-xs font-medium">
                                         {comment.authorName.split(' ').map((n) => n[0]).join('')}
                                       </span>
                                     </div>
@@ -691,12 +691,12 @@ export default function CareLog({
                                     }
                                     onKeyPress={(e) => e.key === 'Enter' && handleComment(entry.id)}
                                     placeholder="Add a comment..."
-                                    className="flex-1 px-3 py-2 bg-cream-50 border border-lavender-200 rounded-xl text-sm focus:ring-2 focus:ring-lavender-300 focus:border-transparent"
+                                    className="flex-1 px-3 py-2 bg-cream-50 border border-primary-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-300 focus:border-transparent"
                                   />
                                   <button
                                     onClick={() => handleComment(entry.id)}
                                     disabled={!commentInputs[entry.id]?.trim()}
-                                    className="p-2 text-lavender-500 disabled:text-navy-300 hover:bg-lavender-50 rounded-lg transition-colors"
+                                    className="p-2 text-primary-500 disabled:text-navy-300 hover:bg-primary-50 rounded-lg transition-colors"
                                   >
                                     <Send className="h-4 w-4" />
                                   </button>
@@ -719,7 +719,7 @@ export default function CareLog({
       {showAddModal && isNurse && (
         <div className="fixed inset-0 bg-navy-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
           <div className="bg-white rounded-3xl max-w-xl w-full shadow-glass-lg animate-scale-in max-h-[90vh] overflow-y-auto">
-            <div className="p-5 border-b border-lavender-100/50 flex items-center justify-between sticky top-0 bg-white rounded-t-3xl z-10">
+            <div className="p-5 border-b border-primary-100/50 flex items-center justify-between sticky top-0 bg-white rounded-t-3xl z-10">
               <h3 className="text-xl font-bold text-navy-900">New Log Entry</h3>
               <button
                 onClick={() => { setShowAddModal(false); resetForm() }}
@@ -762,7 +762,7 @@ export default function CareLog({
                   type="text"
                   value={formTitle}
                   onChange={(e) => setFormTitle(e.target.value)}
-                  className="w-full px-3 py-2.5 border border-lavender-200 rounded-xl focus:ring-2 focus:ring-lavender-400 focus:border-transparent"
+                  className="w-full px-3 py-2.5 border border-primary-200 rounded-xl focus:ring-2 focus:ring-primary-400 focus:border-transparent"
                   placeholder="Brief description of the entry"
                 />
               </div>
@@ -774,41 +774,41 @@ export default function CareLog({
                     <div>
                       <label className="block text-xs font-medium text-navy-600 mb-1">BP Systolic</label>
                       <input type="number" value={bpSystolic} onChange={(e) => setBpSystolic(e.target.value)}
-                        className="w-full px-3 py-2 border border-lavender-200 rounded-xl text-sm focus:ring-2 focus:ring-lavender-400 focus:border-transparent" placeholder="120" />
+                        className="w-full px-3 py-2 border border-primary-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-400 focus:border-transparent" placeholder="120" />
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-navy-600 mb-1">BP Diastolic</label>
                       <input type="number" value={bpDiastolic} onChange={(e) => setBpDiastolic(e.target.value)}
-                        className="w-full px-3 py-2 border border-lavender-200 rounded-xl text-sm focus:ring-2 focus:ring-lavender-400 focus:border-transparent" placeholder="80" />
+                        className="w-full px-3 py-2 border border-primary-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-400 focus:border-transparent" placeholder="80" />
                     </div>
                   </div>
                   <div className="grid grid-cols-3 gap-3">
                     <div>
                       <label className="block text-xs font-medium text-navy-600 mb-1">Heart Rate</label>
                       <input type="number" value={heartRate} onChange={(e) => setHeartRate(e.target.value)}
-                        className="w-full px-3 py-2 border border-lavender-200 rounded-xl text-sm focus:ring-2 focus:ring-lavender-400 focus:border-transparent" placeholder="72" />
+                        className="w-full px-3 py-2 border border-primary-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-400 focus:border-transparent" placeholder="72" />
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-navy-600 mb-1">Temp (°F)</label>
                       <input type="number" step="0.1" value={temperature} onChange={(e) => setTemperature(e.target.value)}
-                        className="w-full px-3 py-2 border border-lavender-200 rounded-xl text-sm focus:ring-2 focus:ring-lavender-400 focus:border-transparent" placeholder="98.6" />
+                        className="w-full px-3 py-2 border border-primary-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-400 focus:border-transparent" placeholder="98.6" />
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-navy-600 mb-1">O2 Sat (%)</label>
                       <input type="number" value={oxygenSat} onChange={(e) => setOxygenSat(e.target.value)}
-                        className="w-full px-3 py-2 border border-lavender-200 rounded-xl text-sm focus:ring-2 focus:ring-lavender-400 focus:border-transparent" placeholder="97" />
+                        className="w-full px-3 py-2 border border-primary-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-400 focus:border-transparent" placeholder="97" />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-medium text-navy-600 mb-1">Resp Rate</label>
                       <input type="number" value={respRate} onChange={(e) => setRespRate(e.target.value)}
-                        className="w-full px-3 py-2 border border-lavender-200 rounded-xl text-sm focus:ring-2 focus:ring-lavender-400 focus:border-transparent" placeholder="16" />
+                        className="w-full px-3 py-2 border border-primary-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-400 focus:border-transparent" placeholder="16" />
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-navy-600 mb-1">Weight (lbs)</label>
                       <input type="number" value={weight} onChange={(e) => setWeight(e.target.value)}
-                        className="w-full px-3 py-2 border border-lavender-200 rounded-xl text-sm focus:ring-2 focus:ring-lavender-400 focus:border-transparent" placeholder="145" />
+                        className="w-full px-3 py-2 border border-primary-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-400 focus:border-transparent" placeholder="145" />
                     </div>
                   </div>
                 </div>
@@ -819,18 +819,18 @@ export default function CareLog({
                   <div>
                     <label className="block text-xs font-medium text-navy-600 mb-1">Medication Name</label>
                     <input type="text" value={medName} onChange={(e) => setMedName(e.target.value)}
-                      className="w-full px-3 py-2 border border-lavender-200 rounded-xl text-sm focus:ring-2 focus:ring-lavender-400 focus:border-transparent" placeholder="e.g., Lisinopril 10mg" />
+                      className="w-full px-3 py-2 border border-primary-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-400 focus:border-transparent" placeholder="e.g., Lisinopril 10mg" />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-medium text-navy-600 mb-1">Dosage</label>
                       <input type="text" value={medDosage} onChange={(e) => setMedDosage(e.target.value)}
-                        className="w-full px-3 py-2 border border-lavender-200 rounded-xl text-sm focus:ring-2 focus:ring-lavender-400 focus:border-transparent" placeholder="10mg" />
+                        className="w-full px-3 py-2 border border-primary-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-400 focus:border-transparent" placeholder="10mg" />
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-navy-600 mb-1">Route</label>
                       <select value={medRoute} onChange={(e) => setMedRoute(e.target.value)}
-                        className="w-full px-3 py-2 border border-lavender-200 rounded-xl text-sm focus:ring-2 focus:ring-lavender-400 focus:border-transparent">
+                        className="w-full px-3 py-2 border border-primary-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-400 focus:border-transparent">
                         <option>Oral</option>
                         <option>IV</option>
                         <option>Injection</option>
@@ -847,7 +847,7 @@ export default function CareLog({
                   <div>
                     <label className="block text-xs font-medium text-navy-600 mb-1">Activity Type</label>
                     <select value={activityType} onChange={(e) => setActivityType(e.target.value)}
-                      className="w-full px-3 py-2 border border-lavender-200 rounded-xl text-sm focus:ring-2 focus:ring-lavender-400 focus:border-transparent">
+                      className="w-full px-3 py-2 border border-primary-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-400 focus:border-transparent">
                       <option value="physical_therapy">Physical Therapy</option>
                       <option value="occupational_therapy">Occupational Therapy</option>
                       <option value="meal">Meal</option>
@@ -860,18 +860,18 @@ export default function CareLog({
                   <div>
                     <label className="block text-xs font-medium text-navy-600 mb-1">Description</label>
                     <textarea value={activityDesc} onChange={(e) => setActivityDesc(e.target.value)}
-                      className="w-full px-3 py-2 border border-lavender-200 rounded-xl text-sm focus:ring-2 focus:ring-lavender-400 focus:border-transparent" rows={2} placeholder="Describe the activity..." />
+                      className="w-full px-3 py-2 border border-primary-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-400 focus:border-transparent" rows={2} placeholder="Describe the activity..." />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-medium text-navy-600 mb-1">Duration (min)</label>
                       <input type="number" value={activityDuration} onChange={(e) => setActivityDuration(e.target.value)}
-                        className="w-full px-3 py-2 border border-lavender-200 rounded-xl text-sm focus:ring-2 focus:ring-lavender-400 focus:border-transparent" placeholder="45" />
+                        className="w-full px-3 py-2 border border-primary-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-400 focus:border-transparent" placeholder="45" />
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-navy-600 mb-1">Participation</label>
                       <select value={activityParticipation} onChange={(e) => setActivityParticipation(e.target.value)}
-                        className="w-full px-3 py-2 border border-lavender-200 rounded-xl text-sm focus:ring-2 focus:ring-lavender-400 focus:border-transparent">
+                        className="w-full px-3 py-2 border border-primary-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-400 focus:border-transparent">
                         <option value="active">Active</option>
                         <option value="moderate">Moderate</option>
                         <option value="minimal">Minimal</option>
@@ -902,7 +902,7 @@ export default function CareLog({
                     <div>
                       <label className="block text-xs font-medium text-navy-600 mb-1">Alertness</label>
                       <select value={alertness} onChange={(e) => setAlertness(e.target.value)}
-                        className="w-full px-3 py-2 border border-lavender-200 rounded-xl text-sm focus:ring-2 focus:ring-lavender-400 focus:border-transparent">
+                        className="w-full px-3 py-2 border border-primary-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-400 focus:border-transparent">
                         <option value="alert">Alert & Oriented</option>
                         <option value="drowsy">Drowsy</option>
                         <option value="lethargic">Lethargic</option>
@@ -912,7 +912,7 @@ export default function CareLog({
                     <div>
                       <label className="block text-xs font-medium text-navy-600 mb-1">Appetite</label>
                       <select value={appetite} onChange={(e) => setAppetite(e.target.value)}
-                        className="w-full px-3 py-2 border border-lavender-200 rounded-xl text-sm focus:ring-2 focus:ring-lavender-400 focus:border-transparent">
+                        className="w-full px-3 py-2 border border-primary-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-400 focus:border-transparent">
                         <option value="good">Good</option>
                         <option value="fair">Fair</option>
                         <option value="poor">Poor</option>
@@ -939,7 +939,7 @@ export default function CareLog({
                     <div>
                       <label className="block text-xs font-medium text-navy-600 mb-1">Incident Type</label>
                       <select value={incidentType} onChange={(e) => setIncidentType(e.target.value)}
-                        className="w-full px-3 py-2 border border-lavender-200 rounded-xl text-sm focus:ring-2 focus:ring-lavender-400 focus:border-transparent">
+                        className="w-full px-3 py-2 border border-primary-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-400 focus:border-transparent">
                         <option value="fall">Fall</option>
                         <option value="behavior_change">Behavior Change</option>
                         <option value="condition_change">Condition Change</option>
@@ -950,7 +950,7 @@ export default function CareLog({
                     <div>
                       <label className="block text-xs font-medium text-navy-600 mb-1">Severity</label>
                       <select value={incidentSeverity} onChange={(e) => setIncidentSeverity(e.target.value)}
-                        className="w-full px-3 py-2 border border-lavender-200 rounded-xl text-sm focus:ring-2 focus:ring-lavender-400 focus:border-transparent">
+                        className="w-full px-3 py-2 border border-primary-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-400 focus:border-transparent">
                         <option value="low">Low</option>
                         <option value="moderate">Moderate</option>
                         <option value="high">High</option>
@@ -960,22 +960,22 @@ export default function CareLog({
                   <div>
                     <label className="block text-xs font-medium text-navy-600 mb-1">Description</label>
                     <textarea value={incidentDesc} onChange={(e) => setIncidentDesc(e.target.value)}
-                      className="w-full px-3 py-2 border border-lavender-200 rounded-xl text-sm focus:ring-2 focus:ring-lavender-400 focus:border-transparent" rows={2} placeholder="Describe what happened..." />
+                      className="w-full px-3 py-2 border border-primary-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-400 focus:border-transparent" rows={2} placeholder="Describe what happened..." />
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-navy-600 mb-1">Action Taken</label>
                     <textarea value={incidentAction} onChange={(e) => setIncidentAction(e.target.value)}
-                      className="w-full px-3 py-2 border border-lavender-200 rounded-xl text-sm focus:ring-2 focus:ring-lavender-400 focus:border-transparent" rows={2} placeholder="What actions were taken..." />
+                      className="w-full px-3 py-2 border border-primary-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-400 focus:border-transparent" rows={2} placeholder="What actions were taken..." />
                   </div>
                   <div className="flex gap-4">
                     <label className="flex items-center gap-2 text-sm">
                       <input type="checkbox" checked={physicianNotified} onChange={(e) => setPhysicianNotified(e.target.checked)}
-                        className="rounded border-lavender-300 text-lavender-600 focus:ring-lavender-400" />
+                        className="rounded border-primary-300 text-primary-600 focus:ring-primary-400" />
                       Physician Notified
                     </label>
                     <label className="flex items-center gap-2 text-sm">
                       <input type="checkbox" checked={familyNotified} onChange={(e) => setFamilyNotified(e.target.checked)}
-                        className="rounded border-lavender-300 text-lavender-600 focus:ring-lavender-400" />
+                        className="rounded border-primary-300 text-primary-600 focus:ring-primary-400" />
                       Family Notified
                     </label>
                   </div>
@@ -988,24 +988,24 @@ export default function CareLog({
                 <textarea
                   value={formNotes}
                   onChange={(e) => setFormNotes(e.target.value)}
-                  className="w-full px-3 py-2.5 border border-lavender-200 rounded-xl focus:ring-2 focus:ring-lavender-400 focus:border-transparent"
+                  className="w-full px-3 py-2.5 border border-primary-200 rounded-xl focus:ring-2 focus:ring-primary-400 focus:border-transparent"
                   rows={3}
                   placeholder="Additional notes..."
                 />
               </div>
             </div>
 
-            <div className="p-5 border-t border-lavender-100/50 flex gap-3 sticky bottom-0 bg-white rounded-b-3xl">
+            <div className="p-5 border-t border-primary-100/50 flex gap-3 sticky bottom-0 bg-white rounded-b-3xl">
               <button
                 onClick={() => { setShowAddModal(false); resetForm() }}
-                className="flex-1 px-4 py-2.5 border border-lavender-200 text-navy-700 rounded-xl hover:bg-cream-50 transition-colors"
+                className="flex-1 px-4 py-2.5 border border-primary-200 text-navy-700 rounded-xl hover:bg-cream-50 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSubmitEntry}
                 disabled={!formTitle}
-                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-lavender-500 to-lavender-600 text-white rounded-xl hover:from-lavender-600 hover:to-lavender-700 transition-all duration-200 shadow-soft disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-200 shadow-soft disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Submit Entry
               </button>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import {
   Calendar,
   Users,
@@ -11,7 +12,6 @@ import {
   Heart,
   Home,
   ClipboardList,
-  Link2,
 } from 'lucide-react'
 
 interface NavigationProps {
@@ -38,22 +38,16 @@ export default function Navigation({ activeTab, onTabChange }: NavigationProps) 
           <div className="flex items-center">
             <button
               onClick={() => onTabChange('landing')}
-              className="flex items-center gap-3 hover:opacity-90 transition-opacity group"
+              className="flex items-center hover:opacity-90 transition-opacity"
             >
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-lavender-400 to-lavender-600 rounded-2xl blur-md opacity-50 group-hover:opacity-70 transition-opacity"></div>
-                <div className="relative p-2.5 bg-gradient-to-br from-lavender-500 to-lavender-600 rounded-2xl shadow-float">
-                  <Link2 className="h-5 w-5 text-white" />
-                </div>
-              </div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-xl font-bold gradient-text">
-                  CareBridge
-                </span>
-                <span className="text-sm font-semibold text-navy-400">
-                  Connect
-                </span>
-              </div>
+              <Image
+                src="/logos/Logo 1 (color).png"
+                alt="CareBridge Connect"
+                width={180}
+                height={50}
+                className="h-10 w-auto"
+                priority
+              />
             </button>
           </div>
 
@@ -71,13 +65,13 @@ export default function Navigation({ activeTab, onTabChange }: NavigationProps) 
                     flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300
                     ${isActive
                       ? isLog
-                        ? 'bg-gradient-to-r from-lavender-100 to-peach-100 text-lavender-700 shadow-soft'
-                        : 'bg-lavender-100 text-lavender-700 shadow-soft'
+                        ? 'bg-gradient-to-r from-primary-100 to-accent-100 text-primary-700 shadow-soft'
+                        : 'bg-primary-100 text-primary-700 shadow-soft'
                       : 'text-navy-600 hover:bg-cream-100 hover:text-navy-800'
                     }
                   `}
                 >
-                  <Icon className={`h-4 w-4 ${isActive ? 'text-lavender-600' : ''}`} />
+                  <Icon className={`h-4 w-4 ${isActive ? 'text-primary-600' : ''}`} />
                   {item.label}
                 </button>
               )
@@ -98,7 +92,7 @@ export default function Navigation({ activeTab, onTabChange }: NavigationProps) 
 
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-lavender-100/50 bg-white/95 backdrop-blur-xl animate-slide-down">
+        <div className="md:hidden border-t border-primary-100/50 bg-white/95 backdrop-blur-xl animate-slide-down">
           <div className="px-3 pt-2 pb-3 space-y-1">
             {navItems.map((item) => {
               const Icon = item.icon
@@ -113,12 +107,12 @@ export default function Navigation({ activeTab, onTabChange }: NavigationProps) 
                   className={`
                     flex items-center w-full gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all duration-200
                     ${isActive
-                      ? 'bg-lavender-100 text-lavender-700'
+                      ? 'bg-primary-100 text-primary-700'
                       : 'text-navy-600 hover:bg-cream-100'
                     }
                   `}
                 >
-                  <Icon className={`h-5 w-5 ${isActive ? 'text-lavender-600' : ''}`} />
+                  <Icon className={`h-5 w-5 ${isActive ? 'text-primary-600' : ''}`} />
                   {item.label}
                 </button>
               )

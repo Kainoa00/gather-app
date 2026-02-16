@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Heart, Shield, ShieldCheck, Activity, Users, Check, Mail, Lock, ArrowRight, Sparkles, Link2 } from 'lucide-react'
+import Image from 'next/image'
+import { Heart, Shield, ShieldCheck, Activity, Users, Check, Mail, Lock, ArrowRight, Sparkles } from 'lucide-react'
 import { UserRole } from '@/types'
 
 interface LoginScreenProps {
@@ -32,11 +33,11 @@ const demoUsers = [
     subtitle: 'Admin',
     initials: 'MW',
     icon: Shield,
-    gradientFrom: 'from-lavender-400',
-    gradientTo: 'to-lavender-600',
-    bgLight: 'bg-lavender-50',
-    borderActive: 'border-lavender-400',
-    badgeColor: 'bg-lavender-100 text-lavender-700',
+    gradientFrom: 'from-primary-400',
+    gradientTo: 'to-primary-600',
+    bgLight: 'bg-primary-50',
+    borderActive: 'border-primary-400',
+    badgeColor: 'bg-primary-100 text-primary-700',
     shadowColor: 'rgba(151, 117, 250, 0.2)',
   },
   {
@@ -62,11 +63,11 @@ const demoUsers = [
     subtitle: 'Family Member',
     initials: 'KS',
     icon: Users,
-    gradientFrom: 'from-peach-400',
-    gradientTo: 'to-peach-600',
-    bgLight: 'bg-peach-50',
-    borderActive: 'border-peach-400',
-    badgeColor: 'bg-peach-100 text-peach-700',
+    gradientFrom: 'from-accent-400',
+    gradientTo: 'to-accent-600',
+    bgLight: 'bg-accent-50',
+    borderActive: 'border-accent-400',
+    badgeColor: 'bg-accent-100 text-accent-700',
     shadowColor: 'rgba(255, 138, 101, 0.2)',
   },
 ]
@@ -111,9 +112,9 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
     <div className="min-h-screen gradient-mesh-bg flex items-center justify-center p-4">
       {/* Decorative blobs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-96 h-96 blob-lavender rounded-full animate-blob"></div>
-        <div className="absolute top-1/3 -left-20 w-72 h-72 blob-peach rounded-full animate-blob" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute bottom-20 right-1/4 w-64 h-64 blob-lavender rounded-full animate-blob" style={{ animationDelay: '4s' }}></div>
+        <div className="absolute -top-40 -right-40 w-96 h-96 blob-primary rounded-full animate-blob"></div>
+        <div className="absolute top-1/3 -left-20 w-72 h-72 blob-accent rounded-full animate-blob" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute bottom-20 right-1/4 w-64 h-64 blob-primary rounded-full animate-blob" style={{ animationDelay: '4s' }}></div>
       </div>
 
       {/* Login Card */}
@@ -124,18 +125,17 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
         >
           {/* Logo */}
           <div className="flex flex-col items-center mb-8 animate-slide-up">
-            <div className="relative mb-5">
-              <div className="absolute inset-0 bg-gradient-to-br from-lavender-400 to-peach-400 rounded-2xl blur-lg opacity-50 animate-pulse-soft"></div>
-              <div className="relative p-4 bg-gradient-to-br from-lavender-500 to-lavender-600 rounded-2xl shadow-float">
-                <Link2 className="h-7 w-7 text-white" />
-              </div>
+            <div className="relative mb-6">
+              <Image
+                src="/logos/Logo 1 (color).png"
+                alt="CareBridge Connect"
+                width={280}
+                height={80}
+                className="h-20 w-auto"
+                priority
+              />
             </div>
-
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-              <span className="gradient-text">CareBridge</span>
-              <span className="text-navy-400 text-lg sm:text-xl ml-1.5">Connect</span>
-            </h1>
-            <p className="mt-2 text-navy-500 text-sm text-center">
+            <p className="mt-2 text-neutral-600 text-sm text-center font-medium">
               {showEmailForm ? 'Sign in to your account' : 'Choose your role to continue'}
             </p>
           </div>
@@ -158,7 +158,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
                         animate-slide-up
                         ${isSelected
                           ? `${user.borderActive} ${user.bgLight} scale-[0.98]`
-                          : 'border-transparent bg-white/60 hover:bg-white/80 hover:border-lavender-200 hover:shadow-soft-lg hover:-translate-y-0.5'
+                          : 'border-transparent bg-white/60 hover:bg-white/80 hover:border-primary-200 hover:shadow-soft-lg hover:-translate-y-0.5'
                         }
                         ${isLoggingIn && !isSelected ? 'opacity-40 pointer-events-none' : ''}
                       `}
@@ -169,7 +169,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
                         <span className="text-white font-bold text-sm">{user.initials}</span>
                         {isSelected && (
                           <div className="absolute -top-1 -right-1 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-sm animate-scale-in">
-                            <Check className="h-3 w-3 text-lavender-600" strokeWidth={3} />
+                            <Check className="h-3 w-3 text-primary-600" strokeWidth={3} />
                           </div>
                         )}
                       </div>
@@ -194,15 +194,15 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
 
               {/* Divider */}
               <div className="flex items-center gap-3 my-6 animate-slide-up" style={{ animationDelay: '450ms', animationFillMode: 'backwards' }}>
-                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-lavender-200 to-transparent"></div>
+                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-primary-200 to-transparent"></div>
                 <span className="text-xs text-navy-400 font-medium">or</span>
-                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-lavender-200 to-transparent"></div>
+                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-primary-200 to-transparent"></div>
               </div>
 
               {/* Email Toggle */}
               <button
                 onClick={() => setShowEmailForm(true)}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium text-navy-600 hover:text-lavender-700 hover:bg-lavender-50 transition-all duration-200 animate-slide-up"
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium text-navy-600 hover:text-primary-700 hover:bg-primary-50 transition-all duration-200 animate-slide-up"
                 style={{ animationDelay: '500ms', animationFillMode: 'backwards' }}
               >
                 <Mail className="h-4 w-4" />
@@ -221,7 +221,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="sarah@carebridge.com"
-                    className="w-full pl-10 pr-4 py-3 bg-white/70 border border-lavender-200 rounded-xl text-sm text-navy-900 placeholder:text-navy-400 focus:border-lavender-400 focus:bg-white transition-all"
+                    className="w-full pl-10 pr-4 py-3 bg-white/70 border border-primary-200 rounded-xl text-sm text-navy-900 placeholder:text-navy-400 focus:border-primary-400 focus:bg-white transition-all"
                   />
                 </div>
               </div>
@@ -235,7 +235,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter your password"
-                    className="w-full pl-10 pr-4 py-3 bg-white/70 border border-lavender-200 rounded-xl text-sm text-navy-900 placeholder:text-navy-400 focus:border-lavender-400 focus:bg-white transition-all"
+                    className="w-full pl-10 pr-4 py-3 bg-white/70 border border-primary-200 rounded-xl text-sm text-navy-900 placeholder:text-navy-400 focus:border-primary-400 focus:bg-white transition-all"
                   />
                 </div>
               </div>
@@ -258,7 +258,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
               <button
                 type="button"
                 onClick={() => setShowEmailForm(false)}
-                className="w-full text-center text-xs text-navy-500 hover:text-lavender-600 transition-colors py-2"
+                className="w-full text-center text-xs text-navy-500 hover:text-primary-600 transition-colors py-2"
               >
                 Back to role selection
               </button>
@@ -266,8 +266,8 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
           )}
 
           {/* Footer Tag */}
-          <div className="mt-6 pt-5 border-t border-lavender-100/60 flex items-center justify-center gap-2 animate-slide-up" style={{ animationDelay: '550ms', animationFillMode: 'backwards' }}>
-            <Sparkles className="h-3.5 w-3.5 text-lavender-400" />
+          <div className="mt-6 pt-5 border-t border-primary-100/60 flex items-center justify-center gap-2 animate-slide-up" style={{ animationDelay: '550ms', animationFillMode: 'backwards' }}>
+            <Sparkles className="h-3.5 w-3.5 text-primary-400" />
             <p className="text-xs text-navy-400">
               Demo mode — no real credentials required
             </p>

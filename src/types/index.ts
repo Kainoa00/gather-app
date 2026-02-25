@@ -250,6 +250,18 @@ export interface VaultDocument {
   notes?: string
 }
 
+// Facility Reviews
+export interface FacilityReviewEntry {
+  id: string
+  authorId: string
+  authorName: string
+  rating: number        // 1–5
+  content: string
+  tags: string[]        // ['food', 'staff', 'cleanliness', 'activities', 'communication']
+  createdAt: Date
+  isPublic: boolean     // true if rating >= 4
+}
+
 // Quick Actions for Nurses
 export type QuickActionType = 'vitals_check' | 'meds_given' | 'meal_update' | 'mood_check' | 'walk_completed' | 'resting' | 'pt_session' | 'bathed_groomed'
 

@@ -35,6 +35,34 @@ import {
   getVisibleLogCategories,
 } from '@/lib/permissions'
 
+// ---------------------------------------------------------------------------
+// Time block helpers
+// ---------------------------------------------------------------------------
+
+function getTimeBlock(date: Date): 'Morning' | 'Afternoon' | 'Evening' {
+  const hour = date.getHours()
+  if (hour >= 6 && hour < 12) return 'Morning'
+  if (hour >= 12 && hour < 18) return 'Afternoon'
+  return 'Evening'
+}
+
+const timeBlockMeta = {
+  Morning: { emoji: '🌅', label: 'Morning', color: 'text-amber-700 bg-amber-50' },
+  Afternoon: { emoji: '☀️', label: 'Afternoon', color: 'text-blue-700 bg-blue-50' },
+  Evening: { emoji: '🌙', label: 'Evening', color: 'text-indigo-700 bg-indigo-50' },
+}
+
+function isFamilyFacingRole(role: UserRole): boolean {
+  return role === 'family' || role === 'primary'
+}
+
+const participationToPercent: Record<string, number> = {
+  active: 90,
+  moderate: 60,
+  minimal: 25,
+  refused: 0,
+}
+
 interface CareLogProps {
   logEntries: LogEntry[]
   currentUserRole: UserRole
@@ -163,7 +191,8 @@ export default function CareLog({
   const showExactVitals = canViewExactVitals(currentUserRole)
   const showIncidentDetails = canViewIncidentDetails(currentUserRole)
   const showIncidentSummary = canViewIncidentSummary(currentUserRole)
-  const showMoodDetails = canViewMoodDetails(currentUserRole)
+  const showMoodDetails = canViewMoodDetails(currentUserRole) && !isFamilyFacingRole(currentUserRole)
+  const isFamilyView = isFamilyFacingRole(currentUserRole)
 
   const filteredEntries = logEntries
     .filter((entry) => {
@@ -174,7 +203,12 @@ export default function CareLog({
         entry.notes?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         entry.enteredByName.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesCategory = filterCategory === 'all' || entry.category === filterCategory
-      return matchesRole && matchesSearch && matchesCategory
+      // HIPAA: for family/primary roles, only show therapy, OT, meal activities + mood
+      const matchesHipaa = !isFamilyView ||
+        entry.category === 'mood' ||
+        (entry.category === 'activity' && entry.activityLog &&
+          ['physical_therapy', 'occupational_therapy', 'meal'].includes(entry.activityLog.activityType))
+      return matchesRole && matchesSearch && matchesCategory && matchesHipaa
     })
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
@@ -283,11 +317,12 @@ export default function CareLog({
     setShowAddModal(false)
   }
 
-  // Group entries by date
-  const groupedEntries = filteredEntries.reduce<Record<string, LogEntry[]>>((groups, entry) => {
+  // Group entries by date, then by time block
+  const groupedEntries = filteredEntries.reduce<Record<string, Record<string, LogEntry[]>>>((groups, entry) => {
     const dateKey = format(new Date(entry.createdAt), 'yyyy-MM-dd')
-    if (!groups[dateKey]) groups[dateKey] = []
-    groups[dateKey].push(entry)
+    const block = getTimeBlock(new Date(entry.createdAt))
+    if (!groups[dateKey]) groups[dateKey] = { Morning: [], Afternoon: [], Evening: [] }
+    groups[dateKey][block].push(entry)
     return groups
   }, {})
 
@@ -368,7 +403,7 @@ export default function CareLog({
         </div>
       </div>
 
-      {/* Log Entries grouped by date */}
+      {/* Log Entries grouped by date then time block */}
       <div className="space-y-8">
         {Object.keys(groupedEntries).length === 0 ? (
           <div className="text-center py-12 card-glass">
@@ -376,17 +411,31 @@ export default function CareLog({
             <p className="text-navy-500">No log entries found</p>
           </div>
         ) : (
-          Object.entries(groupedEntries).map(([dateKey, entries]) => (
+          Object.entries(groupedEntries).map(([dateKey, blockGroups]) => {
+            const totalEntries = Object.values(blockGroups).reduce((sum, arr) => sum + arr.length, 0)
+            return (
             <div key={dateKey}>
               <h3 className="text-lg font-semibold text-navy-800 mb-4 flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-gradient-to-r from-primary-400 to-accent-400"></div>
                 {getDateLabel(dateKey)}
                 <span className="text-sm font-normal text-navy-500">
-                  ({entries.length} {entries.length === 1 ? 'entry' : 'entries'})
+                  ({totalEntries} {totalEntries === 1 ? 'entry' : 'entries'})
                 </span>
               </h3>
 
-              <div className="space-y-4">
+              <div className="space-y-6">
+                {(['Morning', 'Afternoon', 'Evening'] as const).map(block => {
+                  const entries = blockGroups[block]
+                  if (!entries || entries.length === 0) return null
+                  return (
+                    <div key={block}>
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-sm">{timeBlockMeta[block].emoji}</span>
+                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${timeBlockMeta[block].color}`}>
+                          {timeBlockMeta[block].label}
+                        </span>
+                      </div>
+                      <div className="space-y-4">
                 {entries.map((entry) => {
                   const config = categoryConfig[entry.category]
                   const Icon = config.icon
@@ -521,23 +570,35 @@ export default function CareLog({
                                         {entry.activityLog.activityType.replace('_', ' ')}
                                       </span>
                                     </div>
-                                    <div>
-                                      <span className="text-sm text-navy-500">Description</span>
-                                      <p className="text-navy-900 text-sm mt-0.5">{entry.activityLog.description}</p>
-                                    </div>
-                                    {entry.activityLog.duration && (
+                                    {/* Family view: meal — show % eaten */}
+                                    {isFamilyView && entry.activityLog.activityType === 'meal' && entry.activityLog.participation ? (
                                       <div className="flex justify-between">
-                                        <span className="text-sm text-navy-500">Duration</span>
-                                        <span className="font-medium text-navy-900">{entry.activityLog.duration} min</span>
-                                      </div>
-                                    )}
-                                    {entry.activityLog.participation && (
-                                      <div className="flex justify-between">
-                                        <span className="text-sm text-navy-500">Participation</span>
+                                        <span className="text-sm text-navy-500">Meal</span>
                                         <span className="font-medium text-navy-900">
-                                          {participationLabels[entry.activityLog.participation]}
+                                          {participationToPercent[entry.activityLog.participation] ?? 60}% eaten
                                         </span>
                                       </div>
+                                    ) : (
+                                      <>
+                                        <div>
+                                          <span className="text-sm text-navy-500">Description</span>
+                                          <p className="text-navy-900 text-sm mt-0.5">{entry.activityLog.description}</p>
+                                        </div>
+                                        {entry.activityLog.duration && (
+                                          <div className="flex justify-between">
+                                            <span className="text-sm text-navy-500">Duration</span>
+                                            <span className="font-medium text-navy-900">{entry.activityLog.duration} min</span>
+                                          </div>
+                                        )}
+                                        {entry.activityLog.participation && (
+                                          <div className="flex justify-between">
+                                            <span className="text-sm text-navy-500">Participation</span>
+                                            <span className="font-medium text-navy-900">
+                                              {participationLabels[entry.activityLog.participation]}
+                                            </span>
+                                          </div>
+                                        )}
+                                      </>
                                     )}
                                   </div>
                                 )}
@@ -648,7 +709,7 @@ export default function CareLog({
                               </span>
                               <span className="flex items-center gap-1">
                                 <Clock className="h-3.5 w-3.5" />
-                                {formatDistanceToNow(new Date(entry.createdAt), { addSuffix: true })}
+                                {getTimeBlock(new Date(entry.createdAt))}
                               </span>
                               <button
                                 onClick={() => toggleExpand(entry.id)}
@@ -709,9 +770,14 @@ export default function CareLog({
                     </div>
                   )
                 })}
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
             </div>
-          ))
+            )
+          })
         )}
       </div>
 

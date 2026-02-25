@@ -43,8 +43,10 @@ import {
   markNotificationReadInDb,
   markAllNotificationsReadInDb,
 } from '@/lib/api/mutations'
-import { CareCircleMember, CalendarEvent, Vault, LogEntry, FeedPost, UserRole, Visit, Notification } from '@/types'
-import { Heart, Shield, Calendar, Users, ClipboardList, ArrowRight, Sparkles, Download, Lock, CheckCircle2, Building2, Link2, MessageSquare, Phone, PhoneOff, TrendingUp, Star } from 'lucide-react'
+import { CareCircleMember, CalendarEvent, Vault, LogEntry, FeedPost, UserRole, Visit, Notification, FacilityReviewEntry } from '@/types'
+import { Heart, Shield, Calendar, Users, ClipboardList, ArrowRight, Sparkles, Download, Lock, CheckCircle2, Building2, Link2, MessageSquare, Phone, PhoneOff, TrendingUp, Star, CheckSquare } from 'lucide-react'
+import { format } from 'date-fns'
+import { demoGoals } from '@/components/HomeView'
 import {
   canUseQuickActions,
   canViewMedications,
@@ -56,6 +58,7 @@ import {
 export default function Home() {
   const [activeTab, setActiveTab] = useState('landing')
   const [showExportModal, setShowExportModal] = useState(false)
+  const [internalReviews, setInternalReviews] = useState<FacilityReviewEntry[]>([])
 
   // Current user state (set by login screen)
   const [currentUser, setCurrentUser] = useState<{
@@ -71,7 +74,7 @@ export default function Home() {
   const currentUserRole: UserRole = currentUser?.role || 'primary'
 
   // Sub-tab states
-  const [logSubTab, setLogSubTab] = useState<'timeline' | 'trends' | 'vitals' | 'wellness'>('timeline')
+  const [logSubTab, setLogSubTab] = useState<'timeline' | 'trends' | 'vitals' | 'wellness' | 'progress'>('timeline')
 
   // Supabase data hooks (fall back to demo data when isDemoMode)
   const { patient } = usePatient(DEMO_PATIENT_ID)
@@ -415,6 +418,11 @@ export default function Home() {
         console.error('Error marking all notifications as read:', error)
       }
     }
+  }
+
+  // Review handler
+  const handleAddReview = (review: FacilityReviewEntry) => {
+    setInternalReviews(prev => [review, ...prev])
   }
 
   // Login screen
@@ -831,15 +839,14 @@ export default function Home() {
             logEntries={logEntries}
             events={events}
             visits={visits}
-            posts={posts}
             members={members}
             currentUserId={currentUserId}
             currentUserName={currentUserName}
             currentUserRole={currentUserRole}
+            reviews={internalReviews}
             onClaimVisit={(eventId) => handleClaimEvent(eventId, currentUserName)}
-            onAddPost={handleAddPost}
-            onLikePost={handleLikePost}
-            onAddComment={handleAddPostComment}
+            onAddReview={handleAddReview}
+            onNavigateToCalendar={() => setActiveTab('calendar')}
           />
         )}
 
@@ -864,11 +871,12 @@ export default function Home() {
             )}
 
             {/* Log Sub-tabs */}
-            <div className="flex gap-2 border-b border-primary-100 pb-2">
+            <div className="flex gap-2 border-b border-primary-100 pb-2 flex-wrap">
               {[
                 { id: 'timeline' as const, label: 'Timeline' },
                 { id: 'vitals' as const, label: 'Vitals Trends' },
                 { id: 'wellness' as const, label: 'Wellness' },
+                { id: 'progress' as const, label: 'Progress' },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -898,6 +906,155 @@ export default function Home() {
             {logSubTab === 'vitals' && <VitalsTrends logEntries={logEntries} />}
 
             {logSubTab === 'wellness' && <WellnessTrends days={wellnessDays} />}
+
+            {logSubTab === 'progress' && (
+              <div className="space-y-6">
+                {/* Recovery Goals */}
+                <div className="card-glass p-6">
+                  <h3 className="text-lg font-bold text-navy-900 mb-5">Recovery Goals</h3>
+                  <div className="space-y-6">
+                    {demoGoals.map(goal => (
+                      <div key={goal.id}>
+                        <div className="flex justify-between items-center mb-2">
+                          <div>
+                            <p className="font-semibold text-navy-900">{goal.title}</p>
+                            <p className="text-xs text-navy-500">{goal.category} · Target: {goal.targetDate}</p>
+                          </div>
+                          <span className={`text-base font-bold ${
+                            goal.progressPercent >= 70 ? 'text-mint-600'
+                              : goal.progressPercent >= 40 ? 'text-amber-600'
+                              : 'text-red-500'
+                          }`}>{goal.progressPercent}%</span>
+                        </div>
+                        <div className="w-full bg-navy-100 rounded-full h-3 mb-3">
+                          <div
+                            className={`h-3 rounded-full transition-all ${
+                              goal.progressPercent >= 70 ? 'bg-gradient-to-r from-mint-400 to-mint-500'
+                                : goal.progressPercent >= 40 ? 'bg-gradient-to-r from-amber-400 to-amber-500'
+                                : 'bg-gradient-to-r from-red-400 to-red-500'
+                            }`}
+                            style={{ width: `${goal.progressPercent}%` }}
+                          />
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {goal.milestones.map((milestone, i) => {
+                            const completed = (i / goal.milestones.length) * 100 < goal.progressPercent
+                            return (
+                              <label key={i} className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full cursor-default select-none ${
+                                completed ? 'bg-mint-50 text-mint-700' : 'bg-cream-100 text-navy-400'
+                              }`}>
+                                <CheckSquare className={`h-3.5 w-3.5 flex-shrink-0 ${completed ? 'text-mint-600' : 'text-navy-300'}`} />
+                                {milestone}
+                              </label>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Therapy Session Stats */}
+                <div className="card-glass p-6">
+                  <h3 className="text-lg font-bold text-navy-900 mb-5">Activity Completion</h3>
+                  {(() => {
+                    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+                    const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
+                    const thisWeek = logEntries.filter(e => new Date(e.createdAt) >= sevenDaysAgo)
+                    const lastWeek = logEntries.filter(e => new Date(e.createdAt) >= fourteenDaysAgo && new Date(e.createdAt) < sevenDaysAgo)
+                    const therapyThis = thisWeek.filter(e => e.category === 'activity' && (e.activityLog?.activityType === 'physical_therapy' || e.activityLog?.activityType === 'occupational_therapy')).length
+                    const therapyLast = lastWeek.filter(e => e.category === 'activity' && (e.activityLog?.activityType === 'physical_therapy' || e.activityLog?.activityType === 'occupational_therapy')).length
+                    const mealThis = thisWeek.filter(e => e.category === 'activity' && e.activityLog?.activityType === 'meal')
+                    const mealLast = lastWeek.filter(e => e.category === 'activity' && e.activityLog?.activityType === 'meal')
+                    const participationMap: Record<string, number> = { active: 90, moderate: 60, minimal: 25, refused: 0 }
+                    const avgThis = mealThis.length > 0 ? Math.round(mealThis.reduce((s, e) => s + (participationMap[e.activityLog?.participation || 'moderate'] ?? 60), 0) / mealThis.length) : 0
+                    const avgLast = mealLast.length > 0 ? Math.round(mealLast.reduce((s, e) => s + (participationMap[e.activityLog?.participation || 'moderate'] ?? 60), 0) / mealLast.length) : 0
+                    return (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="p-4 bg-blue-50 rounded-2xl text-center">
+                            <p className="text-3xl font-bold text-blue-700">{therapyThis}</p>
+                            <p className="text-xs font-medium text-blue-600 mt-1">Therapy Sessions</p>
+                            <p className="text-xs text-navy-500">this week</p>
+                            {therapyLast > 0 && (
+                              <p className={`text-xs font-medium mt-1 flex items-center justify-center gap-1 ${therapyThis >= therapyLast ? 'text-mint-600' : 'text-amber-600'}`}>
+                                {therapyThis >= therapyLast ? '↑' : '↓'} vs {therapyLast} last week
+                              </p>
+                            )}
+                          </div>
+                          <div className="p-4 bg-green-50 rounded-2xl text-center">
+                            <p className="text-3xl font-bold text-green-700">{avgThis > 0 ? `${avgThis}%` : '—'}</p>
+                            <p className="text-xs font-medium text-green-600 mt-1">Meal Participation</p>
+                            <p className="text-xs text-navy-500">avg this week</p>
+                            {avgLast > 0 && avgThis > 0 && (
+                              <p className={`text-xs font-medium mt-1 flex items-center justify-center gap-1 ${avgThis >= avgLast ? 'text-mint-600' : 'text-amber-600'}`}>
+                                {avgThis >= avgLast ? '↑' : '↓'} from {avgLast}% last week
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="p-4 bg-primary-50 rounded-2xl">
+                          <p className="text-sm text-primary-700 leading-relaxed">
+                            {therapyThis > therapyLast
+                              ? `Therapy participation improved from ${therapyLast} → ${therapyThis} sessions this week.`
+                              : therapyThis === therapyLast && therapyThis > 0
+                                ? `Therapy sessions are consistent at ${therapyThis} per week.`
+                                : therapyThis > 0
+                                  ? `${therapyThis} therapy session${therapyThis > 1 ? 's' : ''} completed this week.`
+                                  : 'Therapy sessions are scheduled this week.'
+                            }
+                            {avgThis > 0 && avgLast > 0
+                              ? avgThis >= avgLast
+                                ? ` Meal participation improved from ${avgLast}% → ${avgThis}% this week.`
+                                : ` Meal participation changed from ${avgLast}% → ${avgThis}% this week.`
+                              : ''
+                            }
+                          </p>
+                        </div>
+                      </div>
+                    )
+                  })()}
+                </div>
+              </div>
+            )}
+
+            {/* Admin: Internal Feedback */}
+            {currentUserRole === 'admin' && internalReviews.filter(r => !r.isPublic).length > 0 && (
+              <div className="card-glass p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="p-2 rounded-xl bg-amber-50">
+                    <Star className="h-4 w-4 text-amber-500" />
+                  </div>
+                  <h3 className="text-sm font-bold text-navy-900">Internal Feedback</h3>
+                  <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs font-medium">
+                    {internalReviews.filter(r => !r.isPublic).length} private
+                  </span>
+                </div>
+                <div className="space-y-3">
+                  {internalReviews.filter(r => !r.isPublic).map(review => (
+                    <div key={review.id} className="p-4 bg-amber-50/60 rounded-2xl border border-amber-100">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="flex gap-0.5">
+                          {[1, 2, 3, 4, 5].map(s => (
+                            <Star key={s} className={`h-3.5 w-3.5 ${s <= review.rating ? 'text-amber-400 fill-amber-400' : 'text-navy-200'}`} />
+                          ))}
+                        </div>
+                        <span className="text-sm font-medium text-navy-700">{review.authorName}</span>
+                        <span className="text-xs text-navy-400">{format(new Date(review.createdAt), 'MMM d, yyyy')}</span>
+                      </div>
+                      {review.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-2">
+                          {review.tags.map(tag => (
+                            <span key={tag} className="px-2 py-0.5 bg-white rounded-full text-xs text-navy-600 capitalize">{tag}</span>
+                          ))}
+                        </div>
+                      )}
+                      {review.content && <p className="text-sm text-navy-700 leading-relaxed">{review.content}</p>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

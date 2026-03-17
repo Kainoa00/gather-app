@@ -23,7 +23,9 @@ import {
   Smile,
   Frown,
   Meh,
+  Upload,
 } from 'lucide-react'
+import NurseNotesUpload from '@/components/NurseNotesUpload'
 import { LogEntry, LogEntryCategory, UserRole, LogComment } from '@/types'
 import { formatDistanceToNow, format } from 'date-fns'
 import {
@@ -68,6 +70,7 @@ interface CareLogProps {
   currentUserRole: UserRole
   currentUserId: string
   currentUserName: string
+  patientName?: string
   onAddLogEntry: (entry: Omit<LogEntry, 'id' | 'createdAt' | 'comments'>) => void
   onAddComment: (entryId: string, content: string) => void
 }
@@ -143,15 +146,17 @@ export default function CareLog({
   currentUserRole,
   currentUserId,
   currentUserName,
+  patientName = 'the patient',
   onAddLogEntry,
   onAddComment,
 }: CareLogProps) {
   const [showAddModal, setShowAddModal] = useState(false)
+  const [showNotesUpload, setShowNotesUpload] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [filterCategory, setFilterCategory] = useState<LogEntryCategory | 'all'>('all')
   const [expandedEntries, setExpandedEntries] = useState<Set<string>>(new Set())
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({})
-  const [selectedCategory, setSelectedCategory] = useState<LogEntryCategory>('vitals')
+  const [selectedCategory, setSelectedCategory] = useState<LogEntryCategory>('medication')
 
   // Form states
   const [formTitle, setFormTitle] = useState('')
@@ -165,24 +170,24 @@ export default function CareLog({
   const [respRate, setRespRate] = useState('')
   const [weight, setWeight] = useState('')
   // Medication
-  const [medName, setMedName] = useState('')
-  const [medDosage, setMedDosage] = useState('')
+  const [medName, setMedName] = useState('Lisinopril')
+  const [medDosage, setMedDosage] = useState('10mg')
   const [medRoute, setMedRoute] = useState('Oral')
   // Activity
   const [activityType, setActivityType] = useState<string>('physical_therapy')
-  const [activityDesc, setActivityDesc] = useState('')
-  const [activityDuration, setActivityDuration] = useState('')
+  const [activityDesc, setActivityDesc] = useState('Morning stretching and balance exercises with walker')
+  const [activityDuration, setActivityDuration] = useState('30')
   const [activityParticipation, setActivityParticipation] = useState('active')
   // Mood
   const [mood, setMood] = useState('content')
   const [alertness, setAlertness] = useState('alert')
   const [appetite, setAppetite] = useState('good')
-  const [painLevel, setPainLevel] = useState('0')
+  const [painLevel, setPainLevel] = useState('2')
   // Incident
   const [incidentType, setIncidentType] = useState('fall')
   const [incidentSeverity, setIncidentSeverity] = useState('low')
-  const [incidentDesc, setIncidentDesc] = useState('')
-  const [incidentAction, setIncidentAction] = useState('')
+  const [incidentDesc, setIncidentDesc] = useState('Patient attempted to stand without calling for assistance')
+  const [incidentAction, setIncidentAction] = useState('Assisted patient safely back to bed; physician and family notified; fall mat placed')
   const [physicianNotified, setPhysicianNotified] = useState(false)
   const [familyNotified, setFamilyNotified] = useState(false)
 
@@ -238,21 +243,21 @@ export default function CareLog({
     setOxygenSat('')
     setRespRate('')
     setWeight('')
-    setMedName('')
-    setMedDosage('')
+    setMedName('Lisinopril')
+    setMedDosage('10mg')
     setMedRoute('Oral')
     setActivityType('physical_therapy')
-    setActivityDesc('')
-    setActivityDuration('')
+    setActivityDesc('Morning stretching and balance exercises with walker')
+    setActivityDuration('30')
     setActivityParticipation('active')
     setMood('content')
     setAlertness('alert')
     setAppetite('good')
-    setPainLevel('0')
+    setPainLevel('2')
     setIncidentType('fall')
     setIncidentSeverity('low')
-    setIncidentDesc('')
-    setIncidentAction('')
+    setIncidentDesc('Patient attempted to stand without calling for assistance')
+    setIncidentAction('Assisted patient safely back to bed; physician and family notified; fall mat placed')
     setPhysicianNotified(false)
     setFamilyNotified(false)
   }
@@ -349,13 +354,22 @@ export default function CareLog({
           </p>
         </div>
         {isNurse && (
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center px-5 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-2xl hover:from-primary-600 hover:to-primary-700 transition-all duration-200 shadow-float hover:-translate-y-0.5"
-          >
-            <Plus className="h-5 w-5 mr-2" />
-            New Entry
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowNotesUpload(true)}
+              className="flex items-center px-4 py-2.5 border border-primary-300 text-primary-700 bg-white/80 rounded-2xl hover:bg-primary-50 transition-all duration-200"
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              Upload Notes
+            </button>
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="flex items-center px-5 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-2xl hover:from-primary-600 hover:to-primary-700 transition-all duration-200 shadow-float hover:-translate-y-0.5"
+            >
+              <Plus className="h-5 w-5 mr-2" />
+              New Entry
+            </button>
+          </div>
         )}
       </div>
 
@@ -781,6 +795,18 @@ export default function CareLog({
         )}
       </div>
 
+      {/* Nurse Notes Upload Modal */}
+      {showNotesUpload && isNurse && (
+        <NurseNotesUpload
+          currentUserId={currentUserId}
+          currentUserName={currentUserName}
+          currentUserRole={currentUserRole}
+          patientName={patientName}
+          onAddLogEntry={onAddLogEntry}
+          onClose={() => setShowNotesUpload(false)}
+        />
+      )}
+
       {/* Nurse Entry Modal */}
       {showAddModal && isNurse && (
         <div className="fixed inset-0 bg-navy-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
@@ -796,11 +822,11 @@ export default function CareLog({
             </div>
 
             <div className="p-5 space-y-5">
-              {/* Category Selection */}
+              {/* Category Selection (vitals excluded — logged via QuickActions) */}
               <div>
                 <label className="block text-sm font-medium text-navy-700 mb-2">Entry Type</label>
-                <div className="grid grid-cols-5 gap-2">
-                  {(Object.keys(categoryConfig) as LogEntryCategory[]).map((cat) => {
+                <div className="grid grid-cols-4 gap-2">
+                  {(Object.keys(categoryConfig) as LogEntryCategory[]).filter(cat => cat !== 'vitals').map((cat) => {
                     const config = categoryConfig[cat]
                     const CatIcon = config.icon
                     return (

@@ -44,9 +44,9 @@ export const demoMembers: CareCircleMember[] = [
   },
   {
     id: 'n2',
-    name: 'Jane Doe',
-    email: 'jdoe@gmail.com',
-    phone: '(111) 111-1111',
+    name: 'Robert Kim',
+    email: 'rkim@abcfacility.com',
+    phone: '(111) 222-3333',
     role: 'nurse',
     relationship: 'CNA',
     joinedAt: new Date('2026-01-01'),
@@ -436,7 +436,7 @@ export const demoLogEntries: LogEntry[] = [
     title: 'Daily Mood & Wellness Check',
     notes: 'Kenji is in good spirits today. Chatting with staff and reading the newspaper. Ate most of breakfast.',
     enteredBy: 'n2',
-    enteredByName: 'Jane Doe',
+    enteredByName: 'Robert Kim',
     enteredByRole: 'nurse',
     createdAt: new Date(today.getTime() - 3 * 60 * 60 * 1000),
     moodLog: {
@@ -526,7 +526,7 @@ export const demoLogEntries: LogEntry[] = [
     title: 'Afternoon Mood Check',
     notes: 'Kenji was a bit tired after rehab but still in decent spirits. Watched TV and napped in the afternoon.',
     enteredBy: 'n2',
-    enteredByName: 'Jane Doe',
+    enteredByName: 'Robert Kim',
     enteredByRole: 'nurse',
     createdAt: new Date(yesterday.getTime() + 14 * 60 * 60 * 1000),
     moodLog: {
@@ -593,7 +593,7 @@ export const demoLogEntries: LogEntry[] = [
     title: 'Hallway Walk',
     notes: 'Walked two laps around the west wing hallway with walker. Slow but steady pace. No shortness of breath.',
     enteredBy: 'n2',
-    enteredByName: 'Jane Doe',
+    enteredByName: 'Robert Kim',
     enteredByRole: 'nurse',
     createdAt: new Date(twoDaysAgo.getTime() + 14 * 60 * 60 * 1000),
     activityLog: {
@@ -648,7 +648,7 @@ export const demoLogEntries: LogEntry[] = [
     title: 'Daily Mood & Wellness Check',
     notes: 'Kenji expressed some frustration about the pace of recovery. Had a good talk with him about setting realistic goals. Spirits improved after family call.',
     enteredBy: 'n2',
-    enteredByName: 'Jane Doe',
+    enteredByName: 'Robert Kim',
     enteredByRole: 'nurse',
     createdAt: new Date(threeDaysAgo.getTime() + 12 * 60 * 60 * 1000),
     moodLog: {
@@ -713,7 +713,7 @@ export const demoLogEntries: LogEntry[] = [
     title: 'Participated in Card Game Social',
     notes: 'Kenji joined the common area card game. Played for over an hour and was laughing and chatting with other residents.',
     enteredBy: 'n2',
-    enteredByName: 'Jane Doe',
+    enteredByName: 'Robert Kim',
     enteredByRole: 'nurse',
     createdAt: new Date(fourDaysAgo.getTime() + 14 * 60 * 60 * 1000),
     activityLog: {
@@ -757,7 +757,7 @@ export const demoLogEntries: LogEntry[] = [
     title: 'Daily Mood & Wellness Check',
     notes: 'Kenji in great spirits today. Told stories about growing up in Hawaii. Staff enjoyed listening.',
     enteredBy: 'n2',
-    enteredByName: 'Jane Doe',
+    enteredByName: 'Robert Kim',
     enteredByRole: 'nurse',
     createdAt: new Date(fiveDaysAgo.getTime() + 12 * 60 * 60 * 1000),
     moodLog: {
@@ -816,8 +816,8 @@ export const demoPosts: FeedPost[] = [
   {
     id: '1',
     authorId: 'n2',
-    authorName: 'Jane Doe',
-    authorInitials: 'JD',
+    authorName: 'Robert Kim',
+    authorInitials: 'RK',
     authorRole: 'nurse',
     content: 'Kenji had a wonderful morning today! He was up early, ate a full breakfast, and even cracked a few jokes with the staff. His recovery energy is inspiring.',
     postType: 'facility_moment',
@@ -1119,5 +1119,44 @@ export const demoWellnessDays: WellnessDay[] = [
     socialEngagement: 'moderate',
     therapySessions: 0,
     visitCount: 1,
+  },
+]
+
+export const demoGoals = [
+  {
+    id: 'g1',
+    title: 'Regain Independent Walking',
+    category: 'Mobility',
+    targetDate: 'Apr 15',
+    progressPercent: 65,
+    description: 'Walk 50ft unassisted',
+    milestones: ['Walk with walker 20ft', 'Walk with minimal assist 30ft', 'Independent 50ft walk'],
+  },
+  {
+    id: 'g2',
+    title: 'Improve Nutritional Intake',
+    category: 'Nutrition',
+    targetDate: 'Mar 30',
+    progressPercent: 80,
+    description: 'Achieve 80% meal completion consistently',
+    milestones: ['50% meal completion', '70% meal completion', '80% meal completion'],
+  },
+  {
+    id: 'g3',
+    title: 'Reduce Pain Levels',
+    category: 'Comfort',
+    targetDate: 'Apr 1',
+    progressPercent: 50,
+    description: 'Maintain pain score below 3/10',
+    milestones: ['Pain management plan in place', 'Average pain 5/10', 'Average pain 3/10'],
+  },
+  {
+    id: 'g4',
+    title: 'Restore Upper Body Strength',
+    category: 'Therapy',
+    targetDate: 'May 1',
+    progressPercent: 40,
+    description: 'Complete OT strength exercises independently',
+    milestones: ['Assisted exercises 3x/week', 'Partial independent exercises', 'Full independent exercises'],
   },
 ]

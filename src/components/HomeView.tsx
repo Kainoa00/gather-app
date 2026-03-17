@@ -6,18 +6,17 @@ import {
   Brain,
   Sparkles,
   Calendar,
-  Clock,
   TrendingUp,
   Star,
   ClipboardList,
   Activity,
   CheckSquare,
   ChevronRight,
-  Target,
   Utensils,
 } from 'lucide-react'
 import { PatientInfo, LogEntry, CalendarEvent, Visit, CareCircleMember, UserRole, FacilityReviewEntry } from '@/types'
 import { differenceInDays, format, isToday, isTomorrow, addDays, formatDistanceToNow } from 'date-fns'
+import { demoGoals } from '@/lib/demo-data'
 import FacilityReview from './FacilityReview'
 import { canViewExactVitals, canViewMoodDetails } from '@/lib/permissions'
 
@@ -39,49 +38,6 @@ interface HomeViewProps {
   onAddReview: (review: FacilityReviewEntry) => void
   onNavigateToCalendar: () => void
 }
-
-// ---------------------------------------------------------------------------
-// Shared demo goals (also used in CareLog Progress tab via page.tsx)
-// ---------------------------------------------------------------------------
-
-export const demoGoals = [
-  {
-    id: 'g1',
-    title: 'Regain Independent Walking',
-    category: 'Mobility',
-    targetDate: 'Apr 15',
-    progressPercent: 65,
-    description: 'Walk 50ft unassisted',
-    milestones: ['Walk with walker 20ft', 'Walk with minimal assist 30ft', 'Independent 50ft walk'],
-  },
-  {
-    id: 'g2',
-    title: 'Improve Nutritional Intake',
-    category: 'Nutrition',
-    targetDate: 'Mar 30',
-    progressPercent: 80,
-    description: 'Achieve 80% meal completion consistently',
-    milestones: ['50% meal completion', '70% meal completion', '80% meal completion'],
-  },
-  {
-    id: 'g3',
-    title: 'Reduce Pain Levels',
-    category: 'Comfort',
-    targetDate: 'Apr 1',
-    progressPercent: 50,
-    description: 'Maintain pain score below 3/10',
-    milestones: ['Pain management plan in place', 'Average pain 5/10', 'Average pain 3/10'],
-  },
-  {
-    id: 'g4',
-    title: 'Restore Upper Body Strength',
-    category: 'Therapy',
-    targetDate: 'May 1',
-    progressPercent: 40,
-    description: 'Complete OT strength exercises independently',
-    milestones: ['Assisted exercises 3x/week', 'Partial independent exercises', 'Full independent exercises'],
-  },
-]
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -397,46 +353,6 @@ export default function HomeView({
           </div>
         </div>
 
-        {/* ----- Upcoming Appointments Widget ----- */}
-        {upcomingAppointments.length > 0 && (
-          <div className="card-glass p-5">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-blue-50">
-                  <Calendar className="h-4 w-4 text-blue-500" />
-                </div>
-                <h3 className="text-sm font-bold text-navy-900">Upcoming</h3>
-              </div>
-              <button
-                onClick={onNavigateToCalendar}
-                className="text-xs text-primary-600 hover:text-primary-700 font-medium flex items-center gap-0.5"
-              >
-                View All <ChevronRight className="h-3.5 w-3.5" />
-              </button>
-            </div>
-            <div className="space-y-2">
-              {upcomingAppointments.map(event => {
-                const eventDate = new Date(event.date)
-                const config = eventTypeConfig[event.type]
-                const dateLabel = isToday(eventDate)
-                  ? 'Today'
-                  : isTomorrow(eventDate)
-                    ? 'Tomorrow'
-                    : format(eventDate, 'EEE, MMM d')
-                return (
-                  <div key={event.id} className="flex items-center gap-3 p-2.5 bg-white/60 rounded-xl">
-                    <span className="text-base">{config.emoji}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-navy-900 truncate">{event.title}</p>
-                      <p className="text-xs text-navy-500">{dateLabel}{event.time ? ` · ${event.time}` : ''}</p>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        )}
-
         {/* ----- Vitals Snapshot Card ----- */}
         <div className="card-glass p-5">
           <div className="flex items-center gap-2 mb-4">
@@ -561,6 +477,48 @@ export default function HomeView({
             </div>
           ) : (
             <p className="text-sm text-navy-400 text-center py-4">No mood recorded yet</p>
+          )}
+        </div>
+
+        {/* ----- Upcoming Appointments Widget ----- */}
+        <div className="card-glass p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-xl bg-blue-50">
+                <Calendar className="h-4 w-4 text-blue-500" />
+              </div>
+              <h3 className="text-sm font-bold text-navy-900">Upcoming Appointments</h3>
+            </div>
+            <button
+              onClick={onNavigateToCalendar}
+              className="text-xs text-primary-600 hover:text-primary-700 font-medium flex items-center gap-0.5"
+            >
+              View All <ChevronRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
+          {upcomingAppointments.length === 0 ? (
+            <p className="text-xs text-navy-400 text-center py-3">No appointments in the next 14 days.</p>
+          ) : (
+            <div className="space-y-2">
+              {upcomingAppointments.map(event => {
+                const eventDate = new Date(event.date)
+                const config = eventTypeConfig[event.type]
+                const dateLabel = isToday(eventDate)
+                  ? 'Today'
+                  : isTomorrow(eventDate)
+                    ? 'Tomorrow'
+                    : format(eventDate, 'EEE, MMM d')
+                return (
+                  <div key={event.id} className="flex items-center gap-3 p-2.5 bg-white/60 rounded-xl">
+                    <span className="text-base">{config.emoji}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-navy-900 truncate">{event.title}</p>
+                      <p className="text-xs text-navy-500">{dateLabel}{event.time ? ` · ${event.time}` : ''}</p>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           )}
         </div>
       </aside>
@@ -699,96 +657,170 @@ export default function HomeView({
         )}
 
         {/* ============================================================= */}
-        {/* PLAN TAB — Recovery Goals + This Week's Schedule              */}
+        {/* PLAN TAB — Facility Care Plan                               */}
         {/* ============================================================= */}
         {homeTab === 'plan' && (
-          <div className="space-y-5">
-            {/* Recovery Goals */}
-            <div className="card-glass p-6">
-              <div className="flex items-center gap-2 mb-5">
-                <div className="p-2 rounded-xl bg-primary-50">
-                  <Target className="h-4 w-4 text-primary-500" />
+          <div className="card-glass overflow-hidden">
+            {/* Header */}
+            <div className="px-6 py-5 border-b border-primary-100/60 bg-gradient-to-r from-primary-50/60 to-accent-50/40">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="text-base font-bold text-navy-900">Care Plan</h3>
+                  <p className="text-xs text-navy-500 mt-0.5">{patient.name} · {patient.facilityName}</p>
                 </div>
-                <h3 className="text-sm font-bold text-navy-900">Recovery Goals</h3>
-              </div>
-              <div className="space-y-5">
-                {demoGoals.map(goal => (
-                  <div key={goal.id} className="p-4 bg-white/60 rounded-2xl">
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <p className="font-semibold text-navy-900 text-sm">{goal.title}</p>
-                        <p className="text-xs text-navy-500 mt-0.5">{goal.category} · Target: {goal.targetDate}</p>
-                      </div>
-                      <span className={`text-sm font-bold ${
-                        goal.progressPercent >= 70 ? 'text-mint-600'
-                          : goal.progressPercent >= 40 ? 'text-amber-600'
-                          : 'text-red-500'
-                      }`}>
-                        {goal.progressPercent}%
-                      </span>
-                    </div>
-                    <div className="w-full bg-navy-100 rounded-full h-2 mb-2">
-                      <div
-                        className={`h-2 rounded-full transition-all ${
-                          goal.progressPercent >= 70 ? 'bg-gradient-to-r from-mint-400 to-mint-500'
-                            : goal.progressPercent >= 40 ? 'bg-gradient-to-r from-amber-400 to-amber-500'
-                            : 'bg-gradient-to-r from-red-400 to-red-500'
-                        }`}
-                        style={{ width: `${goal.progressPercent}%` }}
-                      />
-                    </div>
-                    <p className="text-xs text-navy-400">{goal.description}</p>
-                  </div>
-                ))}
+                <div className="text-right">
+                  <span className="px-2.5 py-1 bg-mint-100 text-mint-700 text-xs font-semibold rounded-full">Active</span>
+                  <p className="text-[10px] text-navy-400 mt-1">Updated Feb 20, 2026</p>
+                </div>
               </div>
             </div>
 
-            {/* This Week's Schedule */}
-            <div className="card-glass p-6">
-              <div className="flex items-center justify-between mb-5">
-                <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-xl bg-accent-50">
-                    <Calendar className="h-4 w-4 text-accent-500" />
+            <div className="divide-y divide-primary-100/40">
+              {/* Goals of Care */}
+              <div className="px-6 py-5">
+                <h4 className="text-xs font-bold text-navy-500 uppercase tracking-wider mb-3">Goals of Care</h4>
+                <p className="text-sm font-medium text-navy-800 mb-3">
+                  Maximize functional independence and support safe discharge to home or assisted living.
+                </p>
+                <div className="space-y-2">
+                  <div>
+                    <p className="text-xs font-semibold text-primary-600 mb-1.5">Short-term Goals (30 days)</p>
+                    <ul className="space-y-1">
+                      {[
+                        'Ambulate 50 ft with minimal assistance using walker',
+                        'Achieve ≥75% meal completion consistently',
+                        'Maintain pain score ≤3/10 with current management',
+                        'Complete ADLs with standby assistance only',
+                      ].map((item, i) => (
+                        <li key={i} className="flex items-start gap-2 text-sm text-navy-700">
+                          <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-primary-400 flex-shrink-0" />
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                  <h3 className="text-sm font-bold text-navy-900">This Week&apos;s Schedule</h3>
+                  <div className="pt-2">
+                    <p className="text-xs font-semibold text-accent-600 mb-1.5">Long-term Goals (60–90 days)</p>
+                    <ul className="space-y-1">
+                      {[
+                        'Independent ambulation with assistive device in home environment',
+                        'Resume prior level of function for self-care activities',
+                        'Sustained pain control and self-managed medication routine',
+                      ].map((item, i) => (
+                        <li key={i} className="flex items-start gap-2 text-sm text-navy-700">
+                          <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-accent-400 flex-shrink-0" />
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
-                <button
-                  onClick={onNavigateToCalendar}
-                  className="text-xs text-primary-600 hover:text-primary-700 font-medium flex items-center gap-0.5"
-                >
-                  Full Calendar <ChevronRight className="h-3.5 w-3.5" />
-                </button>
               </div>
 
-              {thisWeekEvents.length === 0 ? (
-                <p className="text-sm text-navy-400 text-center py-6">No events scheduled this week.</p>
-              ) : (
-                <div className="space-y-3">
-                  {thisWeekEvents.map(event => {
-                    const config = eventTypeConfig[event.type] || eventTypeConfig.facility_event
-                    const eventDate = new Date(event.date)
-                    const dateLabel = isToday(eventDate)
-                      ? 'Today'
-                      : isTomorrow(eventDate)
-                        ? 'Tomorrow'
-                        : format(eventDate, 'EEEE, MMM d')
-                    return (
-                      <div key={event.id} className="flex items-center gap-3 p-3 bg-white/60 rounded-xl">
-                        <span className="text-lg">{config.emoji}</span>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-navy-900 text-sm truncate">{event.title}</p>
-                          <p className="text-xs text-navy-500 mt-0.5">
-                            {dateLabel}{event.time ? ` · ${event.time}` : ''}
-                          </p>
-                        </div>
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium border flex-shrink-0 ${config.color}`}>
-                          {config.label}
-                        </span>
-                      </div>
-                    )
-                  })}
+              {/* Nursing Care */}
+              <div className="px-6 py-5">
+                <h4 className="text-xs font-bold text-navy-500 uppercase tracking-wider mb-3">Nursing Care</h4>
+                <ul className="space-y-1.5">
+                  {[
+                    'Monitor vitals BID and PRN; document all deviations',
+                    'Medication administration per physician orders — reconcile daily',
+                    'Skin integrity checks daily; reposition Q2H overnight',
+                    'Fall prevention protocol: call light within reach, non-slip footwear, bed in lowest position',
+                    'Daily weight monitoring; alert dietitian if loss >2 lbs/week',
+                    'Encourage fluid intake ≥1,500 mL/day',
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-navy-700">
+                      <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-red-400 flex-shrink-0" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Therapy */}
+              <div className="px-6 py-5">
+                <h4 className="text-xs font-bold text-navy-500 uppercase tracking-wider mb-3">Therapy</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="p-3 bg-blue-50/60 rounded-xl">
+                    <p className="text-xs font-bold text-blue-700 mb-2">Physical Therapy · 5×/week</p>
+                    <ul className="space-y-1">
+                      {['Gait training with walker', 'Lower extremity strengthening', 'Balance & coordination exercises', 'Stair negotiation training'].map((item, i) => (
+                        <li key={i} className="text-xs text-navy-700 flex items-start gap-1.5">
+                          <span className="mt-1 h-1 w-1 rounded-full bg-blue-400 flex-shrink-0" />{item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="p-3 bg-green-50/60 rounded-xl">
+                    <p className="text-xs font-bold text-green-700 mb-2">Occupational Therapy · 3×/week</p>
+                    <ul className="space-y-1">
+                      {['ADL retraining (bathing, dressing, grooming)', 'Upper extremity strengthening', 'Adaptive equipment training', 'Home modification recommendations'].map((item, i) => (
+                        <li key={i} className="text-xs text-navy-700 flex items-start gap-1.5">
+                          <span className="mt-1 h-1 w-1 rounded-full bg-green-400 flex-shrink-0" />{item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
-              )}
+              </div>
+
+              {/* Nutrition */}
+              <div className="px-6 py-5">
+                <h4 className="text-xs font-bold text-navy-500 uppercase tracking-wider mb-3">Nutrition</h4>
+                <ul className="space-y-1.5">
+                  {[
+                    'Diet: Regular / Heart-Healthy with mechanical soft modification as tolerated',
+                    'Fluid intake target: ≥1,500 mL/day — monitor and document',
+                    'Nutritional supplements (Ensure) if meal completion <75% at any meal',
+                    'Dietitian follow-up if weight loss exceeds 5% in 30 days',
+                    'Avoid high-sodium foods; limit added sugar per cardiac history',
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-navy-700">
+                      <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-amber-400 flex-shrink-0" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Activity & Engagement */}
+              <div className="px-6 py-5">
+                <h4 className="text-xs font-bold text-navy-500 uppercase tracking-wider mb-3">Activity &amp; Engagement</h4>
+                <ul className="space-y-1.5">
+                  {[
+                    'Encourage participation in group activities at least 3×/week',
+                    'Daily outdoor time or sunroom access weather permitting',
+                    'Family visits actively encouraged per posted visiting hours',
+                    'Social meals with peers — seat near social residents to promote interaction',
+                    'Cognitive engagement: reading, puzzles, or preferred leisure activities daily',
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-navy-700">
+                      <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-purple-400 flex-shrink-0" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Care Team */}
+              <div className="px-6 py-5 bg-cream-50/40">
+                <h4 className="text-xs font-bold text-navy-500 uppercase tracking-wider mb-3">Care Team</h4>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {[
+                    { role: 'Attending Physician', name: 'Dr. Sarah Chen, MD' },
+                    { role: 'Primary Nurse', name: 'Jane Doe, RN' },
+                    { role: 'Physical Therapist', name: 'Mike Torres, PT' },
+                    { role: 'OT', name: 'Lisa Park, OTR/L' },
+                    { role: 'Dietitian', name: 'Rachel Kim, RD' },
+                    { role: 'Social Worker', name: 'Tom Nguyen, MSW' },
+                  ].map((member, i) => (
+                    <div key={i} className="p-2.5 bg-white/70 rounded-xl">
+                      <p className="text-[10px] text-navy-400 font-medium">{member.role}</p>
+                      <p className="text-xs font-semibold text-navy-800 mt-0.5">{member.name}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         )}

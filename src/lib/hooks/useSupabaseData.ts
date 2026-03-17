@@ -122,7 +122,7 @@ export function useMembers(patientId: string = DEMO_PATIENT_ID) {
 
     if (!isDemoMode) {
       const channel = supabase
-        .channel('members_changes')
+        .channel(`members_changes_${patientId}`)
         .on('postgres_changes', {
           event: '*',
           schema: 'public',
@@ -187,7 +187,7 @@ export function useEvents(patientId: string = DEMO_PATIENT_ID) {
 
     if (!isDemoMode) {
       const channel = supabase
-        .channel('events_changes')
+        .channel(`events_changes_${patientId}`)
         .on('postgres_changes', {
           event: '*',
           schema: 'public',
@@ -323,7 +323,7 @@ export function useLogEntries(patientId: string = DEMO_PATIENT_ID) {
 
     if (!isDemoMode) {
       const channel = supabase
-        .channel('logs_changes')
+        .channel(`logs_changes_${patientId}`)
         .on('postgres_changes', {
           event: '*',
           schema: 'public',
@@ -393,7 +393,7 @@ export function usePosts(patientId: string = DEMO_PATIENT_ID) {
 
     if (!isDemoMode) {
       const channel = supabase
-        .channel('posts_changes')
+        .channel(`posts_changes_${patientId}`)
         .on('postgres_changes', {
           event: '*',
           schema: 'public',
@@ -452,7 +452,7 @@ export function useVisits(patientId: string = DEMO_PATIENT_ID) {
 
     if (!isDemoMode) {
       const channel = supabase
-        .channel('visits_changes')
+        .channel(`visits_changes_${patientId}`)
         .on('postgres_changes', {
           event: '*',
           schema: 'public',
@@ -510,7 +510,7 @@ export function useNotifications(patientId: string = DEMO_PATIENT_ID) {
 
     if (!isDemoMode) {
       const channel = supabase
-        .channel('notifications_changes')
+        .channel(`notifications_changes_${patientId}`)
         .on('postgres_changes', {
           event: '*',
           schema: 'public',

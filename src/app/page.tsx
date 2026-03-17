@@ -44,9 +44,9 @@ import {
   markAllNotificationsReadInDb,
 } from '@/lib/api/mutations'
 import { CareCircleMember, CalendarEvent, Vault, LogEntry, FeedPost, UserRole, Visit, Notification, FacilityReviewEntry } from '@/types'
-import { Heart, Shield, Calendar, Users, ClipboardList, ArrowRight, Sparkles, Download, Lock, CheckCircle2, Building2, Link2, MessageSquare, Phone, PhoneOff, TrendingUp, Star, CheckSquare } from 'lucide-react'
+import { Heart, Shield, Calendar, Users, ClipboardList, ArrowRight, Sparkles, Download, Lock, CheckCircle2, MessageSquare, Phone, PhoneOff, TrendingUp, Star, CheckSquare } from 'lucide-react'
 import { format } from 'date-fns'
-import { demoGoals } from '@/components/HomeView'
+import { demoGoals } from '@/lib/demo-data'
 import {
   canUseQuickActions,
   canViewMedications,
@@ -874,7 +874,6 @@ export default function Home() {
             <div className="flex gap-2 border-b border-primary-100 pb-2 flex-wrap">
               {[
                 { id: 'timeline' as const, label: 'Timeline' },
-                { id: 'vitals' as const, label: 'Vitals Trends' },
                 { id: 'wellness' as const, label: 'Wellness' },
                 { id: 'progress' as const, label: 'Progress' },
               ].map((tab) => (
@@ -898,12 +897,11 @@ export default function Home() {
                 currentUserRole={currentUserRole}
                 currentUserId={currentUserId}
                 currentUserName={currentUserName}
+                patientName={patient?.name ?? 'the patient'}
                 onAddLogEntry={handleAddLogEntry}
                 onAddComment={handleAddLogComment}
               />
             )}
-
-            {logSubTab === 'vitals' && <VitalsTrends logEntries={logEntries} />}
 
             {logSubTab === 'wellness' && <WellnessTrends days={wellnessDays} />}
 

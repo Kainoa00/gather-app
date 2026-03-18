@@ -40,19 +40,21 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
   return (
     <div className="min-h-screen bg-white flex">
       {/* Left panel — brand */}
-      <div className="hidden lg:flex lg:w-[45%] xl:w-[40%] bg-slate-900 flex-col justify-between p-12 relative overflow-hidden">
-        {/* Subtle grid */}
+      <div
+        className="hidden lg:flex lg:w-[45%] xl:w-[40%] flex-col justify-between p-12 relative overflow-hidden"
+        style={{ backgroundColor: '#0f172a' }}
+      >
+        {/* Dot grid overlay */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)',
+            backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px)',
             backgroundSize: '28px 28px',
           }}
         />
-        {/* Gradient accent */}
-        <div className="absolute -top-32 -right-32 w-96 h-96 bg-primary-600/20 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative">
+        {/* Logo */}
+        <div className="relative z-10">
           <Image
             src="/logos/Logo 1 (color).png"
             alt="CareBridge Connect"
@@ -62,36 +64,46 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
           />
         </div>
 
-        <div className="relative space-y-6">
-          <h1 className="text-3xl xl:text-4xl font-bold text-white leading-tight">
+        {/* Copy */}
+        <div className="relative z-10" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <h1 style={{ fontSize: '2rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.25, margin: 0 }}>
             Connecting families with the people who care for them.
           </h1>
-          <p className="text-slate-400 text-base leading-relaxed max-w-sm">
+          <p style={{ color: '#cbd5e1', fontSize: '1rem', lineHeight: 1.6, margin: 0, maxWidth: '28rem' }}>
             Real-time care updates, secure messaging, and transparent progress tracking — built for skilled nursing facilities.
           </p>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 gap-4 pt-4">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', paddingTop: '1rem' }}>
             {[
-              { number: '\u221260%', label: 'Family call volume' },
-              { number: '2\u20133 hrs', label: 'Reclaimed per shift' },
+              { number: '−60%', label: 'Family call volume' },
+              { number: '2–3 hrs', label: 'Reclaimed per shift' },
             ].map(s => (
-              <div key={s.label} className="bg-white/5 border border-white/10 rounded-xl p-4">
-                <div className="text-2xl font-bold text-white">{s.number}</div>
-                <div className="text-xs text-slate-400 mt-0.5">{s.label}</div>
+              <div
+                key={s.label}
+                style={{
+                  background: 'rgba(255,255,255,0.08)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  borderRadius: '0.75rem',
+                  padding: '1rem',
+                }}
+              >
+                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#ffffff' }}>{s.number}</div>
+                <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.25rem' }}>{s.label}</div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="relative flex items-center gap-2 text-sm text-slate-500">
-          <Shield size={14} className="text-green-400" />
-          HIPAA Certified &middot; SOC 2 Type II &middot; 256-bit encryption
+        {/* Compliance footer */}
+        <div className="relative z-10" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8125rem', color: '#94a3b8' }}>
+          <Shield size={14} style={{ color: '#4ade80', flexShrink: 0 }} />
+          HIPAA Certified · SOC 2 Type II · 256-bit encryption
         </div>
       </div>
 
       {/* Right panel — form */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12 lg:px-12">
+      <div className="flex-1 flex items-center justify-center px-6 py-12 lg:px-12 relative">
         {/* Dot grid background */}
         <div
           className="absolute inset-0 pointer-events-none"

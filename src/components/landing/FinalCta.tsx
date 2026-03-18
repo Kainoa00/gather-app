@@ -1,9 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import { motion, useInView, type Variants } from 'framer-motion'
+import { motion, type Variants } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
-import { useRef } from 'react'
+import { useSectionInView } from '@/lib/hooks/useSectionInView'
+import { EASE, makeFadeUpVariants } from '@/lib/motion'
 
 // ─── Animation variants ───────────────────────────────────────────────────────
 const sectionVariants: Variants = {
@@ -11,18 +12,11 @@ const sectionVariants: Variants = {
   visible: {
     opacity: 1,
     scale: 1,
-    transition: { duration: 0.65, ease: 'easeInOut' },
+    transition: { duration: 0.65, ease: EASE },
   },
 }
 
-const childVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: (delay: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: 'easeOut', delay },
-  }),
-}
+const childVariants: Variants = makeFadeUpVariants(20)
 
 // Animated border gradient — inline animate prop avoids Variants type conflict
 const BORDER_ANIMATE = {
@@ -32,8 +26,7 @@ const BORDER_ANIMATE = {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function FinalCta() {
-  const ref = useRef<HTMLElement>(null)
-  const isInView = useInView(ref, { once: true, margin: '-80px' })
+  const { ref, inView: isInView } = useSectionInView('-80px')
 
   return (
     <section
@@ -56,7 +49,6 @@ export default function FinalCta() {
               'linear-gradient(135deg, rgba(27,71,152,0.6), rgba(27,163,198,0.4), rgba(74,222,128,0.3), rgba(27,71,152,0.6))',
             backgroundSize: '300% 300%',
           }}
-          aria-hidden="true"
         >
           {/* Inner card */}
           <div className="bg-gradient-to-br from-navy-800 to-navy-900 rounded-3xl p-12 sm:p-16 text-center">

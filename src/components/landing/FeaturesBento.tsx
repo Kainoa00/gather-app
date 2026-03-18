@@ -1,7 +1,9 @@
 'use client'
 
-import { useRef } from 'react'
-import { motion, useInView } from 'framer-motion'
+import React from 'react'
+import { motion } from 'framer-motion'
+import { useSectionInView } from '@/lib/hooks/useSectionInView'
+import { EASE, makeContainerVariants } from '@/lib/motion'
 import {
   ClipboardList,
   MessageSquare,
@@ -39,16 +41,7 @@ function TagPill({ label, color }: TagPillProps) {
 
 // ─── Card animation variants ──────────────────────────────────────────────────
 
-const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
-
-const containerVariants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.08,
-    },
-  },
-}
+const containerVariants = makeContainerVariants(0.08)
 
 const cardVariants = {
   hidden: { opacity: 0, y: 28 },
@@ -79,11 +72,29 @@ function TimelineEvent({
   )
 }
 
+// ─── Module-level constants ───────────────────────────────────────────────────
+
+const SPARK_HEIGHTS = [4, 5, 4, 6, 5, 7, 6, 8, 7, 9, 8, 10]
+
+const PERMISSION_ROWS = [
+  { label: 'Primary Contact', level: 'Full access', dot: 'bg-primary-500' },
+  { label: 'Adult Child', level: 'Read-only', dot: 'bg-accent-500' },
+  { label: 'Extended Family', level: 'Limited', dot: 'bg-navy-300' },
+]
+
+const VAULT_DOCS = [
+  { label: 'Facility Info', icon: '🏥' },
+  { label: 'Insurance', icon: '📋' },
+  { label: 'Medications', icon: '💊' },
+  { label: 'Care Team', icon: '👥' },
+  { label: 'Documents', icon: '📄' },
+  { label: 'Access Log', icon: '🔒' },
+]
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function FeaturesBento() {
-  const ref = useRef<HTMLDivElement>(null)
-  const inView = useInView(ref, { once: true, margin: '-80px' })
+  const { ref, inView: isInView } = useSectionInView('-80px')
 
   return (
     <section id="features" className="bg-cream-100 py-24">
@@ -101,10 +112,10 @@ export default function FeaturesBento() {
 
         {/* Bento grid */}
         <motion.div
-          ref={ref}
+          ref={ref as React.RefObject<HTMLDivElement>}
           variants={containerVariants}
           initial="hidden"
-          animate={inView ? 'visible' : 'hidden'}
+          animate={isInView ? 'visible' : 'hidden'}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
         >
 
@@ -112,7 +123,7 @@ export default function FeaturesBento() {
           <motion.div
             variants={cardVariants}
             whileHover={{ y: -4 }}
-            className="group md:col-span-2 card-glass rounded-2xl p-6 lg:p-8 transition-all duration-300 hover:shadow-lg hover:shadow-primary-100/50 hover:-translate-y-1 hover:border-primary-200/70"
+            className="group md:col-span-2 card-glass rounded-2xl p-6 lg:p-8 transition-all duration-300 hover:shadow-lg hover:shadow-primary-100/50 hover:border-primary-200/70"
           >
             <div className="flex items-start gap-4 mb-5">
               <div className="w-11 h-11 rounded-xl bg-primary-100 flex items-center justify-center shrink-0">
@@ -180,7 +191,7 @@ export default function FeaturesBento() {
             </p>
             {/* Spark bars */}
             <div className="flex items-end gap-1 h-8">
-              {[4, 5, 4, 6, 5, 7, 6, 8, 7, 9, 8, 10].map((h, i) => (
+              {SPARK_HEIGHTS.map((h, i) => (
                 <div
                   key={i}
                   className="flex-1 rounded-sm bg-mint-400/70 group-hover:bg-mint-500/80 transition-colors duration-300"
@@ -206,11 +217,7 @@ export default function FeaturesBento() {
             </p>
             {/* Permission tier badges */}
             <div className="flex flex-col gap-1.5">
-              {[
-                { label: 'Primary Contact', level: 'Full access', dot: 'bg-primary-500' },
-                { label: 'Adult Child', level: 'Read-only', dot: 'bg-accent-500' },
-                { label: 'Extended Family', level: 'Limited', dot: 'bg-navy-300' },
-              ].map((row) => (
+              {PERMISSION_ROWS.map((row) => (
                 <div key={row.label} className="flex items-center justify-between text-xs">
                   <span className="flex items-center gap-1.5 text-navy-600">
                     <span className={`w-2 h-2 rounded-full ${row.dot}`} />
@@ -226,7 +233,7 @@ export default function FeaturesBento() {
           <motion.div
             variants={cardVariants}
             whileHover={{ y: -4 }}
-            className="group md:col-span-2 card-glass rounded-2xl p-6 lg:p-8 transition-all duration-300 hover:shadow-lg hover:shadow-primary-100/50 hover:-translate-y-1 hover:border-mint-200/70"
+            className="group md:col-span-2 card-glass rounded-2xl p-6 lg:p-8 transition-all duration-300 hover:shadow-lg hover:shadow-primary-100/50 hover:border-mint-200/70"
           >
             <div className="flex items-start gap-4 mb-5">
               <div className="w-11 h-11 rounded-xl bg-mint-100 flex items-center justify-center shrink-0">
@@ -244,14 +251,7 @@ export default function FeaturesBento() {
 
             {/* Document preview grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-5">
-              {[
-                { label: 'Facility Info', icon: '🏥' },
-                { label: 'Insurance', icon: '📋' },
-                { label: 'Medications', icon: '💊' },
-                { label: 'Care Team', icon: '👥' },
-                { label: 'Documents', icon: '📄' },
-                { label: 'Access Log', icon: '🔒' },
-              ].map((item) => (
+              {VAULT_DOCS.map((item) => (
                 <div
                   key={item.label}
                   className="flex items-center gap-2 bg-white/50 rounded-lg px-3 py-2 border border-white/70"

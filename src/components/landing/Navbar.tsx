@@ -44,29 +44,6 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Shimmer keyframe injected once */}
-      <style>{`
-        @keyframes btn-shimmer {
-          0%   { background-position: -200% center; }
-          100% { background-position:  200% center; }
-        }
-        .btn-demo-shimmer {
-          background: linear-gradient(
-            90deg,
-            #1B4798 0%,
-            #1B4798 35%,
-            #4f7fcf 50%,
-            #1B4798 65%,
-            #1B4798 100%
-          );
-          background-size: 200% auto;
-          animation: btn-shimmer 3s linear infinite;
-        }
-        .btn-demo-shimmer:hover {
-          animation-duration: 1.5s;
-        }
-      `}</style>
-
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           scrolled

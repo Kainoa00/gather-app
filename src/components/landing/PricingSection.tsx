@@ -1,8 +1,10 @@
 'use client'
 
-import { useRef } from 'react'
+import React from 'react'
 import Link from 'next/link'
-import { motion, useInView } from 'framer-motion'
+import { motion } from 'framer-motion'
+import { useSectionInView } from '@/lib/hooks/useSectionInView'
+import { EASE, makeContainerVariants, fadeUpVariants } from '@/lib/motion'
 import { CheckCircle2 } from 'lucide-react'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -81,14 +83,7 @@ const TIERS: PricingTier[] = [
 
 // ─── Animation variants ───────────────────────────────────────────────────────
 
-const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
-
-const containerVariants = {
-  hidden: {},
-  visible: {
-    transition: { staggerChildren: 0.1 },
-  },
-}
+const containerVariants = makeContainerVariants(0.1)
 
 const cardVariants = {
   hidden: { opacity: 0, y: 36 },
@@ -113,14 +108,12 @@ function FeatureRow({ text }: { text: string }) {
 // ─── Pricing card ─────────────────────────────────────────────────────────────
 
 function PricingCard({ tier }: { tier: PricingTier }) {
-  const isHighlighted = tier.highlighted
-
   return (
     <motion.div
       variants={cardVariants}
       className={[
         'relative flex flex-col rounded-2xl p-7 lg:p-8 transition-all duration-300',
-        isHighlighted
+        tier.highlighted
           ? 'card-glass ring-2 ring-primary-400 shadow-float lg:scale-105 z-10'
           : 'card-glass hover:shadow-lg hover:shadow-primary-100/50 hover:-translate-y-1',
       ].join(' ')}
@@ -130,7 +123,7 @@ function PricingCard({ tier }: { tier: PricingTier }) {
         <span
           className={[
             'inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold',
-            isHighlighted
+            tier.highlighted
               ? 'bg-primary-600 text-white'
               : 'bg-navy-100 text-navy-600',
           ].join(' ')}
@@ -173,8 +166,7 @@ function PricingCard({ tier }: { tier: PricingTier }) {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function PricingSection() {
-  const ref = useRef<HTMLDivElement>(null)
-  const inView = useInView(ref, { once: true, margin: '-80px' })
+  const { ref: gridRef, inView: isInView } = useSectionInView('-80px')
 
   return (
     <section id="pricing" className="bg-cream-100 py-24">
@@ -182,10 +174,9 @@ export default function PricingSection() {
 
         {/* Section header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-60px' }}
-          transition={{ duration: 0.6, ease: EASE }}
+          variants={fadeUpVariants}
+          initial="hidden"
+          animate={isInView ? 'visible' : 'hidden'}
           className="text-center max-w-2xl mx-auto mb-16"
         >
           <h2 className="text-4xl font-bold text-navy-900 tracking-tight mb-4">
@@ -200,10 +191,10 @@ export default function PricingSection() {
 
         {/* Pricing cards grid */}
         <motion.div
-          ref={ref}
+          ref={gridRef as React.RefObject<HTMLDivElement>}
           variants={containerVariants}
           initial="hidden"
-          animate={inView ? 'visible' : 'hidden'}
+          animate={isInView ? 'visible' : 'hidden'}
           className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center"
         >
           {TIERS.map((tier) => (
@@ -213,10 +204,9 @@ export default function PricingSection() {
 
         {/* Footnote */}
         <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.4 }}
+          variants={fadeUpVariants}
+          initial="hidden"
+          animate={isInView ? 'visible' : 'hidden'}
           className="text-center text-sm text-navy-500 mt-10"
         >
           All plans include a 30-day pilot with white-glove setup. No long-term contracts.

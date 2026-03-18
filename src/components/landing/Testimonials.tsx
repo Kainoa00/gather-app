@@ -1,7 +1,9 @@
 'use client'
 
-import { useRef } from 'react'
-import { motion, useInView } from 'framer-motion'
+import React from 'react'
+import { motion } from 'framer-motion'
+import { useSectionInView } from '@/lib/hooks/useSectionInView'
+import { EASE } from '@/lib/motion'
 import { Star } from 'lucide-react'
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
@@ -62,6 +64,8 @@ const RAW_TESTIMONIALS: Testimonial[] = [
 // Duplicate to create seamless infinite loop
 const TESTIMONIALS = [...RAW_TESTIMONIALS, ...RAW_TESTIMONIALS]
 
+const STARS = [0, 1, 2, 3, 4]
+
 // ─── Single card ──────────────────────────────────────────────────────────────
 
 function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
@@ -69,7 +73,7 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
     <div className="bg-white/5 border border-white/10 rounded-2xl p-6 w-80 shrink-0 flex flex-col gap-4">
       {/* Stars */}
       <div className="flex gap-0.5" aria-label="5 out of 5 stars">
-        {Array.from({ length: 5 }).map((_, i) => (
+        {STARS.map((_, i) => (
           <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
         ))}
       </div>
@@ -92,8 +96,7 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function Testimonials() {
-  const ref = useRef<HTMLDivElement>(null)
-  const inView = useInView(ref, { once: true, margin: '-60px' })
+  const { ref: sectionRef, inView: isInView } = useSectionInView('-60px')
 
   return (
     <section className="bg-navy-900 py-24 overflow-hidden">
@@ -115,10 +118,10 @@ export default function Testimonials() {
 
         {/* Section header */}
         <motion.div
-          ref={ref}
+          ref={sectionRef as React.RefObject<HTMLDivElement>}
           initial={{ opacity: 0, y: 20 }}
-          animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.6, ease: EASE }}
           className="text-center mb-14"
         >
           <h2 className="text-3xl font-bold text-white mb-3">
@@ -133,7 +136,7 @@ export default function Testimonials() {
       {/* Full-bleed carousel — sits outside the inner container so it bleeds edge to edge */}
       <motion.div
         initial={{ opacity: 0 }}
-        animate={inView ? { opacity: 1 } : { opacity: 0 }}
+        animate={isInView ? { opacity: 1 } : { opacity: 0 }}
         transition={{ duration: 0.8, delay: 0.2 }}
       >
         {/* Fade-out masks on left and right edges */}
@@ -148,7 +151,7 @@ export default function Testimonials() {
         >
           <div className="testimonials-track flex gap-5 w-max">
             {TESTIMONIALS.map((t, i) => (
-              <TestimonialCard key={i} testimonial={t} />
+              <TestimonialCard key={`${t.name}-${i}`} testimonial={t} />
             ))}
           </div>
         </div>

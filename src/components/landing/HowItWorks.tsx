@@ -1,7 +1,9 @@
 'use client'
 
-import { useRef } from 'react'
-import { motion, useInView } from 'framer-motion'
+import React from 'react'
+import { motion } from 'framer-motion'
+import { useSectionInView } from '@/lib/hooks/useSectionInView'
+import { EASE } from '@/lib/motion'
 import { ClipboardList, Sparkles, Heart, ArrowRight } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
@@ -56,15 +58,14 @@ const STEPS: Step[] = [
 // ---------------------------------------------------------------------------
 
 function ArrowConnector({ delay }: { delay: number }) {
-  const ref = useRef<HTMLDivElement>(null)
-  const isInView = useInView(ref, { once: true, margin: '-80px 0px' })
+  const { ref, inView: isInView } = useSectionInView('-80px 0px')
 
   return (
-    <div ref={ref} className="hidden lg:flex items-center justify-center flex-shrink-0 px-2">
+    <div ref={ref as React.RefObject<HTMLDivElement>} className="hidden lg:flex items-center justify-center flex-shrink-0 px-2">
       <motion.div
         initial={{ opacity: 0, scale: 0.6 }}
         animate={isInView ? { opacity: 1, scale: 1 } : {}}
-        transition={{ duration: 0.4, delay, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 0.4, delay, ease: EASE }}
         aria-hidden="true"
       >
         <ArrowRight className="w-7 h-7 text-navy-300" strokeWidth={1.5} />
@@ -93,7 +94,7 @@ function StepCard({ step, index, sectionInView }: StepCardProps) {
       transition={{
         duration: 0.6,
         delay: index * 0.18,
-        ease: [0.22, 1, 0.36, 1],
+        ease: EASE,
       }}
       className="card-glass rounded-2xl p-8 relative overflow-hidden flex-1 min-w-0"
     >
@@ -124,8 +125,7 @@ function StepCard({ step, index, sectionInView }: StepCardProps) {
 // ---------------------------------------------------------------------------
 
 export default function HowItWorks() {
-  const sectionRef = useRef<HTMLElement>(null)
-  const isInView = useInView(sectionRef, { once: true, margin: '-80px 0px' })
+  const { ref: sectionRef, inView: isInView } = useSectionInView('-80px 0px')
 
   return (
     <section
@@ -140,7 +140,7 @@ export default function HowItWorks() {
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.5, ease: EASE }}
           className="flex justify-center mb-5"
         >
           <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-primary-100 text-primary-600 text-xs font-semibold uppercase tracking-widest border border-primary-200">
@@ -152,7 +152,7 @@ export default function HowItWorks() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.55, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.55, delay: 0.08, ease: EASE }}
           className="text-center mb-16"
         >
           <h2

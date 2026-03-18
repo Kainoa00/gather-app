@@ -222,6 +222,28 @@ body {
   100% { background-position: 200% 0; }
 }
 
+@keyframes btn-shimmer {
+  0% { transform: translateX(-100%) skewX(-15deg); }
+  100% { transform: translateX(200%) skewX(-15deg); }
+}
+
+.btn-demo-shimmer {
+  background: linear-gradient(
+    90deg,
+    #1B4798 0%,
+    #1B4798 35%,
+    #4f7fcf 50%,
+    #1B4798 65%,
+    #1B4798 100%
+  );
+  background-size: 200% auto;
+  animation: btn-shimmer 3s linear infinite;
+}
+
+.btn-demo-shimmer:hover {
+  animation-duration: 1.5s;
+}
+
 @keyframes blob {
   0%, 100% { transform: translate(0, 0) scale(1); }
   33% { transform: translate(30px, -50px) scale(1.1); }

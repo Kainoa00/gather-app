@@ -1,7 +1,8 @@
 'use client'
 
-import { useRef } from 'react'
-import { motion, useInView } from 'framer-motion'
+import { motion } from 'framer-motion'
+import { useSectionInView } from '@/lib/hooks/useSectionInView'
+import { EASE } from '@/lib/motion'
 import Link from 'next/link'
 import {
   PhoneOff,
@@ -100,8 +101,6 @@ const FAMILY_BENEFITS: BenefitRow[] = [
 // Cubic-bezier tuple typed as const to satisfy Framer Motion v12 Easing type.
 // ---------------------------------------------------------------------------
 
-const EASE = [0.22, 1, 0.36, 1] as [number, number, number, number]
-
 const leftVariant = {
   hidden: { opacity: 0, x: -48 },
   visible: {
@@ -125,8 +124,7 @@ const rightVariant = {
 // ---------------------------------------------------------------------------
 
 export default function AudienceSplit() {
-  const sectionRef = useRef<HTMLElement>(null)
-  const isInView = useInView(sectionRef, { once: true, margin: '-80px 0px' })
+  const { ref: sectionRef, inView: isInView } = useSectionInView('-80px 0px')
 
   return (
     <section
@@ -166,14 +164,12 @@ export default function AudienceSplit() {
         </ul>
 
         {/* CTA */}
-        <div>
-          <Link
-            href="/demo"
-            className="inline-flex items-center justify-center min-h-[48px] px-7 py-3 rounded-xl border border-white text-white font-semibold text-base hover:bg-white hover:text-navy-900 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-navy-800"
-          >
-            Request a Demo
-          </Link>
-        </div>
+        <Link
+          href="/demo"
+          className="inline-flex items-center justify-center min-h-[48px] px-7 py-3 rounded-xl border border-white text-white font-semibold text-base hover:bg-white hover:text-navy-900 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-navy-800"
+        >
+          Request a Demo
+        </Link>
       </motion.div>
 
       {/* ------------------------------------------------------------------ */}
@@ -209,14 +205,12 @@ export default function AudienceSplit() {
         </ul>
 
         {/* CTA */}
-        <div>
-          <Link
-            href="/demo"
-            className="inline-flex items-center justify-center min-h-[48px] px-7 py-3 rounded-xl bg-primary-600 text-white font-semibold text-base hover:bg-primary-700 shadow-float transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
-          >
-            See a Demo
-          </Link>
-        </div>
+        <Link
+          href="/demo"
+          className="inline-flex items-center justify-center min-h-[48px] px-7 py-3 rounded-xl bg-primary-600 text-white font-semibold text-base hover:bg-primary-700 shadow-float transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
+        >
+          See a Demo
+        </Link>
       </motion.div>
     </section>
   )

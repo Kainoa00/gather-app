@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, FormEvent } from 'react'
+import { useState, useRef, useEffect, FormEvent } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Lock, CheckCircle2, ArrowLeft } from 'lucide-react'
@@ -55,6 +55,9 @@ export default function DemoPage() {
   const [form, setForm] = useState<FormData>(initialForm)
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
+  const isMounted = useRef(true)
+
+  useEffect(() => () => { isMounted.current = false }, [])
 
   function handleChange(
     e: React.ChangeEvent<
@@ -70,6 +73,8 @@ export default function DemoPage() {
 
     // Simulate a brief async send (mailto fallback below)
     await new Promise((res) => setTimeout(res, 600))
+
+    if (!isMounted.current) return
 
     // Open the user's mail client as a fallback delivery method
     const body = encodeURIComponent(

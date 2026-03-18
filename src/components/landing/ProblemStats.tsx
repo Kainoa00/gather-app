@@ -1,7 +1,9 @@
 'use client'
 
 import { useRef, useEffect, useState } from 'react'
-import { motion, useInView } from 'framer-motion'
+import { motion } from 'framer-motion'
+import { useSectionInView } from '@/lib/hooks/useSectionInView'
+import { EASE } from '@/lib/motion'
 import { PhoneOff, TrendingDown, AlertCircle } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
@@ -73,7 +75,7 @@ function AnimatedStatCard({ stat, index, sectionInView }: StatCardProps) {
     <motion.div
       initial={{ opacity: 0, y: 32 }}
       animate={sectionInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.6, delay: index * 0.15, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.6, delay: index * 0.15, ease: EASE }}
       className="bg-white/5 border border-white/10 rounded-2xl p-8 flex flex-col gap-4"
     >
       {/* Icon */}
@@ -132,8 +134,7 @@ const STATS: StatCard[] = [
 // ---------------------------------------------------------------------------
 
 export default function ProblemStats() {
-  const sectionRef = useRef<HTMLElement>(null)
-  const isInView = useInView(sectionRef, { once: true, margin: '-80px 0px' })
+  const { ref: sectionRef, inView: isInView } = useSectionInView('-80px 0px')
 
   return (
     <section
@@ -147,7 +148,7 @@ export default function ProblemStats() {
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.6, ease: EASE }}
           className="text-center mb-14"
         >
           <h2
@@ -178,7 +179,7 @@ export default function ProblemStats() {
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.6, delay: 0.55, ease: EASE }}
           className="bg-primary-600/20 border border-primary-400/30 rounded-2xl p-6 text-center"
         >
           <p className="text-white font-medium text-lg leading-relaxed">

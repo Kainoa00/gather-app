@@ -1,106 +1,88 @@
 import Link from 'next/link'
 import Image from 'next/image'
 
-// ─── Footer link groups ───────────────────────────────────────────────────────
-const footerGroups = [
-  {
-    heading: 'Product',
-    links: [
-      { label: 'Features', href: '#features' },
-      { label: 'How It Works', href: '#how-it-works' },
-      { label: 'Pricing', href: '#pricing' },
-      { label: 'Security', href: '#hipaa' },
-    ],
-  },
-  {
-    heading: 'Company',
-    links: [
-      { label: 'About', href: '/about' },
-      { label: 'Blog', href: '/blog' },
-      { label: 'Careers', href: '/careers' },
-    ],
-  },
-  {
-    heading: 'Legal',
-    links: [
-      { label: 'Privacy Policy', href: '/privacy' },
-      { label: 'Terms of Service', href: '/terms' },
-      { label: 'HIPAA Notice', href: '/hipaa-notice' },
-      { label: 'Cookie Policy', href: '/cookies' },
-    ],
-  },
-]
+const LINKS = {
+  Product: [
+    { label: 'How It Works', href: '#how-it-works' },
+    { label: 'Features', href: '#features' },
+    { label: 'Security & HIPAA', href: '#security' },
+    { label: 'Pricing', href: '#pricing' },
+  ],
+  Company: [
+    { label: 'About', href: '/about' },
+    { label: 'Blog', href: '/blog' },
+    { label: 'Careers', href: '/careers' },
+    { label: 'Contact', href: '/demo' },
+  ],
+  Legal: [
+    { label: 'Privacy Policy', href: '/privacy' },
+    { label: 'Terms of Service', href: '/terms' },
+    { label: 'BAA Template', href: '/baa' },
+    { label: 'Accessibility', href: '/accessibility' },
+  ],
+}
 
-// ─── Component ────────────────────────────────────────────────────────────────
 export default function Footer() {
   return (
-    <footer className="bg-navy-900 py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <footer className="bg-slate-900 border-t border-slate-800">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12">
 
-        {/* Top row — logo + nav columns */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
-
-          {/* Logo column */}
-          <div className="sm:col-span-2 lg:col-span-1">
-            <Link href="/" aria-label="CareBridge Connect — Home">
+          {/* Brand */}
+          <div className="col-span-2 md:col-span-1">
+            <Link href="/" className="inline-block mb-4">
               <Image
                 src="/logos/Logo 1 (color).png"
                 alt="CareBridge Connect"
                 width={160}
-                height={45}
-                className="h-9 w-auto brightness-0 invert"
+                height={40}
+                className="h-7 w-auto brightness-0 invert opacity-80"
               />
             </Link>
-            <p className="text-navy-400 text-sm mt-4 leading-relaxed max-w-xs">
-              A HIPAA-compliant communication bridge between care teams and
-              families.
+            <p className="text-sm text-slate-400 leading-relaxed mb-5 max-w-[200px]">
+              HIPAA-compliant family communication for skilled nursing facilities.
             </p>
+            {/* Social */}
+            <div className="flex gap-3">
+              {['Li', 'Tw', 'Yt'].map((s) => (
+                <div key={s} className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors flex items-center justify-center cursor-pointer">
+                  <span className="text-[10px] font-bold text-slate-400">{s}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Link groups */}
-          {footerGroups.map((group) => (
-            <div key={group.heading}>
-              <h3 className="text-white text-sm font-semibold mb-4 tracking-wide uppercase">
-                {group.heading}
+          {Object.entries(LINKS).map(([group, links]) => (
+            <div key={group}>
+              <h3 className="text-xs font-semibold text-slate-300 uppercase tracking-widest mb-4">
+                {group}
               </h3>
-              <ul className="flex flex-col gap-3">
-                {group.links.map((link) => (
+              <ul className="space-y-3">
+                {links.map((link) => (
                   <li key={link.label}>
-                    {link.href.startsWith('#') ? (
-                      <a
-                        href={link.href}
-                        className="text-navy-400 text-sm hover:text-white transition-colors duration-150"
-                      >
-                        {link.label}
-                      </a>
-                    ) : (
-                      <Link
-                        href={link.href}
-                        className="text-navy-400 text-sm hover:text-white transition-colors duration-150"
-                      >
-                        {link.label}
-                      </Link>
-                    )}
+                    <Link
+                      href={link.href}
+                      className="text-sm text-slate-500 hover:text-slate-300 transition-colors"
+                    >
+                      {link.label}
+                    </Link>
                   </li>
                 ))}
               </ul>
             </div>
           ))}
-
         </div>
 
-        {/* Divider */}
-        <div className="border-t border-white/10 mt-12 pt-8">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <p className="text-navy-500 text-sm">
-              © 2026 CareBridge Connect, Inc. All rights reserved.
-            </p>
-            <p className="text-navy-500 text-sm">
-              Built for the people who care for our parents.
-            </p>
-          </div>
+        {/* Bottom bar */}
+        <div className="mt-12 pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <p className="text-sm text-slate-600">
+            &copy; {new Date().getFullYear()} CareBridge Connect LLC. All rights reserved.
+          </p>
+          <p className="text-sm text-slate-600">
+            Built for the people who care for our parents.
+          </p>
         </div>
-
       </div>
     </footer>
   )

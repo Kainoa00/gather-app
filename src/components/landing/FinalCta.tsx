@@ -1,107 +1,51 @@
 'use client'
 
 import Link from 'next/link'
-import { motion, type Variants } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import { useSectionInView } from '@/lib/hooks/useSectionInView'
-import { EASE, makeFadeUpVariants } from '@/lib/motion'
+import { EASE } from '@/lib/motion'
 
-// ─── Animation variants ───────────────────────────────────────────────────────
-const sectionVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.97 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: { duration: 0.65, ease: EASE },
-  },
-}
-
-const childVariants: Variants = makeFadeUpVariants(20)
-
-// Animated border gradient — inline animate prop avoids Variants type conflict
-const BORDER_ANIMATE = {
-  backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-  transition: { duration: 6, ease: 'linear' as const, repeat: Infinity },
-}
-
-// ─── Component ────────────────────────────────────────────────────────────────
 export default function FinalCta() {
-  const { ref, inView: isInView } = useSectionInView('-80px')
+  const { ref, inView } = useSectionInView('-80px')
 
   return (
     <section
       ref={ref}
-      className="gradient-mesh-bg py-28 px-4 sm:px-6"
+      className="bg-navy-900 py-32 md:py-40"
     >
-      {/* Fade + scale-up on scroll into view */}
-      <motion.div
-        variants={sectionVariants}
-        initial="hidden"
-        animate={isInView ? 'visible' : 'hidden'}
-        className="max-w-3xl mx-auto"
-      >
-        {/* Animated gradient border ring */}
+      <div className="max-w-5xl mx-auto px-6 lg:px-8 text-center">
         <motion.div
-          animate={BORDER_ANIMATE}
-          className="rounded-3xl p-[2px]"
-          style={{
-            background:
-              'linear-gradient(135deg, rgba(27,71,152,0.6), rgba(27,163,198,0.4), rgba(74,222,128,0.3), rgba(27,71,152,0.6))',
-            backgroundSize: '300% 300%',
-          }}
+          initial={{ opacity: 0, y: 24 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.65, ease: EASE }}
         >
-          {/* Inner card */}
-          <div className="bg-gradient-to-br from-navy-800 to-navy-900 rounded-3xl p-12 sm:p-16 text-center">
-
-            {/* Heading */}
-            <motion.h2
-              variants={childVariants}
-              initial="hidden"
-              animate={isInView ? 'visible' : 'hidden'}
-              custom={0.15}
-              className="text-white text-3xl sm:text-4xl font-bold leading-tight mb-6"
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight mb-6">
+            Ready to give your nurses<br className="hidden sm:block" /> their afternoons back?
+          </h2>
+          <p className="text-lg sm:text-xl text-slate-400 leading-relaxed mb-12 max-w-xl mx-auto">
+            Start a 30-day pilot at your facility. White-glove setup included. No long-term contracts.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link
+              href="/demo"
+              className="inline-flex items-center justify-center gap-2 bg-white text-navy-900 px-8 py-4 rounded-xl text-base font-bold hover:bg-slate-100 transition-all duration-200 min-h-[52px] shadow-sm hover:shadow-md hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900"
             >
-              Ready to give your nurses their afternoons back?
-            </motion.h2>
-
-            {/* Subheading */}
-            <motion.p
-              variants={childVariants}
-              initial="hidden"
-              animate={isInView ? 'visible' : 'hidden'}
-              custom={0.3}
-              className="text-navy-300 text-lg leading-relaxed max-w-2xl mx-auto mb-10"
+              Schedule a Demo
+              <ArrowRight size={18} />
+            </Link>
+            <Link
+              href="/app"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-base font-semibold text-slate-400 hover:text-white transition-colors min-h-[52px]"
             >
-              CareBridge Connect exists to ensure that families never have to
-              wonder how their loved one is doing — and that nursing staff never
-              have to answer the same question twice.
-            </motion.p>
-
-            {/* CTA button */}
-            <motion.div
-              variants={childVariants}
-              initial="hidden"
-              animate={isInView ? 'visible' : 'hidden'}
-              custom={0.45}
-              className="flex flex-col items-center gap-4"
-            >
-              <Link
-                href="/demo"
-                className="bg-primary-600 hover:bg-primary-500 text-white rounded-xl px-10 py-4 font-semibold text-lg min-h-[52px] inline-flex items-center gap-2 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900"
-              >
-                Schedule a Demo
-                <ArrowRight size={20} aria-hidden="true" />
-              </Link>
-
-              {/* Trust line */}
-              <p className="text-navy-400 text-sm">
-                30-day pilot · No long-term contracts · White-glove setup
-              </p>
-            </motion.div>
-
+              Explore the product
+            </Link>
           </div>
+          <p className="mt-8 text-sm text-slate-600">
+            Trusted by skilled nursing facilities across the US · HIPAA Certified · SOC 2 Type II
+          </p>
         </motion.div>
-      </motion.div>
+      </div>
     </section>
   )
 }

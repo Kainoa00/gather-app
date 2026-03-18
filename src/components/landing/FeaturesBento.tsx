@@ -1,311 +1,271 @@
 'use client'
 
-import React from 'react'
 import { motion } from 'framer-motion'
 import { useSectionInView } from '@/lib/hooks/useSectionInView'
-import { EASE, makeContainerVariants } from '@/lib/motion'
-import {
-  ClipboardList,
-  MessageSquare,
-  TrendingUp,
-  Users,
-  Shield,
-  Clock,
-} from 'lucide-react'
+import { EASE } from '@/lib/motion'
+import { ClipboardList, Users, Calendar, Lock } from 'lucide-react'
 
-// ─── Tag pill component ───────────────────────────────────────────────────────
+// ─── Feature visuals (pure CSS mockups) ───────────────────────────────────────
 
-interface TagPillProps {
-  label: string
-  color: 'red' | 'blue' | 'green' | 'purple' | 'orange' | 'teal'
-}
-
-const tagColorMap: Record<TagPillProps['color'], string> = {
-  red:    'bg-red-50 text-red-600 border border-red-100',
-  blue:   'bg-blue-50 text-blue-600 border border-blue-100',
-  green:  'bg-green-50 text-green-700 border border-green-100',
-  purple: 'bg-purple-50 text-purple-600 border border-purple-100',
-  orange: 'bg-orange-50 text-orange-600 border border-orange-100',
-  teal:   'bg-primary-50 text-primary-600 border border-primary-100',
-}
-
-function TagPill({ label, color }: TagPillProps) {
+function CareLogVisual() {
+  const entries = [
+    { dot: 'bg-blue-400', title: 'Physical Therapy Session', time: '9:15 AM', category: 'Therapy', catColor: 'bg-blue-100 text-blue-700' },
+    { dot: 'bg-green-400', title: 'Meal — Breakfast', time: '8:00 AM', category: 'Nutrition', catColor: 'bg-green-100 text-green-700' },
+    { dot: 'bg-purple-400', title: 'Physician Visit — Dr. Chen', time: '7:30 AM', category: 'Medical', catColor: 'bg-purple-100 text-purple-700' },
+    { dot: 'bg-amber-400', title: 'Personal Care', time: '7:00 AM', category: 'Daily Care', catColor: 'bg-amber-100 text-amber-700' },
+  ]
   return (
-    <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${tagColorMap[color]}`}
-    >
-      {label}
-    </span>
-  )
-}
-
-// ─── Card animation variants ──────────────────────────────────────────────────
-
-const containerVariants = makeContainerVariants(0.08)
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 28 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: EASE },
-  },
-}
-
-// ─── Timeline event row ───────────────────────────────────────────────────────
-
-function TimelineEvent({
-  time,
-  label,
-  color,
-}: {
-  time: string
-  label: string
-  color: string
-}) {
-  return (
-    <div className="flex items-center gap-3 py-1.5">
-      <span className="text-xs font-mono text-navy-400 w-16 shrink-0">{time}</span>
-      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${color}`} />
-      <span className="text-sm text-navy-700">{label}</span>
+    <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+      <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+        <span className="text-sm font-semibold text-slate-800">Care Log — Today</span>
+        <span className="text-xs text-slate-400">4 entries</span>
+      </div>
+      <div className="divide-y divide-slate-50">
+        {entries.map((e, i) => (
+          <div key={i} className="flex items-start gap-3 px-5 py-3.5">
+            <div className={`w-2.5 h-2.5 rounded-full ${e.dot} shrink-0 mt-1.5`} />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="text-sm font-medium text-slate-800 truncate">{e.title}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`text-[11px] font-medium px-1.5 py-0.5 rounded-full ${e.catColor}`}>{e.category}</span>
+                <span className="text-[11px] text-slate-400">{e.time}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
 
-// ─── Module-level constants ───────────────────────────────────────────────────
+function FamilyFeedVisual() {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+      {/* Mobile header */}
+      <div className="bg-navy-800 px-5 py-4 flex items-center justify-between">
+        <span className="text-white text-sm font-semibold">Family View</span>
+        <div className="flex items-center gap-1">
+          <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
+          <span className="text-xs text-green-300">Live updates</span>
+        </div>
+      </div>
+      {/* Patient card */}
+      <div className="px-5 py-4 border-b border-slate-100 bg-slate-50">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center text-sm font-bold text-primary-700">MT</div>
+          <div>
+            <div className="text-sm font-semibold text-slate-800">Margaret Thompson</div>
+            <div className="text-xs text-slate-500">Room 412 · Sunrise Care Center</div>
+          </div>
+        </div>
+      </div>
+      {/* Updates */}
+      <div className="divide-y divide-slate-50">
+        {[
+          { icon: '🏃', text: 'Completed PT session', sub: '9:15 AM · Logged by Maria R., RN', isNew: true },
+          { icon: '🍳', text: 'Good breakfast appetite', sub: '8:00 AM · Logged by Care Team', isNew: false },
+          { icon: '💊', text: 'Morning medications given', sub: '7:45 AM · Logged by Sarah K., CNA', isNew: false },
+        ].map((item, i) => (
+          <div key={i} className={`flex items-start gap-3 px-5 py-3.5 ${item.isNew ? 'bg-primary-50/40' : ''}`}>
+            <div className="text-base shrink-0">{item.icon}</div>
+            <div>
+              <div className="text-sm font-medium text-slate-800">{item.text}</div>
+              <div className="text-xs text-slate-400 mt-0.5">{item.sub}</div>
+            </div>
+            {item.isNew && <div className="ml-auto shrink-0 w-2 h-2 rounded-full bg-primary-500 mt-1.5" />}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
 
-const SPARK_HEIGHTS = [4, 5, 4, 6, 5, 7, 6, 8, 7, 9, 8, 10]
+function CalendarVisual() {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+      <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+        <span className="text-sm font-semibold text-slate-800">Care Calendar — March 2026</span>
+        <div className="flex gap-1">
+          <div className="w-6 h-6 rounded-lg bg-slate-100" />
+          <div className="w-6 h-6 rounded-lg bg-slate-100" />
+        </div>
+      </div>
+      <div className="p-4">
+        {/* Mini calendar grid */}
+        <div className="grid grid-cols-7 gap-1 mb-3">
+          {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => (
+            <div key={d} className="text-center text-[10px] font-semibold text-slate-400">{d}</div>
+          ))}
+          {Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
+            <div key={d} className={`aspect-square flex items-center justify-center text-[11px] rounded-full cursor-default select-none
+              ${d === 17 ? 'bg-primary-600 text-white font-bold' :
+                [5, 10, 14, 21, 25].includes(d) ? 'bg-primary-100 text-primary-700 font-semibold' :
+                'text-slate-600'}`}>
+              {d}
+            </div>
+          ))}
+        </div>
+        {/* Upcoming events */}
+        <div className="space-y-2 mt-2 pt-3 border-t border-slate-100">
+          {[
+            { dot: 'bg-blue-400', text: 'Physical Therapy · 9:00 AM', today: true },
+            { dot: 'bg-green-400', text: 'Family Visit · 2:30 PM', today: false },
+            { dot: 'bg-amber-400', text: 'Podiatry Appointment · 4:00 PM', today: false },
+          ].map((e, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <div className={`w-2 h-2 rounded-full ${e.dot}`} />
+              <span className="text-[12px] text-slate-600">{e.text}</span>
+              {e.today && <span className="ml-auto text-[10px] font-semibold text-primary-600">Today</span>}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
 
-const PERMISSION_ROWS = [
-  { label: 'Primary Contact', level: 'Full access', dot: 'bg-primary-500' },
-  { label: 'Adult Child', level: 'Read-only', dot: 'bg-accent-500' },
-  { label: 'Extended Family', level: 'Limited', dot: 'bg-navy-300' },
+function VaultVisual() {
+  const files = [
+    { name: 'Advance Directive', type: 'PDF', size: '240 KB', color: 'bg-red-100 text-red-600' },
+    { name: 'Insurance Card', type: 'JPG', size: '1.2 MB', color: 'bg-blue-100 text-blue-600' },
+    { name: 'Power of Attorney', type: 'PDF', size: '180 KB', color: 'bg-red-100 text-red-600' },
+    { name: 'Medication List', type: 'PDF', size: '95 KB', color: 'bg-red-100 text-red-600' },
+  ]
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+      <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+        <span className="text-sm font-semibold text-slate-800">Document Vault</span>
+        <div className="flex items-center gap-1 text-xs text-green-600 font-medium">
+          <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
+          Encrypted
+        </div>
+      </div>
+      <div className="divide-y divide-slate-50">
+        {files.map((f, i) => (
+          <div key={i} className="flex items-center gap-3 px-5 py-3.5 hover:bg-slate-50 transition-colors">
+            <div className={`w-8 h-8 rounded-lg ${f.color} flex items-center justify-center text-[10px] font-bold shrink-0`}>
+              {f.type}
+            </div>
+            <div className="flex-1">
+              <div className="text-sm font-medium text-slate-800">{f.name}</div>
+              <div className="text-xs text-slate-400">{f.size}</div>
+            </div>
+            <div className="w-7 h-7 rounded-lg bg-slate-100 shrink-0" />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ─── Feature rows ──────────────────────────────────────────────────────────────
+
+const FEATURES = [
+  {
+    icon: ClipboardList,
+    tag: 'Care Log',
+    title: 'Every shift, documented and shared.',
+    description: 'Staff log care entries — meals, therapy, medications, incidents — from any device. Families see updates the moment they\'re written. No phone tag, no missed calls.',
+    bullets: ['Categorized entries (therapy, nutrition, medical)', 'Staff attribution and timestamps', 'Role-based visibility controls'],
+    visual: <CareLogVisual />,
+  },
+  {
+    icon: Users,
+    tag: 'Family Feed',
+    title: 'Families stay informed without interrupting care.',
+    description: 'Every care log entry appears in a clean, readable feed for the right family members. Secure messaging replaces the phone as the default way families communicate.',
+    bullets: ['Real-time notifications via app or email', 'Configurable access per family member', 'HIPAA-compliant messaging channel'],
+    visual: <FamilyFeedVisual />,
+  },
+  {
+    icon: Calendar,
+    tag: 'Care Calendar',
+    title: 'Appointments, visits, and milestones in one view.',
+    description: 'A shared calendar for therapy sessions, physician visits, family visit windows, and care milestones. Families can request visits without calling the front desk.',
+    bullets: ['Staff and family calendar in sync', 'Visit request workflow', 'Appointment reminders to families'],
+    visual: <CalendarVisual />,
+  },
+  {
+    icon: Lock,
+    tag: 'Document Vault',
+    title: 'Critical documents, always at hand.',
+    description: 'Store advance directives, insurance cards, powers of attorney, and medication lists in an encrypted, access-controlled vault. No more digging through filing cabinets mid-incident.',
+    bullets: ['AES-256 encryption at rest', 'Per-document access controls', 'Full audit trail on every view'],
+    visual: <VaultVisual />,
+  },
 ]
-
-const VAULT_DOCS = [
-  { label: 'Facility Info', icon: '🏥' },
-  { label: 'Insurance', icon: '📋' },
-  { label: 'Medications', icon: '💊' },
-  { label: 'Care Team', icon: '👥' },
-  { label: 'Documents', icon: '📄' },
-  { label: 'Access Log', icon: '🔒' },
-]
-
-// ─── Main component ───────────────────────────────────────────────────────────
 
 export default function FeaturesBento() {
-  const { ref, inView: isInView } = useSectionInView('-80px')
+  const { ref, inView } = useSectionInView('-80px')
 
   return (
-    <section id="features" className="bg-cream-100 py-24">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section ref={ref} className="bg-white py-24 md:py-32">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
 
         {/* Section header */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <h2 className="text-4xl font-bold text-navy-900 tracking-tight mb-4">
-            Everything families need to feel connected
-          </h2>
-          <p className="text-lg text-navy-600 leading-relaxed">
-            Real-time visibility into your loved one&apos;s day-to-day care&nbsp;&mdash; without adding work for staff.
-          </p>
-        </div>
-
-        {/* Bento grid */}
         <motion.div
-          ref={ref as React.RefObject<HTMLDivElement>}
-          variants={containerVariants}
-          initial="hidden"
-          animate={isInView ? 'visible' : 'hidden'}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.55, ease: EASE }}
+          className="max-w-2xl mb-20"
         >
-
-          {/* ── Card 1: Event-Based Care Timeline (large) ── */}
-          <motion.div
-            variants={cardVariants}
-            whileHover={{ y: -4 }}
-            className="group md:col-span-2 card-glass rounded-2xl p-6 lg:p-8 transition-all duration-300 hover:shadow-lg hover:shadow-primary-100/50 hover:border-primary-200/70"
-          >
-            <div className="flex items-start gap-4 mb-5">
-              <div className="w-11 h-11 rounded-xl bg-primary-100 flex items-center justify-center shrink-0">
-                <ClipboardList className="w-5 h-5 text-primary-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-navy-900 mb-1">
-                  Event-Based Care Timeline
-                </h3>
-                <p className="text-sm text-navy-600 leading-relaxed">
-                  Time-stamped updates families can actually parse — not vague nurse notes, but discrete documented events. Read-only for families, which matters for liability control.
-                </p>
-              </div>
-            </div>
-
-            {/* Mini timeline preview */}
-            <div className="bg-white/60 rounded-xl border border-white/80 px-4 py-3 mb-5 divide-y divide-navy-50">
-              <TimelineEvent time="7:02 AM" label="Medication administered" color="bg-blue-400" />
-              <TimelineEvent time="9:15 AM" label="PT session completed (30 min)" color="bg-green-400" />
-              <TimelineEvent time="10:30 AM" label="Breakfast consumed (75%)" color="bg-orange-400" />
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              <TagPill label="Vitals" color="red" />
-              <TagPill label="Medications" color="blue" />
-              <TagPill label="Activities" color="green" />
-              <TagPill label="Mood" color="purple" />
-              <TagPill label="Incidents" color="orange" />
-            </div>
-          </motion.div>
-
-          {/* ── Card 2: Guardrailed AI Chat ── */}
-          <motion.div
-            variants={cardVariants}
-            className="group card-glass rounded-2xl p-6 lg:p-8 transition-all duration-300 hover:shadow-lg hover:shadow-primary-100/50 hover:-translate-y-1"
-          >
-            <div className="w-11 h-11 rounded-xl bg-accent-100 flex items-center justify-center mb-4">
-              <MessageSquare className="w-5 h-5 text-accent-600" />
-            </div>
-            <h3 className="text-lg font-semibold text-navy-900 mb-2">
-              Guardrailed AI Chat
-            </h3>
-            <p className="text-sm text-navy-600 leading-relaxed mb-4">
-              &ldquo;When did she last eat?&rdquo; — Families ask plain questions. The AI only queries documented facts. Never interprets. Never advises. Never guesses.
-            </p>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-mint-100 text-mint-600 text-xs font-semibold border border-mint-200">
-              <span className="w-1.5 h-1.5 rounded-full bg-mint-500 inline-block" />
-              Fact-only · No hallucinations
-            </span>
-          </motion.div>
-
-          {/* ── Card 3: Progress Summaries ── */}
-          <motion.div
-            variants={cardVariants}
-            className="group card-glass rounded-2xl p-6 lg:p-8 transition-all duration-300 hover:shadow-lg hover:shadow-primary-100/50 hover:-translate-y-1"
-          >
-            <div className="w-11 h-11 rounded-xl bg-mint-100 flex items-center justify-center mb-4">
-              <TrendingUp className="w-5 h-5 text-mint-600" />
-            </div>
-            <h3 className="text-lg font-semibold text-navy-900 mb-2">
-              Progress Summaries
-            </h3>
-            <p className="text-sm text-navy-600 leading-relaxed mb-4">
-              Daily and weekly summaries highlighting trends — mobility improving, pain decreasing, appetite consistency — not just raw events.
-            </p>
-            {/* Spark bars */}
-            <div className="flex items-end gap-1 h-8">
-              {SPARK_HEIGHTS.map((h, i) => (
-                <div
-                  key={i}
-                  className="flex-1 rounded-sm bg-mint-400/70 group-hover:bg-mint-500/80 transition-colors duration-300"
-                  style={{ height: `${h * 10}%` }}
-                />
-              ))}
-            </div>
-          </motion.div>
-
-          {/* ── Card 4: Permissioned Care Circle ── */}
-          <motion.div
-            variants={cardVariants}
-            className="group card-glass rounded-2xl p-6 lg:p-8 transition-all duration-300 hover:shadow-lg hover:shadow-primary-100/50 hover:-translate-y-1"
-          >
-            <div className="w-11 h-11 rounded-xl bg-primary-100 flex items-center justify-center mb-4">
-              <Users className="w-5 h-5 text-primary-600" />
-            </div>
-            <h3 className="text-lg font-semibold text-navy-900 mb-2">
-              Permissioned Care Circle
-            </h3>
-            <p className="text-sm text-navy-600 leading-relaxed mb-4">
-              Patient opts in. Facility controls who sees what. Family members verified. Every access event logged for HIPAA compliance.
-            </p>
-            {/* Permission tier badges */}
-            <div className="flex flex-col gap-1.5">
-              {PERMISSION_ROWS.map((row) => (
-                <div key={row.label} className="flex items-center justify-between text-xs">
-                  <span className="flex items-center gap-1.5 text-navy-600">
-                    <span className={`w-2 h-2 rounded-full ${row.dot}`} />
-                    {row.label}
-                  </span>
-                  <span className="text-navy-400">{row.level}</span>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* ── Card 5: The Vault (large) ── */}
-          <motion.div
-            variants={cardVariants}
-            whileHover={{ y: -4 }}
-            className="group md:col-span-2 card-glass rounded-2xl p-6 lg:p-8 transition-all duration-300 hover:shadow-lg hover:shadow-primary-100/50 hover:border-mint-200/70"
-          >
-            <div className="flex items-start gap-4 mb-5">
-              <div className="w-11 h-11 rounded-xl bg-mint-100 flex items-center justify-center shrink-0">
-                <Shield className="w-5 h-5 text-mint-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-navy-900 mb-1">
-                  The Vault
-                </h3>
-                <p className="text-sm text-navy-600 leading-relaxed">
-                  Facility info, visiting hours, insurance cards, medications, and care team contacts. Everything families need — with role-based access controls so sensitive data stays protected.
-                </p>
-              </div>
-            </div>
-
-            {/* Document preview grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-5">
-              {VAULT_DOCS.map((item) => (
-                <div
-                  key={item.label}
-                  className="flex items-center gap-2 bg-white/50 rounded-lg px-3 py-2 border border-white/70"
-                >
-                  <span className="text-base leading-none">{item.icon}</span>
-                  <span className="text-xs font-medium text-navy-700">{item.label}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              <TagPill label="Facility Info" color="teal" />
-              <TagPill label="Insurance" color="blue" />
-              <TagPill label="Medications" color="purple" />
-              <TagPill label="Care Team" color="green" />
-              <TagPill label="Documents" color="orange" />
-            </div>
-          </motion.div>
-
-          {/* ── Card 6: Visit Tracking ── */}
-          <motion.div
-            variants={cardVariants}
-            className="group card-glass rounded-2xl p-6 lg:p-8 transition-all duration-300 hover:shadow-lg hover:shadow-primary-100/50 hover:-translate-y-1"
-          >
-            <div className="w-11 h-11 rounded-xl bg-accent-100 flex items-center justify-center mb-4">
-              <Clock className="w-5 h-5 text-accent-600" />
-            </div>
-            <h3 className="text-lg font-semibold text-navy-900 mb-2">
-              Visit Tracking
-            </h3>
-            <p className="text-sm text-navy-600 leading-relaxed mb-4">
-              Check in and out with a note. See who has visited and when. Coordinate visit windows so Kenji is never overwhelmed.
-            </p>
-            {/* Visit log preview */}
-            <div className="space-y-2">
-              {[
-                { name: 'Sarah M.', time: 'Today 2:30 PM', dur: '45 min' },
-                { name: 'David M.', time: 'Yesterday 11 AM', dur: '1 hr' },
-              ].map((v) => (
-                <div
-                  key={v.name}
-                  className="flex items-center justify-between bg-white/50 rounded-lg px-3 py-2 border border-white/70"
-                >
-                  <div>
-                    <p className="text-xs font-semibold text-navy-800">{v.name}</p>
-                    <p className="text-xs text-navy-400">{v.time}</p>
-                  </div>
-                  <span className="text-xs text-accent-600 font-medium">{v.dur}</span>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-
+          <p className="text-sm font-semibold text-primary-600 uppercase tracking-widest mb-4">
+            Features
+          </p>
+          <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 tracking-tight leading-tight">
+            Built for how care teams actually work.
+          </h2>
         </motion.div>
+
+        {/* Feature rows */}
+        <div className="space-y-24 md:space-y-32">
+          {FEATURES.map((feature, i) => {
+            const Icon = feature.icon
+            const isEven = i % 2 === 0
+            return (
+              <motion.div
+                key={feature.tag}
+                initial={{ opacity: 0, y: 32 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, ease: EASE, delay: Math.min(i * 0.08, 0.24) }}
+                className={`grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center ${
+                  !isEven ? 'lg:grid-flow-dense' : ''
+                }`}
+              >
+                {/* Text */}
+                <div className={!isEven ? 'lg:col-start-2' : ''}>
+                  <div className="inline-flex items-center gap-2 mb-5 px-3 py-1.5 bg-primary-50 border border-primary-100 rounded-full">
+                    <Icon size={14} className="text-primary-600" />
+                    <span className="text-xs font-semibold text-primary-700 uppercase tracking-wide">{feature.tag}</span>
+                  </div>
+                  <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 leading-tight mb-4">
+                    {feature.title}
+                  </h3>
+                  <p className="text-base sm:text-lg text-slate-500 leading-relaxed mb-6">
+                    {feature.description}
+                  </p>
+                  <ul className="space-y-2.5">
+                    {feature.bullets.map((b) => (
+                      <li key={b} className="flex items-start gap-2.5 text-sm text-slate-600">
+                        <div className="w-5 h-5 rounded-full bg-primary-100 flex items-center justify-center shrink-0 mt-0.5">
+                          <div className="w-2 h-2 rounded-full bg-primary-500" />
+                        </div>
+                        {b}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Visual */}
+                <div className={!isEven ? 'lg:col-start-1 lg:row-start-1' : ''}>
+                  {feature.visual}
+                </div>
+              </motion.div>
+            )
+          })}
+        </div>
       </div>
     </section>
   )

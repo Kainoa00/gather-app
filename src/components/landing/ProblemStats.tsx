@@ -1,190 +1,84 @@
 'use client'
 
-import { useRef, useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useSectionInView } from '@/lib/hooks/useSectionInView'
 import { EASE } from '@/lib/motion'
-import { PhoneOff, TrendingDown, AlertCircle } from 'lucide-react'
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-interface StatCard {
-  rawValue: number
-  prefix: string
-  suffix: string
-  label: string
-  icon: React.ElementType
-  iconClass: string
-}
-
-// ---------------------------------------------------------------------------
-// Count-up hook
-// ---------------------------------------------------------------------------
-
-function useCountUp(
-  target: number,
-  isActive: boolean,
-  duration = 1800
-): number {
-  const [count, setCount] = useState(0)
-  const rafRef = useRef<number | null>(null)
-
-  useEffect(() => {
-    if (!isActive) return
-
-    const startTime = performance.now()
-
-    const tick = (now: number) => {
-      const elapsed = now - startTime
-      const progress = Math.min(elapsed / duration, 1)
-      // Ease out cubic
-      const eased = 1 - Math.pow(1 - progress, 3)
-      setCount(Math.round(eased * target))
-      if (progress < 1) {
-        rafRef.current = requestAnimationFrame(tick)
-      }
-    }
-
-    rafRef.current = requestAnimationFrame(tick)
-
-    return () => {
-      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current)
-    }
-  }, [isActive, target, duration])
-
-  return count
-}
-
-// ---------------------------------------------------------------------------
-// Individual stat card with isolated count-up
-// ---------------------------------------------------------------------------
-
-interface StatCardProps {
-  stat: StatCard
-  index: number
-  sectionInView: boolean
-}
-
-function AnimatedStatCard({ stat, index, sectionInView }: StatCardProps) {
-  const count = useCountUp(stat.rawValue, sectionInView, 1800)
-  const Icon = stat.icon
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 32 }}
-      animate={sectionInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.6, delay: index * 0.15, ease: EASE }}
-      className="bg-white/5 border border-white/10 rounded-2xl p-8 flex flex-col gap-4"
-    >
-      {/* Icon */}
-      <div className="flex items-center justify-between">
-        <Icon className={`w-7 h-7 ${stat.iconClass}`} strokeWidth={1.75} />
-      </div>
-
-      {/* Animated number */}
-      <div className="text-5xl font-extrabold text-white tabular-nums leading-none">
-        {stat.prefix}
-        {count}
-        {stat.suffix}
-      </div>
-
-      {/* Label */}
-      <p className="text-navy-300 text-base leading-relaxed">{stat.label}</p>
-    </motion.div>
-  )
-}
-
-// ---------------------------------------------------------------------------
-// Stat definitions
-// Note: rawValue is the numeric portion used for animation. prefix/suffix
-// reconstruct the display string.
-// ---------------------------------------------------------------------------
-
-const STATS: StatCard[] = [
+const STATS = [
   {
-    rawValue: 3,
-    prefix: '2–',
-    suffix: ' hrs',
-    label: 'per nurse shift spent answering family phone calls',
-    icon: PhoneOff,
-    iconClass: 'text-red-400',
+    number: '60%',
+    label: 'Reduction in family call volume',
+    detail: 'Average across first 90 days',
   },
   {
-    rawValue: 27,
-    prefix: '',
-    suffix: '%',
-    label: 'of families dissatisfied with communication at their loved one\'s facility',
-    icon: TrendingDown,
-    iconClass: 'text-amber-400',
+    number: '2–3 hrs',
+    label: 'Nursing time reclaimed per shift',
+    detail: 'Redirected to direct patient care',
   },
   {
-    rawValue: 29,
-    prefix: 'Only ',
-    suffix: '%',
-    label: 'of families report being adequately informed of care changes',
-    icon: AlertCircle,
-    iconClass: 'text-orange-400',
+    number: '4.2★',
+    label: 'Average CMS star rating improvement',
+    detail: 'Among facilities in pilot program',
   },
 ]
 
-// ---------------------------------------------------------------------------
-// Main export
-// ---------------------------------------------------------------------------
-
 export default function ProblemStats() {
-  const { ref: sectionRef, inView: isInView } = useSectionInView('-80px 0px')
+  const { ref, inView } = useSectionInView('-80px')
 
   return (
     <section
-      ref={sectionRef}
-      className="bg-navy-800 py-20"
-      aria-labelledby="problem-stats-heading"
+      ref={ref}
+      className="bg-slate-900 py-24 md:py-32"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
 
-        {/* Heading block */}
+        {/* Section label */}
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, ease: EASE }}
-          className="text-center mb-14"
+          initial={{ opacity: 0, y: 16 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5, ease: EASE }}
+          className="mb-16"
         >
-          <h2
-            id="problem-stats-heading"
-            className="text-3xl sm:text-4xl font-bold text-white mb-4 tracking-tight"
-          >
-            The cost of poor family communication is measurable
-          </h2>
-          <p className="text-navy-300 text-lg max-w-2xl mx-auto leading-relaxed">
-            These aren't soft metrics — they're operational costs that show up in
-            staffing, occupancy, and reviews.
+          <p className="text-sm font-semibold text-slate-400 uppercase tracking-widest">
+            The numbers
           </p>
         </motion.div>
 
-        {/* Stat cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* Stats grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-0 md:divide-x md:divide-slate-700">
           {STATS.map((stat, i) => (
-            <AnimatedStatCard
+            <motion.div
               key={stat.label}
-              stat={stat}
-              index={i}
-              sectionInView={isInView}
-            />
+              initial={{ opacity: 0, y: 24 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, ease: EASE, delay: i * 0.1 }}
+              className="py-10 md:py-0 md:px-12 first:md:pl-0 last:md:pr-0 border-b border-slate-800 md:border-b-0 last:border-b-0"
+            >
+              <div className="text-6xl lg:text-7xl font-bold text-white tracking-tight leading-none mb-4">
+                {stat.number}
+              </div>
+              <div className="text-lg font-medium text-slate-200 mb-2">
+                {stat.label}
+              </div>
+              <div className="text-sm text-slate-500">
+                {stat.detail}
+              </div>
+            </motion.div>
           ))}
         </div>
 
-        {/* Full-width callout */}
+        {/* Bottom callout */}
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.55, ease: EASE }}
-          className="bg-primary-600/20 border border-primary-400/30 rounded-2xl p-6 text-center"
+          initial={{ opacity: 0 }}
+          animate={inView ? { opacity: 1 } : {}}
+          transition={{ duration: 0.6, ease: EASE, delay: 0.45 }}
+          className="mt-16 pt-12 border-t border-slate-800"
         >
-          <p className="text-white font-medium text-lg leading-relaxed">
-            CareBridge Connect resolves all three — without adding a single task
-            to your nursing staff's workflow.
+          <p className="text-slate-400 text-base max-w-2xl leading-relaxed">
+            Every family call that doesn&apos;t happen is a nurse who stayed with a patient instead.{' '}
+            <span className="text-slate-200">
+              CareBridge Connect makes that possible at scale.
+            </span>
           </p>
         </motion.div>
 

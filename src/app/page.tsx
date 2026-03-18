@@ -46,9 +46,29 @@ export const metadata: Metadata = {
   },
 }
 
+const softwareAppJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'CareBridge Connect',
+  applicationCategory: 'HealthApplication',
+  operatingSystem: 'Web, iOS, Android',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+    description: 'Contact for pricing',
+  },
+  description:
+    'HIPAA-compliant platform that reduces family call volume by 60% for skilled nursing facilities',
+}
+
 export default function LandingPage() {
   return (
     <main className="min-h-screen bg-cream-50 overflow-x-hidden">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppJsonLd) }}
+      />
       <Navbar />
 
       {/* Hero — full viewport, animated mesh + word reveal */}

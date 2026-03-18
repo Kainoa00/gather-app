@@ -1,4 +1,5 @@
 import { supabase, DEMO_PATIENT_ID } from '@/lib/supabase'
+import { notifyFamilyMembers } from '@/lib/notifications'
 import {
   CareCircleMember,
   CalendarEvent,
@@ -110,6 +111,31 @@ export async function addLogEntryToDb(
     .single()
 
   if (logError || !logData) throw logError || new Error('Failed to insert log entry')
+
+  // Notify family members (non-blocking)
+  Promise.resolve(
+    supabase
+      .from('care_circle_members')
+      .select('name, email, role')
+      .eq('patient_id', patientId)
+      .in('role', ['primary', 'family'])
+  )
+    .then(({ data: members }) => {
+      if (members && members.length > 0) {
+        const notificationMessage = `${entry.category}: ${entry.title}${entry.notes ? ` \u2014 ${entry.notes.slice(0, 200)}` : ''}`
+        notifyFamilyMembers({
+          patientId,
+          patientName: 'your loved one',
+          notificationType: entry.category,
+          message: notificationMessage,
+          senderName: entry.enteredByName,
+          recipients: members
+            .filter((m): m is typeof m & { email: string } => Boolean(m.email))
+            .map((m) => ({ email: m.email, name: m.name })),
+        }).catch(console.error)
+      }
+    })
+    .catch(console.error)
 
   // Insert category-specific data
   if (entry.category === 'vitals' && entry.vitals) {

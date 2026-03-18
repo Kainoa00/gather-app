@@ -180,12 +180,12 @@ export default function PricingSection() {
           className="text-center max-w-2xl mx-auto mb-16"
         >
           <h2 className="text-4xl font-bold text-navy-900 tracking-tight mb-4">
-            Simple, transparent pricing
+            Flexible pricing for every facility size
           </h2>
           <p className="text-navy-600 text-lg leading-relaxed">
-            All plans include unlimited family members, HIPAA-compliant
-            infrastructure, and white-glove onboarding. Pricing based on facility
-            size.
+            Contact us for a custom quote tailored to your facility. All plans
+            include HIPAA compliance, white-glove onboarding, and no long-term
+            contracts.
           </p>
         </motion.div>
 
@@ -209,7 +209,7 @@ export default function PricingSection() {
           animate={isInView ? 'visible' : 'hidden'}
           className="text-center text-sm text-navy-500 mt-10"
         >
-          All plans include a 30-day pilot with white-glove setup. No long-term contracts.
+          Every plan starts with a 30-day pilot and white-glove onboarding at no extra cost.
         </motion.p>
 
       </div>

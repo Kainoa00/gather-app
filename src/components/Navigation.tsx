@@ -7,14 +7,17 @@ import {
   Shield,
   Home,
   ClipboardList,
+  Settings,
 } from 'lucide-react'
+import { UserRole } from '@/types'
 
 interface NavigationProps {
   activeTab: string
   onTabChange: (tab: string) => void
+  userRole?: UserRole
 }
 
-const navItems = [
+const baseNavItems = [
   { id: 'home', label: 'Home', icon: Home },
   { id: 'calendar', label: 'Calendar', icon: Calendar },
   { id: 'log', label: 'Care Log', icon: ClipboardList },
@@ -26,7 +29,11 @@ const navItems = [
 // Add `pb-16 md:pb-0` to the main content container in the parent layout
 // (e.g., src/app/app/page.tsx) to prevent content from being hidden behind the tab bar.
 
-export default function Navigation({ activeTab, onTabChange }: NavigationProps) {
+export default function Navigation({ activeTab, onTabChange, userRole }: NavigationProps) {
+  const navItems = userRole === 'admin'
+    ? [...baseNavItems, { id: 'settings', label: 'Settings', icon: Settings }]
+    : baseNavItems
+
   return (
     <>
       {/* Top Navigation Bar (desktop + mobile logo) */}

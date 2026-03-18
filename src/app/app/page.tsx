@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Navigation from '@/components/Navigation'
+import ResidentSelector from '@/components/ResidentSelector'
+import FacilitySettings from '@/components/FacilitySettings'
 import CareCircle from '@/components/CareCircle'
 import CareCalendar from '@/components/CareCalendar'
 import VaultComponent from '@/components/Vault'
@@ -74,6 +76,9 @@ export default function Home() {
   const currentUserName = currentUser?.name || 'Toshio Shintaku'
   const currentUserRole: UserRole = currentUser?.role || 'primary'
 
+  const [selectedPatientId, setSelectedPatientId] = useState(DEMO_PATIENT_ID)
+  const [selectedPatientName, setSelectedPatientName] = useState('Yuki Tanaka')
+
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -93,15 +98,15 @@ export default function Home() {
   const [logSubTab, setLogSubTab] = useState<'timeline' | 'trends' | 'vitals' | 'wellness' | 'progress'>('timeline')
 
   // Supabase data hooks (fall back to demo data when isDemoMode)
-  const { patient } = usePatient(DEMO_PATIENT_ID)
-  const { members, loading: membersLoading, setMembers, refetch: refetchMembers } = useMembers(DEMO_PATIENT_ID)
-  const { events, loading: eventsLoading, setEvents, refetch: refetchEvents } = useEvents(DEMO_PATIENT_ID)
-  const { logEntries, loading: logsLoading, setLogEntries, refetch: refetchLogs } = useLogEntries(DEMO_PATIENT_ID)
-  const { posts, loading: postsLoading, setPosts, refetch: refetchPosts } = usePosts(DEMO_PATIENT_ID)
-  const { visits, setVisits, refetch: refetchVisits } = useVisits(DEMO_PATIENT_ID)
-  const { notifications, setNotifications, refetch: refetchNotifications } = useNotifications(DEMO_PATIENT_ID)
-  const { vault, setVault, refetch: refetchVault } = useVault(DEMO_PATIENT_ID)
-  const { wellnessDays } = useWellnessDays(DEMO_PATIENT_ID)
+  const { patient } = usePatient(selectedPatientId)
+  const { members, loading: membersLoading, setMembers, refetch: refetchMembers } = useMembers(selectedPatientId)
+  const { events, loading: eventsLoading, setEvents, refetch: refetchEvents } = useEvents(selectedPatientId)
+  const { logEntries, loading: logsLoading, setLogEntries, refetch: refetchLogs } = useLogEntries(selectedPatientId)
+  const { posts, loading: postsLoading, setPosts, refetch: refetchPosts } = usePosts(selectedPatientId)
+  const { visits, setVisits, refetch: refetchVisits } = useVisits(selectedPatientId)
+  const { notifications, setNotifications, refetch: refetchNotifications } = useNotifications(selectedPatientId)
+  const { vault, setVault, refetch: refetchVault } = useVault(selectedPatientId)
+  const { wellnessDays } = useWellnessDays(selectedPatientId)
 
   // ==========================================
   // Handler functions (demo mode = local state, Supabase mode = DB + refetch)
@@ -119,7 +124,7 @@ export default function Home() {
         }
         setMembers([...members, newMember])
       } else {
-        await addMemberToDb(member, DEMO_PATIENT_ID)
+        await addMemberToDb(member, selectedPatientId)
         refetchMembers()
       }
     } catch (error) {
@@ -163,7 +168,7 @@ export default function Home() {
         }
         setEvents([...events, newEvent])
       } else {
-        await addEventToDb(event, currentUserId, DEMO_PATIENT_ID)
+        await addEventToDb(event, currentUserId, selectedPatientId)
         refetchEvents()
       }
     } catch (error) {
@@ -208,7 +213,7 @@ export default function Home() {
         }
         setNotifications([newNotification, ...notifications])
       } else {
-        const logData = await addLogEntryToDb(entry, DEMO_PATIENT_ID)
+        const logData = await addLogEntryToDb(entry, selectedPatientId)
         // Create notification in DB too
         const notifTypeMap: Record<string, Notification['type']> = {
           vitals: 'vitals',
@@ -223,7 +228,7 @@ export default function Home() {
           message: entry.notes || 'New entry logged',
           sourceId: logData.id,
           sourceType: 'log_entry',
-        }, DEMO_PATIENT_ID)
+        }, selectedPatientId)
         refetchLogs()
         refetchNotifications()
       }
@@ -279,7 +284,7 @@ export default function Home() {
         }
         setPosts([newPost, ...posts])
       } else {
-        await addPostToDb(post, DEMO_PATIENT_ID)
+        await addPostToDb(post, selectedPatientId)
         refetchPosts()
       }
     } catch (error) {
@@ -364,7 +369,7 @@ export default function Home() {
           currentUserId,
           currentMember?.name || currentUserName,
           currentMember?.relationship,
-          DEMO_PATIENT_ID
+          selectedPatientId
         )
         refetchVisits()
       }
@@ -420,7 +425,7 @@ export default function Home() {
             message: note || 'Family visit completed',
             sourceId: activeVisit.id,
             sourceType: 'visit',
-          }, DEMO_PATIENT_ID)
+          }, selectedPatientId)
           refetchVisits()
           refetchNotifications()
         }
@@ -463,7 +468,7 @@ export default function Home() {
       }))
     } else {
       try {
-        await markAllNotificationsReadInDb(DEMO_PATIENT_ID, currentUserId)
+        await markAllNotificationsReadInDb(selectedPatientId, currentUserId)
         refetchNotifications()
       } catch (error) {
         showError('Something went wrong. Please try again.')
@@ -494,7 +499,7 @@ export default function Home() {
 
       {/* Navigation with Notification Bell */}
       <div className="glass-strong sticky top-0 z-50">
-        <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+        <Navigation activeTab={activeTab} onTabChange={setActiveTab} userRole={currentUserRole} />
         <div className="absolute right-4 top-0 h-16 flex items-center z-50">
               <NotificationCenter
                 notifications={notifications.filter(n => getVisibleNotificationTypes(currentUserRole).includes(n.type))}
@@ -508,6 +513,19 @@ export default function Home() {
               />
         </div>
       </div>
+
+      {/* Resident Selector for admin and nurse roles */}
+      {(currentUserRole === 'admin' || currentUserRole === 'nurse') && (
+        <ResidentSelector
+          currentPatientId={selectedPatientId}
+          currentPatientName={selectedPatientName}
+          onSelectResident={(id, name) => {
+            setSelectedPatientId(id)
+            setSelectedPatientName(name)
+          }}
+          userRole={currentUserRole}
+        />
+      )}
 
       <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-20 md:pb-8">
         {/* Role switcher + user banner */}
@@ -784,6 +802,12 @@ export default function Home() {
         {activeTab === 'vault' && (
           <ErrorBoundary>
             <VaultComponent vault={vault} onUpdateVault={setVault} currentUserRole={currentUserRole} />
+          </ErrorBoundary>
+        )}
+
+        {activeTab === 'settings' && currentUserRole === 'admin' && (
+          <ErrorBoundary>
+            <FacilitySettings />
           </ErrorBoundary>
         )}
       </main>

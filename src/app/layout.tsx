@@ -9,8 +9,14 @@ const outfit = Outfit({
 })
 
 export const metadata: Metadata = {
-  title: 'CareBridge Connect - Peace of Mind for Families, Less Burden for Staff',
-  description: 'A HIPAA-compliant family communication platform for skilled nursing facilities. Real-time care updates, progress summaries, and secure information sharing.',
+  title: {
+    default: 'CareBridge Connect — Family Communication for Skilled Nursing Facilities',
+    template: '%s | CareBridge Connect',
+  },
+  description:
+    'A HIPAA-compliant platform that reduces family call volume by 60% and gives care teams their time back. Trusted by skilled nursing facilities.',
+  metadataBase: new URL('https://carebridgeconnect.ai'),
+  robots: { index: true, follow: true },
 }
 
 export default function RootLayout({

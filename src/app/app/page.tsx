@@ -1,0 +1,778 @@
+'use client'
+
+import { useState } from 'react'
+import Navigation from '@/components/Navigation'
+import CareCircle from '@/components/CareCircle'
+import CareCalendar from '@/components/CareCalendar'
+import VaultComponent from '@/components/Vault'
+import CareLog from '@/components/CareLog'
+import ExportModal from '@/components/ExportModal'
+import NotificationCenter from '@/components/NotificationCenter'
+import VisitTracker from '@/components/VisitTracker'
+import WellnessTrends from '@/components/WellnessTrends'
+import VitalsTrends from '@/components/VitalsTrends'
+import QuickActions from '@/components/QuickActions'
+import ChatBot from '@/components/ChatBot'
+import LoginScreen from '@/components/LoginScreen'
+import HomeView from '@/components/HomeView'
+import { isDemoMode, DEMO_PATIENT_ID } from '@/lib/supabase'
+import {
+  usePatient,
+  useMembers,
+  useEvents,
+  useLogEntries,
+  usePosts,
+  useVisits,
+  useNotifications,
+  useVault,
+  useWellnessDays,
+} from '@/lib/hooks/useSupabaseData'
+import {
+  addMemberToDb,
+  addEventToDb,
+  claimEventInDb,
+  addLogEntryToDb,
+  addLogCommentToDb,
+  addPostToDb,
+  likePostInDb,
+  addPostCommentToDb,
+  checkInToDb,
+  checkOutInDb,
+  createNotificationInDb,
+  markNotificationReadInDb,
+  markAllNotificationsReadInDb,
+} from '@/lib/api/mutations'
+import { CareCircleMember, CalendarEvent, Vault, LogEntry, FeedPost, UserRole, Visit, Notification, FacilityReviewEntry } from '@/types'
+import { Heart, Shield, Calendar, Users, ClipboardList, Sparkles, Download, Lock, CheckCircle2, MessageSquare, TrendingUp, Star, CheckSquare } from 'lucide-react'
+import { format } from 'date-fns'
+import { demoGoals } from '@/lib/demo-data'
+import {
+  canUseQuickActions,
+  canViewMedications,
+  getVisibleCalendarEventTypes,
+  getVisibleNotificationTypes,
+  getVisibleLogCategories,
+} from '@/lib/permissions'
+
+export default function Home() {
+  const [activeTab, setActiveTab] = useState('login')
+  const [showExportModal, setShowExportModal] = useState(false)
+  const [internalReviews, setInternalReviews] = useState<FacilityReviewEntry[]>([])
+
+  // Current user state (set by login screen)
+  const [currentUser, setCurrentUser] = useState<{
+    id: string
+    name: string
+    role: UserRole
+    relationship: string
+  } | null>(null)
+
+  // Derive user info from state (fallback for safety)
+  const currentUserId = currentUser?.id || '1'
+  const currentUserName = currentUser?.name || 'Toshio Shintaku'
+  const currentUserRole: UserRole = currentUser?.role || 'primary'
+
+  // Sub-tab states
+  const [logSubTab, setLogSubTab] = useState<'timeline' | 'trends' | 'vitals' | 'wellness' | 'progress'>('timeline')
+
+  // Supabase data hooks (fall back to demo data when isDemoMode)
+  const { patient } = usePatient(DEMO_PATIENT_ID)
+  const { members, setMembers, refetch: refetchMembers } = useMembers(DEMO_PATIENT_ID)
+  const { events, setEvents, refetch: refetchEvents } = useEvents(DEMO_PATIENT_ID)
+  const { logEntries, setLogEntries, refetch: refetchLogs } = useLogEntries(DEMO_PATIENT_ID)
+  const { posts, setPosts, refetch: refetchPosts } = usePosts(DEMO_PATIENT_ID)
+  const { visits, setVisits, refetch: refetchVisits } = useVisits(DEMO_PATIENT_ID)
+  const { notifications, setNotifications, refetch: refetchNotifications } = useNotifications(DEMO_PATIENT_ID)
+  const { vault, setVault, refetch: refetchVault } = useVault(DEMO_PATIENT_ID)
+  const { wellnessDays } = useWellnessDays(DEMO_PATIENT_ID)
+
+  // ==========================================
+  // Handler functions (demo mode = local state, Supabase mode = DB + refetch)
+  // ==========================================
+
+  const handleAddMember = async (member: Omit<CareCircleMember, 'id' | 'joinedAt'>) => {
+    if (isDemoMode) {
+      const newMember: CareCircleMember = {
+        ...member,
+        id: String(members.length + 1),
+        joinedAt: new Date(),
+      }
+      setMembers([...members, newMember])
+    } else {
+      try {
+        await addMemberToDb(member, DEMO_PATIENT_ID)
+        refetchMembers()
+      } catch (error) {
+        console.error('Error adding member:', error)
+      }
+    }
+  }
+
+  const handleClaimEvent = async (eventId: string, userName: string) => {
+    if (isDemoMode) {
+      setEvents(
+        events.map((event) =>
+          event.id === eventId
+            ? { ...event, claimedBy: currentUserId, claimedByName: userName }
+            : event
+        )
+      )
+    } else {
+      try {
+        await claimEventInDb(eventId, currentUserId, userName)
+        refetchEvents()
+      } catch (error) {
+        console.error('Error claiming event:', error)
+      }
+    }
+  }
+
+  const handleAddEvent = async (event: Omit<CalendarEvent, 'id' | 'createdAt' | 'createdBy'>) => {
+    if (isDemoMode) {
+      const newEvent: CalendarEvent = {
+        ...event,
+        id: String(events.length + 1),
+        createdAt: new Date(),
+        createdBy: currentUserId,
+      }
+      setEvents([...events, newEvent])
+    } else {
+      try {
+        await addEventToDb(event, currentUserId, DEMO_PATIENT_ID)
+        refetchEvents()
+      } catch (error) {
+        console.error('Error adding event:', error)
+      }
+    }
+  }
+
+  // Care Log handlers
+  const handleAddLogEntry = async (entry: Omit<LogEntry, 'id' | 'createdAt' | 'comments'>) => {
+    if (isDemoMode) {
+      const newEntry: LogEntry = {
+        ...entry,
+        id: `log-${logEntries.length + 1}`,
+        createdAt: new Date(),
+        comments: [],
+      }
+      setLogEntries([newEntry, ...logEntries])
+
+      // Auto-generate notification
+      const notifTypeMap: Record<string, Notification['type']> = {
+        vitals: 'vitals',
+        medication: 'medication',
+        mood: 'mood',
+        incident: 'incident',
+        activity: 'general',
+      }
+      const newNotification: Notification = {
+        id: `notif-${Date.now()}`,
+        type: notifTypeMap[entry.category] || 'general',
+        title: entry.title,
+        message: entry.notes || 'New entry logged',
+        sourceId: newEntry.id,
+        sourceType: 'log_entry',
+        createdAt: new Date(),
+        readBy: [],
+      }
+      setNotifications([newNotification, ...notifications])
+    } else {
+      try {
+        const logData = await addLogEntryToDb(entry, DEMO_PATIENT_ID)
+        // Create notification in DB too
+        const notifTypeMap: Record<string, Notification['type']> = {
+          vitals: 'vitals',
+          medication: 'medication',
+          mood: 'mood',
+          incident: 'incident',
+          activity: 'general',
+        }
+        await createNotificationInDb({
+          type: notifTypeMap[entry.category] || 'general',
+          title: entry.title,
+          message: entry.notes || 'New entry logged',
+          sourceId: logData.id,
+          sourceType: 'log_entry',
+        }, DEMO_PATIENT_ID)
+        refetchLogs()
+        refetchNotifications()
+      } catch (error) {
+        console.error('Error adding log entry:', error)
+      }
+    }
+  }
+
+  const handleAddLogComment = async (entryId: string, content: string) => {
+    const currentMember = members.find(m => m.id === currentUserId)
+    if (isDemoMode) {
+      setLogEntries(logEntries.map(entry => {
+        if (entry.id === entryId) {
+          return {
+            ...entry,
+            comments: [...entry.comments, {
+              id: `lc-${Date.now()}`,
+              authorId: currentUserId,
+              authorName: currentMember?.name || 'You',
+              content,
+              createdAt: new Date(),
+            }],
+          }
+        }
+        return entry
+      }))
+    } else {
+      try {
+        await addLogCommentToDb(entryId, currentUserId, currentMember?.name || 'You', content)
+        refetchLogs()
+      } catch (error) {
+        console.error('Error adding log comment:', error)
+      }
+    }
+  }
+
+  // Home Feed handlers
+  const handleAddPost = async (post: Omit<FeedPost, 'id' | 'createdAt' | 'likes' | 'comments'>) => {
+    if (isDemoMode) {
+      const newPost: FeedPost = {
+        ...post,
+        id: String(posts.length + 1),
+        createdAt: new Date(),
+        likes: [],
+        comments: [],
+      }
+      setPosts([newPost, ...posts])
+    } else {
+      try {
+        await addPostToDb(post, DEMO_PATIENT_ID)
+        refetchPosts()
+      } catch (error) {
+        console.error('Error adding post:', error)
+      }
+    }
+  }
+
+  const handleLikePost = async (postId: string) => {
+    if (isDemoMode) {
+      setPosts(posts.map(post => {
+        if (post.id === postId) {
+          const isLiked = post.likes.includes(currentUserId)
+          return {
+            ...post,
+            likes: isLiked
+              ? post.likes.filter(id => id !== currentUserId)
+              : [...post.likes, currentUserId],
+          }
+        }
+        return post
+      }))
+    } else {
+      try {
+        await likePostInDb(postId, currentUserId)
+        refetchPosts()
+      } catch (error) {
+        console.error('Error liking post:', error)
+      }
+    }
+  }
+
+  const handleAddPostComment = async (postId: string, content: string) => {
+    const currentMember = members.find(m => m.id === currentUserId)
+    if (isDemoMode) {
+      setPosts(posts.map(post => {
+        if (post.id === postId) {
+          return {
+            ...post,
+            comments: [...post.comments, {
+              id: `c${Date.now()}`,
+              authorId: currentUserId,
+              authorName: currentMember?.name || 'You',
+              content,
+              createdAt: new Date(),
+            }],
+          }
+        }
+        return post
+      }))
+    } else {
+      try {
+        await addPostCommentToDb(postId, currentUserId, currentMember?.name || 'You', content)
+        refetchPosts()
+      } catch (error) {
+        console.error('Error adding post comment:', error)
+      }
+    }
+  }
+
+  // Visit handlers
+  const handleCheckIn = async () => {
+    const currentMember = members.find(m => m.id === currentUserId)
+    if (isDemoMode) {
+      const newVisit: Visit = {
+        id: `v-${Date.now()}`,
+        visitorId: currentUserId,
+        visitorName: currentMember?.name || currentUserName,
+        visitorRelationship: currentMember?.relationship,
+        checkInTime: new Date(),
+      }
+      setVisits([newVisit, ...visits])
+    } else {
+      try {
+        await checkInToDb(
+          currentUserId,
+          currentMember?.name || currentUserName,
+          currentMember?.relationship,
+          DEMO_PATIENT_ID
+        )
+        refetchVisits()
+      } catch (error) {
+        console.error('Error checking in:', error)
+      }
+    }
+  }
+
+  const handleCheckOut = async (mood: string, note: string) => {
+    if (isDemoMode) {
+      setVisits(visits.map(visit => {
+        if (visit.visitorId === currentUserId && !visit.checkOutTime) {
+          const checkOutTime = new Date()
+          const duration = Math.round((checkOutTime.getTime() - new Date(visit.checkInTime).getTime()) / 60000)
+          return {
+            ...visit,
+            checkOutTime,
+            duration,
+            mood: mood as Visit['mood'],
+            note: note || undefined,
+          }
+        }
+        return visit
+      }))
+
+      // Create a notification for the visit
+      const newNotification: Notification = {
+        id: `notif-visit-${Date.now()}`,
+        type: 'visit',
+        title: `${currentUserName} Visited`,
+        message: note || 'Family visit completed',
+        sourceId: `v-${Date.now()}`,
+        sourceType: 'visit',
+        createdAt: new Date(),
+        readBy: [],
+      }
+      setNotifications([newNotification, ...notifications])
+    } else {
+      try {
+        // Find current active visit
+        const activeVisit = visits.find(v => v.visitorId === currentUserId && !v.checkOutTime)
+        if (activeVisit) {
+          const duration = Math.round((new Date().getTime() - new Date(activeVisit.checkInTime).getTime()) / 60000)
+          await checkOutInDb(activeVisit.id, mood, note, duration)
+          await createNotificationInDb({
+            type: 'visit',
+            title: `${currentUserName} Visited`,
+            message: note || 'Family visit completed',
+            sourceId: activeVisit.id,
+            sourceType: 'visit',
+          }, DEMO_PATIENT_ID)
+          refetchVisits()
+          refetchNotifications()
+        }
+      } catch (error) {
+        console.error('Error checking out:', error)
+      }
+    }
+  }
+
+  // Notification handlers
+  const handleMarkAsRead = async (notificationId: string) => {
+    if (isDemoMode) {
+      setNotifications(notifications.map(n => {
+        if (n.id === notificationId && !n.readBy.includes(currentUserId)) {
+          return { ...n, readBy: [...n.readBy, currentUserId] }
+        }
+        return n
+      }))
+    } else {
+      try {
+        await markNotificationReadInDb(notificationId, currentUserId)
+        refetchNotifications()
+      } catch (error) {
+        console.error('Error marking notification as read:', error)
+      }
+    }
+  }
+
+  const handleMarkAllAsRead = async () => {
+    if (isDemoMode) {
+      setNotifications(notifications.map(n => {
+        if (!n.readBy.includes(currentUserId)) {
+          return { ...n, readBy: [...n.readBy, currentUserId] }
+        }
+        return n
+      }))
+    } else {
+      try {
+        await markAllNotificationsReadInDb(DEMO_PATIENT_ID, currentUserId)
+        refetchNotifications()
+      } catch (error) {
+        console.error('Error marking all notifications as read:', error)
+      }
+    }
+  }
+
+  // Review handler
+  const handleAddReview = (review: FacilityReviewEntry) => {
+    setInternalReviews(prev => [review, ...prev])
+  }
+
+  // Login screen
+  if (activeTab === 'login') {
+    return (
+      <LoginScreen
+        onLogin={(user) => {
+          setCurrentUser(user)
+          setActiveTab('home')
+        }}
+      />
+    )
+  }
+
+  return (
+    <div className="min-h-screen gradient-mesh-bg">
+      {/* Decorative blobs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-96 h-96 blob-primary rounded-full opacity-50"></div>
+        <div className="absolute bottom-20 -left-20 w-72 h-72 blob-accent rounded-full opacity-40"></div>
+      </div>
+
+      {/* Navigation with Notification Bell */}
+      <nav className="glass-strong sticky top-0 z-50 border-b border-white/40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+
+            {/* Notification Bell */}
+            <div className="flex items-center">
+              <NotificationCenter
+                notifications={notifications.filter(n => getVisibleNotificationTypes(currentUserRole).includes(n.type))}
+                currentUserId={currentUserId}
+                onMarkAsRead={handleMarkAsRead}
+                onMarkAllAsRead={handleMarkAllAsRead}
+                onNavigate={(sourceType, sourceId) => {
+                  if (sourceType === 'log_entry') setActiveTab('log')
+                  else if (sourceType === 'visit') { setActiveTab('home') }
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Role switcher + user banner */}
+        <div className="mb-4 flex items-center gap-3 flex-wrap">
+          <span className="text-sm text-navy-500">Viewing as:</span>
+          <span className="text-sm font-semibold text-navy-800">{currentUserName}</span>
+          <div className="flex gap-1 bg-cream-100 rounded-xl p-1">
+            {(['primary', 'admin', 'nurse', 'family'] as UserRole[]).map((role) => (
+              <button
+                key={role}
+                onClick={() => {
+                  const roleMap: Record<UserRole, { id: string; name: string; role: UserRole; relationship: string }> = {
+                    primary: { id: '1', name: 'Toshio Shintaku', role: 'primary', relationship: 'Brother (Healthcare POA)' },
+                    admin: { id: 'a1', name: 'Mary Wilson', role: 'admin', relationship: 'Facility Administrator' },
+                    nurse: { id: 'n1', name: 'Jane Doe', role: 'nurse', relationship: 'Primary Nurse' },
+                    family: { id: '2', name: 'Kainoa Shintaku', role: 'family', relationship: 'Nephew' },
+                  }
+                  setCurrentUser(roleMap[role])
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  currentUserRole === role
+                    ? 'bg-white text-navy-900 shadow-sm'
+                    : 'text-navy-500 hover:text-navy-700'
+                }`}
+              >
+                {role === 'primary' ? 'Primary' : role === 'admin' ? 'Admin' : role === 'nurse' ? 'Nurse' : 'Family'}
+              </button>
+            ))}
+          </div>
+          {!isDemoMode && (
+            <span className="text-xs text-mint-600 font-medium px-2 py-1 bg-mint-50 rounded-lg">
+              Connected to Supabase
+            </span>
+          )}
+        </div>
+
+        {activeTab === 'home' && (
+          <HomeView
+            patient={patient}
+            logEntries={logEntries}
+            events={events}
+            visits={visits}
+            members={members}
+            currentUserId={currentUserId}
+            currentUserName={currentUserName}
+            currentUserRole={currentUserRole}
+            reviews={internalReviews}
+            onClaimVisit={(eventId) => handleClaimEvent(eventId, currentUserName)}
+            onAddReview={handleAddReview}
+            onNavigateToCalendar={() => setActiveTab('calendar')}
+          />
+        )}
+
+        {activeTab === 'calendar' && (
+          <CareCalendar
+            events={events.filter(e => getVisibleCalendarEventTypes(currentUserRole).includes(e.type))}
+            onClaimEvent={handleClaimEvent}
+            onAddEvent={handleAddEvent}
+          />
+        )}
+
+        {activeTab === 'log' && (
+          <div className="space-y-6">
+            {/* Quick Actions for Nurses */}
+            {canUseQuickActions(currentUserRole) && (
+              <QuickActions
+                medications={vault.medications}
+                currentUserId={currentUserId}
+                currentUserName={currentUserName}
+                onAddLogEntry={handleAddLogEntry}
+              />
+            )}
+
+            {/* Log Sub-tabs */}
+            <div className="flex gap-2 border-b border-primary-100 pb-2 flex-wrap">
+              {[
+                { id: 'timeline' as const, label: 'Timeline' },
+                { id: 'wellness' as const, label: 'Wellness' },
+                { id: 'progress' as const, label: 'Progress' },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setLogSubTab(tab.id)}
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                    logSubTab === tab.id
+                      ? 'bg-primary-100 text-primary-700 shadow-soft'
+                      : 'text-navy-600 hover:bg-cream-100'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {logSubTab === 'timeline' && (
+              <CareLog
+                logEntries={logEntries}
+                currentUserRole={currentUserRole}
+                currentUserId={currentUserId}
+                currentUserName={currentUserName}
+                patientName={patient?.name ?? 'the patient'}
+                onAddLogEntry={handleAddLogEntry}
+                onAddComment={handleAddLogComment}
+              />
+            )}
+
+            {logSubTab === 'wellness' && <WellnessTrends days={wellnessDays} />}
+
+            {logSubTab === 'progress' && (
+              <div className="space-y-6">
+                {/* Recovery Goals */}
+                <div className="card-glass p-6">
+                  <h3 className="text-lg font-bold text-navy-900 mb-5">Recovery Goals</h3>
+                  <div className="space-y-6">
+                    {demoGoals.map(goal => (
+                      <div key={goal.id}>
+                        <div className="flex justify-between items-center mb-2">
+                          <div>
+                            <p className="font-semibold text-navy-900">{goal.title}</p>
+                            <p className="text-xs text-navy-500">{goal.category} · Target: {goal.targetDate}</p>
+                          </div>
+                          <span className={`text-base font-bold ${
+                            goal.progressPercent >= 70 ? 'text-mint-600'
+                              : goal.progressPercent >= 40 ? 'text-amber-600'
+                              : 'text-red-500'
+                          }`}>{goal.progressPercent}%</span>
+                        </div>
+                        <div className="w-full bg-navy-100 rounded-full h-3 mb-3">
+                          <div
+                            className={`h-3 rounded-full transition-all ${
+                              goal.progressPercent >= 70 ? 'bg-gradient-to-r from-mint-400 to-mint-500'
+                                : goal.progressPercent >= 40 ? 'bg-gradient-to-r from-amber-400 to-amber-500'
+                                : 'bg-gradient-to-r from-red-400 to-red-500'
+                            }`}
+                            style={{ width: `${goal.progressPercent}%` }}
+                          />
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {goal.milestones.map((milestone, i) => {
+                            const completed = (i / goal.milestones.length) * 100 < goal.progressPercent
+                            return (
+                              <label key={i} className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full cursor-default select-none ${
+                                completed ? 'bg-mint-50 text-mint-700' : 'bg-cream-100 text-navy-400'
+                              }`}>
+                                <CheckSquare className={`h-3.5 w-3.5 flex-shrink-0 ${completed ? 'text-mint-600' : 'text-navy-300'}`} />
+                                {milestone}
+                              </label>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Therapy Session Stats */}
+                <div className="card-glass p-6">
+                  <h3 className="text-lg font-bold text-navy-900 mb-5">Activity Completion</h3>
+                  {(() => {
+                    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+                    const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
+                    const thisWeek = logEntries.filter(e => new Date(e.createdAt) >= sevenDaysAgo)
+                    const lastWeek = logEntries.filter(e => new Date(e.createdAt) >= fourteenDaysAgo && new Date(e.createdAt) < sevenDaysAgo)
+                    const therapyThis = thisWeek.filter(e => e.category === 'activity' && (e.activityLog?.activityType === 'physical_therapy' || e.activityLog?.activityType === 'occupational_therapy')).length
+                    const therapyLast = lastWeek.filter(e => e.category === 'activity' && (e.activityLog?.activityType === 'physical_therapy' || e.activityLog?.activityType === 'occupational_therapy')).length
+                    const mealThis = thisWeek.filter(e => e.category === 'activity' && e.activityLog?.activityType === 'meal')
+                    const mealLast = lastWeek.filter(e => e.category === 'activity' && e.activityLog?.activityType === 'meal')
+                    const participationMap: Record<string, number> = { active: 90, moderate: 60, minimal: 25, refused: 0 }
+                    const avgThis = mealThis.length > 0 ? Math.round(mealThis.reduce((s, e) => s + (participationMap[e.activityLog?.participation || 'moderate'] ?? 60), 0) / mealThis.length) : 0
+                    const avgLast = mealLast.length > 0 ? Math.round(mealLast.reduce((s, e) => s + (participationMap[e.activityLog?.participation || 'moderate'] ?? 60), 0) / mealLast.length) : 0
+                    return (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="p-4 bg-blue-50 rounded-2xl text-center">
+                            <p className="text-3xl font-bold text-blue-700">{therapyThis}</p>
+                            <p className="text-xs font-medium text-blue-600 mt-1">Therapy Sessions</p>
+                            <p className="text-xs text-navy-500">this week</p>
+                            {therapyLast > 0 && (
+                              <p className={`text-xs font-medium mt-1 flex items-center justify-center gap-1 ${therapyThis >= therapyLast ? 'text-mint-600' : 'text-amber-600'}`}>
+                                {therapyThis >= therapyLast ? '↑' : '↓'} vs {therapyLast} last week
+                              </p>
+                            )}
+                          </div>
+                          <div className="p-4 bg-green-50 rounded-2xl text-center">
+                            <p className="text-3xl font-bold text-green-700">{avgThis > 0 ? `${avgThis}%` : '—'}</p>
+                            <p className="text-xs font-medium text-green-600 mt-1">Meal Participation</p>
+                            <p className="text-xs text-navy-500">avg this week</p>
+                            {avgLast > 0 && avgThis > 0 && (
+                              <p className={`text-xs font-medium mt-1 flex items-center justify-center gap-1 ${avgThis >= avgLast ? 'text-mint-600' : 'text-amber-600'}`}>
+                                {avgThis >= avgLast ? '↑' : '↓'} from {avgLast}% last week
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="p-4 bg-primary-50 rounded-2xl">
+                          <p className="text-sm text-primary-700 leading-relaxed">
+                            {therapyThis > therapyLast
+                              ? `Therapy participation improved from ${therapyLast} → ${therapyThis} sessions this week.`
+                              : therapyThis === therapyLast && therapyThis > 0
+                                ? `Therapy sessions are consistent at ${therapyThis} per week.`
+                                : therapyThis > 0
+                                  ? `${therapyThis} therapy session${therapyThis > 1 ? 's' : ''} completed this week.`
+                                  : 'Therapy sessions are scheduled this week.'
+                            }
+                            {avgThis > 0 && avgLast > 0
+                              ? avgThis >= avgLast
+                                ? ` Meal participation improved from ${avgLast}% → ${avgThis}% this week.`
+                                : ` Meal participation changed from ${avgLast}% → ${avgThis}% this week.`
+                              : ''
+                            }
+                          </p>
+                        </div>
+                      </div>
+                    )
+                  })()}
+                </div>
+              </div>
+            )}
+
+            {/* Admin: Internal Feedback */}
+            {currentUserRole === 'admin' && internalReviews.filter(r => !r.isPublic).length > 0 && (
+              <div className="card-glass p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="p-2 rounded-xl bg-amber-50">
+                    <Star className="h-4 w-4 text-amber-500" />
+                  </div>
+                  <h3 className="text-sm font-bold text-navy-900">Internal Feedback</h3>
+                  <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs font-medium">
+                    {internalReviews.filter(r => !r.isPublic).length} private
+                  </span>
+                </div>
+                <div className="space-y-3">
+                  {internalReviews.filter(r => !r.isPublic).map(review => (
+                    <div key={review.id} className="p-4 bg-amber-50/60 rounded-2xl border border-amber-100">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="flex gap-0.5">
+                          {[1, 2, 3, 4, 5].map(s => (
+                            <Star key={s} className={`h-3.5 w-3.5 ${s <= review.rating ? 'text-amber-400 fill-amber-400' : 'text-navy-200'}`} />
+                          ))}
+                        </div>
+                        <span className="text-sm font-medium text-navy-700">{review.authorName}</span>
+                        <span className="text-xs text-navy-400">{format(new Date(review.createdAt), 'MMM d, yyyy')}</span>
+                      </div>
+                      {review.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-2">
+                          {review.tags.map(tag => (
+                            <span key={tag} className="px-2 py-0.5 bg-white rounded-full text-xs text-navy-600 capitalize">{tag}</span>
+                          ))}
+                        </div>
+                      )}
+                      {review.content && <p className="text-sm text-navy-700 leading-relaxed">{review.content}</p>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'circle' && (
+          <CareCircle members={members} currentUserRole={currentUserRole} onAddMember={handleAddMember} />
+        )}
+
+        {activeTab === 'vault' && (
+          <VaultComponent vault={vault} onUpdateVault={setVault} currentUserRole={currentUserRole} />
+        )}
+      </main>
+
+      {/* Export Button - positioned above chatbot */}
+      <button
+        onClick={() => setShowExportModal(true)}
+        className="fixed bottom-24 right-6 p-3.5 bg-gradient-to-br from-navy-600 to-navy-700 text-white rounded-2xl shadow-float hover:shadow-float hover:-translate-y-0.5 transition-all duration-300 z-30"
+        title="Export & Share"
+      >
+        <Download className="h-5 w-5" />
+      </button>
+
+      {/* Demo Notice */}
+      <div className="fixed bottom-4 left-4 right-20 sm:left-auto sm:right-20 sm:w-auto">
+        <div className="glass-dark text-white px-4 py-3 rounded-2xl shadow-glass-lg flex items-center gap-3">
+          <div className={`p-2 ${isDemoMode ? 'bg-primary-500' : 'bg-mint-500'} rounded-xl`}>
+            <Sparkles className="h-4 w-4" />
+          </div>
+          <div className="text-sm">
+            <p className="font-medium">{isDemoMode ? 'Demo Mode' : 'Live Mode'}</p>
+            <p className="text-navy-200 text-xs">{isDemoMode ? 'Data stored locally' : 'Connected to Supabase'}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Export Modal */}
+      <ExportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        vault={canViewMedications(currentUserRole) ? vault : { ...vault, medications: [], providers: [], insuranceCards: [] }}
+        logEntries={logEntries.filter(e => getVisibleLogCategories(currentUserRole).includes(e.category))}
+        events={events.filter(e => getVisibleCalendarEventTypes(currentUserRole).includes(e.type))}
+      />
+
+      {/* AI Chat Assistant */}
+      <ChatBot
+        patientInfo={patient}
+        logEntries={logEntries.filter(e => getVisibleLogCategories(currentUserRole).includes(e.category))}
+        events={events.filter(e => getVisibleCalendarEventTypes(currentUserRole).includes(e.type))}
+        vault={canViewMedications(currentUserRole) ? vault : { ...vault, medications: [], providers: [], insuranceCards: [] }}
+        visits={visits}
+      />
+    </div>
+  )
+}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Navigation from '@/components/Navigation'
 import CareCircle from '@/components/CareCircle'
 import CareCalendar from '@/components/CareCalendar'
@@ -46,6 +46,7 @@ import { CareCircleMember, CalendarEvent, Vault, LogEntry, FeedPost, UserRole, V
 import { Heart, Shield, Calendar, Users, ClipboardList, Sparkles, Download, Lock, CheckCircle2, MessageSquare, TrendingUp, Star, CheckSquare } from 'lucide-react'
 import { format } from 'date-fns'
 import { demoGoals } from '@/lib/demo-data'
+import { auditPatient } from '@/lib/audit'
 import {
   canUseQuickActions,
   canViewMedications,
@@ -72,6 +73,21 @@ export default function Home() {
   const currentUserName = currentUser?.name || 'Toshio Shintaku'
   const currentUserRole: UserRole = currentUser?.role || 'primary'
 
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const showError = (msg: string) => {
+    setErrorMsg(msg)
+    setTimeout(() => setErrorMsg(null), 5000)
+  }
+
+  // HIPAA audit logging on login
+  useEffect(() => {
+    if (currentUser) {
+      auditPatient(currentUser.id, currentUser.name, currentUser.role)
+    }
+  }, [currentUser])
+
   // Sub-tab states
   const [logSubTab, setLogSubTab] = useState<'timeline' | 'trends' | 'vitals' | 'wellness' | 'progress'>('timeline')
 
@@ -91,20 +107,25 @@ export default function Home() {
   // ==========================================
 
   const handleAddMember = async (member: Omit<CareCircleMember, 'id' | 'joinedAt'>) => {
-    if (isDemoMode) {
-      const newMember: CareCircleMember = {
-        ...member,
-        id: String(members.length + 1),
-        joinedAt: new Date(),
-      }
-      setMembers([...members, newMember])
-    } else {
-      try {
+    if (isSubmitting) return
+    setIsSubmitting(true)
+    try {
+      if (isDemoMode) {
+        const newMember: CareCircleMember = {
+          ...member,
+          id: crypto.randomUUID(),
+          joinedAt: new Date(),
+        }
+        setMembers([...members, newMember])
+      } else {
         await addMemberToDb(member, DEMO_PATIENT_ID)
         refetchMembers()
-      } catch (error) {
-        console.error('Error adding member:', error)
       }
+    } catch (error) {
+      showError('Something went wrong. Please try again.')
+      console.error('[ERROR]', error)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -122,62 +143,70 @@ export default function Home() {
         await claimEventInDb(eventId, currentUserId, userName)
         refetchEvents()
       } catch (error) {
-        console.error('Error claiming event:', error)
+        showError('Something went wrong. Please try again.')
+        console.error('[ERROR]', error)
       }
     }
   }
 
   const handleAddEvent = async (event: Omit<CalendarEvent, 'id' | 'createdAt' | 'createdBy'>) => {
-    if (isDemoMode) {
-      const newEvent: CalendarEvent = {
-        ...event,
-        id: String(events.length + 1),
-        createdAt: new Date(),
-        createdBy: currentUserId,
-      }
-      setEvents([...events, newEvent])
-    } else {
-      try {
+    if (isSubmitting) return
+    setIsSubmitting(true)
+    try {
+      if (isDemoMode) {
+        const newEvent: CalendarEvent = {
+          ...event,
+          id: crypto.randomUUID(),
+          createdAt: new Date(),
+          createdBy: currentUserId,
+        }
+        setEvents([...events, newEvent])
+      } else {
         await addEventToDb(event, currentUserId, DEMO_PATIENT_ID)
         refetchEvents()
-      } catch (error) {
-        console.error('Error adding event:', error)
       }
+    } catch (error) {
+      showError('Something went wrong. Please try again.')
+      console.error('[ERROR]', error)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
   // Care Log handlers
   const handleAddLogEntry = async (entry: Omit<LogEntry, 'id' | 'createdAt' | 'comments'>) => {
-    if (isDemoMode) {
-      const newEntry: LogEntry = {
-        ...entry,
-        id: `log-${logEntries.length + 1}`,
-        createdAt: new Date(),
-        comments: [],
-      }
-      setLogEntries([newEntry, ...logEntries])
+    if (isSubmitting) return
+    setIsSubmitting(true)
+    try {
+      if (isDemoMode) {
+        const newEntry: LogEntry = {
+          ...entry,
+          id: crypto.randomUUID(),
+          createdAt: new Date(),
+          comments: [],
+        }
+        setLogEntries([newEntry, ...logEntries])
 
-      // Auto-generate notification
-      const notifTypeMap: Record<string, Notification['type']> = {
-        vitals: 'vitals',
-        medication: 'medication',
-        mood: 'mood',
-        incident: 'incident',
-        activity: 'general',
-      }
-      const newNotification: Notification = {
-        id: `notif-${Date.now()}`,
-        type: notifTypeMap[entry.category] || 'general',
-        title: entry.title,
-        message: entry.notes || 'New entry logged',
-        sourceId: newEntry.id,
-        sourceType: 'log_entry',
-        createdAt: new Date(),
-        readBy: [],
-      }
-      setNotifications([newNotification, ...notifications])
-    } else {
-      try {
+        // Auto-generate notification
+        const notifTypeMap: Record<string, Notification['type']> = {
+          vitals: 'vitals',
+          medication: 'medication',
+          mood: 'mood',
+          incident: 'incident',
+          activity: 'general',
+        }
+        const newNotification: Notification = {
+          id: crypto.randomUUID(),
+          type: notifTypeMap[entry.category] || 'general',
+          title: entry.title,
+          message: entry.notes || 'New entry logged',
+          sourceId: newEntry.id,
+          sourceType: 'log_entry',
+          createdAt: new Date(),
+          readBy: [],
+        }
+        setNotifications([newNotification, ...notifications])
+      } else {
         const logData = await addLogEntryToDb(entry, DEMO_PATIENT_ID)
         // Create notification in DB too
         const notifTypeMap: Record<string, Notification['type']> = {
@@ -196,9 +225,12 @@ export default function Home() {
         }, DEMO_PATIENT_ID)
         refetchLogs()
         refetchNotifications()
-      } catch (error) {
-        console.error('Error adding log entry:', error)
       }
+    } catch (error) {
+      showError('Something went wrong. Please try again.')
+      console.error('[ERROR]', error)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -210,7 +242,7 @@ export default function Home() {
           return {
             ...entry,
             comments: [...entry.comments, {
-              id: `lc-${Date.now()}`,
+              id: crypto.randomUUID(),
               authorId: currentUserId,
               authorName: currentMember?.name || 'You',
               content,
@@ -225,29 +257,35 @@ export default function Home() {
         await addLogCommentToDb(entryId, currentUserId, currentMember?.name || 'You', content)
         refetchLogs()
       } catch (error) {
-        console.error('Error adding log comment:', error)
+        showError('Something went wrong. Please try again.')
+        console.error('[ERROR]', error)
       }
     }
   }
 
   // Home Feed handlers
   const handleAddPost = async (post: Omit<FeedPost, 'id' | 'createdAt' | 'likes' | 'comments'>) => {
-    if (isDemoMode) {
-      const newPost: FeedPost = {
-        ...post,
-        id: String(posts.length + 1),
-        createdAt: new Date(),
-        likes: [],
-        comments: [],
-      }
-      setPosts([newPost, ...posts])
-    } else {
-      try {
+    if (isSubmitting) return
+    setIsSubmitting(true)
+    try {
+      if (isDemoMode) {
+        const newPost: FeedPost = {
+          ...post,
+          id: crypto.randomUUID(),
+          createdAt: new Date(),
+          likes: [],
+          comments: [],
+        }
+        setPosts([newPost, ...posts])
+      } else {
         await addPostToDb(post, DEMO_PATIENT_ID)
         refetchPosts()
-      } catch (error) {
-        console.error('Error adding post:', error)
       }
+    } catch (error) {
+      showError('Something went wrong. Please try again.')
+      console.error('[ERROR]', error)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -270,7 +308,8 @@ export default function Home() {
         await likePostInDb(postId, currentUserId)
         refetchPosts()
       } catch (error) {
-        console.error('Error liking post:', error)
+        showError('Something went wrong. Please try again.')
+        console.error('[ERROR]', error)
       }
     }
   }
@@ -283,7 +322,7 @@ export default function Home() {
           return {
             ...post,
             comments: [...post.comments, {
-              id: `c${Date.now()}`,
+              id: crypto.randomUUID(),
               authorId: currentUserId,
               authorName: currentMember?.name || 'You',
               content,
@@ -298,25 +337,28 @@ export default function Home() {
         await addPostCommentToDb(postId, currentUserId, currentMember?.name || 'You', content)
         refetchPosts()
       } catch (error) {
-        console.error('Error adding post comment:', error)
+        showError('Something went wrong. Please try again.')
+        console.error('[ERROR]', error)
       }
     }
   }
 
   // Visit handlers
   const handleCheckIn = async () => {
-    const currentMember = members.find(m => m.id === currentUserId)
-    if (isDemoMode) {
-      const newVisit: Visit = {
-        id: `v-${Date.now()}`,
-        visitorId: currentUserId,
-        visitorName: currentMember?.name || currentUserName,
-        visitorRelationship: currentMember?.relationship,
-        checkInTime: new Date(),
-      }
-      setVisits([newVisit, ...visits])
-    } else {
-      try {
+    if (isSubmitting) return
+    setIsSubmitting(true)
+    try {
+      const currentMember = members.find(m => m.id === currentUserId)
+      if (isDemoMode) {
+        const newVisit: Visit = {
+          id: crypto.randomUUID(),
+          visitorId: currentUserId,
+          visitorName: currentMember?.name || currentUserName,
+          visitorRelationship: currentMember?.relationship,
+          checkInTime: new Date(),
+        }
+        setVisits([newVisit, ...visits])
+      } else {
         await checkInToDb(
           currentUserId,
           currentMember?.name || currentUserName,
@@ -324,43 +366,48 @@ export default function Home() {
           DEMO_PATIENT_ID
         )
         refetchVisits()
-      } catch (error) {
-        console.error('Error checking in:', error)
       }
+    } catch (error) {
+      showError('Something went wrong. Please try again.')
+      console.error('[ERROR]', error)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
   const handleCheckOut = async (mood: string, note: string) => {
-    if (isDemoMode) {
-      setVisits(visits.map(visit => {
-        if (visit.visitorId === currentUserId && !visit.checkOutTime) {
-          const checkOutTime = new Date()
-          const duration = Math.round((checkOutTime.getTime() - new Date(visit.checkInTime).getTime()) / 60000)
-          return {
-            ...visit,
-            checkOutTime,
-            duration,
-            mood: mood as Visit['mood'],
-            note: note || undefined,
+    if (isSubmitting) return
+    setIsSubmitting(true)
+    try {
+      if (isDemoMode) {
+        setVisits(visits.map(visit => {
+          if (visit.visitorId === currentUserId && !visit.checkOutTime) {
+            const checkOutTime = new Date()
+            const duration = Math.round((checkOutTime.getTime() - new Date(visit.checkInTime).getTime()) / 60000)
+            return {
+              ...visit,
+              checkOutTime,
+              duration,
+              mood: mood as Visit['mood'],
+              note: note || undefined,
+            }
           }
-        }
-        return visit
-      }))
+          return visit
+        }))
 
-      // Create a notification for the visit
-      const newNotification: Notification = {
-        id: `notif-visit-${Date.now()}`,
-        type: 'visit',
-        title: `${currentUserName} Visited`,
-        message: note || 'Family visit completed',
-        sourceId: `v-${Date.now()}`,
-        sourceType: 'visit',
-        createdAt: new Date(),
-        readBy: [],
-      }
-      setNotifications([newNotification, ...notifications])
-    } else {
-      try {
+        // Create a notification for the visit
+        const newNotification: Notification = {
+          id: crypto.randomUUID(),
+          type: 'visit',
+          title: `${currentUserName} Visited`,
+          message: note || 'Family visit completed',
+          sourceId: crypto.randomUUID(),
+          sourceType: 'visit',
+          createdAt: new Date(),
+          readBy: [],
+        }
+        setNotifications([newNotification, ...notifications])
+      } else {
         // Find current active visit
         const activeVisit = visits.find(v => v.visitorId === currentUserId && !v.checkOutTime)
         if (activeVisit) {
@@ -376,9 +423,12 @@ export default function Home() {
           refetchVisits()
           refetchNotifications()
         }
-      } catch (error) {
-        console.error('Error checking out:', error)
       }
+    } catch (error) {
+      showError('Something went wrong. Please try again.')
+      console.error('[ERROR]', error)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -396,7 +446,8 @@ export default function Home() {
         await markNotificationReadInDb(notificationId, currentUserId)
         refetchNotifications()
       } catch (error) {
-        console.error('Error marking notification as read:', error)
+        showError('Something went wrong. Please try again.')
+        console.error('[ERROR]', error)
       }
     }
   }
@@ -414,7 +465,8 @@ export default function Home() {
         await markAllNotificationsReadInDb(DEMO_PATIENT_ID, currentUserId)
         refetchNotifications()
       } catch (error) {
-        console.error('Error marking all notifications as read:', error)
+        showError('Something went wrong. Please try again.')
+        console.error('[ERROR]', error)
       }
     }
   }
@@ -437,15 +489,10 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen gradient-mesh-bg">
-      {/* Decorative blobs */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-96 h-96 blob-primary rounded-full opacity-50"></div>
-        <div className="absolute bottom-20 -left-20 w-72 h-72 blob-accent rounded-full opacity-40"></div>
-      </div>
+    <div className="min-h-screen bg-slate-50">
 
       {/* Navigation with Notification Bell */}
-      <nav className="glass-strong sticky top-0 z-50 border-b border-white/40">
+      <nav className="glass-strong sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
@@ -472,7 +519,7 @@ export default function Home() {
         <div className="mb-4 flex items-center gap-3 flex-wrap">
           <span className="text-sm text-navy-500">Viewing as:</span>
           <span className="text-sm font-semibold text-navy-800">{currentUserName}</span>
-          <div className="flex gap-1 bg-cream-100 rounded-xl p-1">
+          <div className="flex gap-1 bg-white border border-slate-200 rounded-xl p-1">
             {(['primary', 'admin', 'nurse', 'family'] as UserRole[]).map((role) => (
               <button
                 key={role}
@@ -487,8 +534,8 @@ export default function Home() {
                 }}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                   currentUserRole === role
-                    ? 'bg-white text-navy-900 shadow-sm'
-                    : 'text-navy-500 hover:text-navy-700'
+                    ? 'bg-primary-600 text-white'
+                    : 'text-slate-600 hover:bg-slate-100'
                 }`}
               >
                 {role === 'primary' ? 'Primary' : role === 'admin' ? 'Admin' : role === 'nurse' ? 'Nurse' : 'Family'}
@@ -745,7 +792,7 @@ export default function Home() {
 
       {/* Demo Notice */}
       <div className="fixed bottom-4 left-4 right-20 sm:left-auto sm:right-20 sm:w-auto">
-        <div className="glass-dark text-white px-4 py-3 rounded-2xl shadow-glass-lg flex items-center gap-3">
+        <div className="bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-lg flex items-center gap-3">
           <div className={`p-2 ${isDemoMode ? 'bg-primary-500' : 'bg-mint-500'} rounded-xl`}>
             <Sparkles className="h-4 w-4" />
           </div>
@@ -773,6 +820,21 @@ export default function Home() {
         vault={canViewMedications(currentUserRole) ? vault : { ...vault, medications: [], providers: [], insuranceCards: [] }}
         visits={visits}
       />
+
+      {/* Error toast */}
+      {errorMsg && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl text-sm font-medium">
+          <div className="w-2 h-2 rounded-full bg-red-400 shrink-0" />
+          {errorMsg}
+          <button
+            onClick={() => setErrorMsg(null)}
+            className="ml-2 text-slate-400 hover:text-white transition-colors text-xs"
+            aria-label="Dismiss"
+          >
+            ✕
+          </button>
+        </div>
+      )}
     </div>
   )
 }

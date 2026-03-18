@@ -66,7 +66,7 @@ export default function CareCircle({ members, currentUserRole, onAddMember }: Ca
   const staffMembers = members.filter((m) => m.role === 'nurse' || m.role === 'admin')
 
   const generateInviteLink = () => {
-    const link = `https://carebridge.app/invite/${Math.random().toString(36).substring(7)}`
+    const link = `https://carebridge.app/invite/${crypto.randomUUID()}`
     setInviteLink(link)
   }
 

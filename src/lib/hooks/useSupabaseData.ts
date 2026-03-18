@@ -33,6 +33,10 @@ import {
   demoWellnessDays,
 } from '@/lib/demo-data'
 
+// TODO: replace with generated Supabase row types
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type DbRow = Record<string, any>
+
 // ==========================================
 // Patient Hook
 // ==========================================
@@ -235,7 +239,7 @@ export function useLogEntries(patientId: string = DEMO_PATIENT_ID) {
     if (error) {
       console.error('Error fetching log entries:', error)
     } else if (logs) {
-      setLogEntries(logs.map((log: any) => {
+      setLogEntries(logs.map((log: DbRow) => { // TODO: type from Supabase schema
         const vitals = log.vitals_data?.[0]
         const medLog = log.medication_log_data?.[0]
         const actLog = log.activity_log_data?.[0]
@@ -252,7 +256,7 @@ export function useLogEntries(patientId: string = DEMO_PATIENT_ID) {
           enteredByRole: log.entered_by_role as UserRole,
           createdAt: new Date(log.created_at),
           photos: log.photos?.length > 0 ? log.photos : undefined,
-          comments: (log.log_comments || []).map((c: any) => ({
+          comments: (log.log_comments || []).map((c: DbRow) => ({ // TODO: type from Supabase schema
             id: c.id,
             authorId: c.author_id,
             authorName: c.author_name,
@@ -362,7 +366,7 @@ export function usePosts(patientId: string = DEMO_PATIENT_ID) {
     if (error) {
       console.error('Error fetching posts:', error)
     } else if (data) {
-      setPosts(data.map((p: any) => ({
+      setPosts(data.map((p: DbRow) => ({ // TODO: type from Supabase schema
         id: p.id,
         authorId: p.author_id,
         authorName: p.author_name,
@@ -370,11 +374,11 @@ export function usePosts(patientId: string = DEMO_PATIENT_ID) {
         authorRole: p.author_role as UserRole,
         content: p.content,
         postType: p.post_type as FeedPost['postType'],
-        media: (p.media as any[]) || undefined,
+        media: (p.media as FeedPost['media']) || undefined, // TODO: type from Supabase schema
         location: p.location || undefined,
         taggedMembers: p.tagged_members || undefined,
         likes: p.likes || [],
-        comments: (p.feed_comments || []).map((c: any) => ({
+        comments: (p.feed_comments || []).map((c: DbRow) => ({ // TODO: type from Supabase schema
           id: c.id,
           authorId: c.author_id,
           authorName: c.author_name,
@@ -597,7 +601,7 @@ export function useVault(patientId: string = DEMO_PATIENT_ID) {
       documents: (docs || []).map(d => ({
         id: d.id,
         name: d.name,
-        category: d.category as any,
+        category: d.category as 'legal' | 'medical' | 'insurance' | 'other', // TODO: type from Supabase schema
         fileUrl: d.file_url || undefined,
         fileType: d.file_type || undefined,
         fileSize: d.file_size || undefined,

@@ -51,9 +51,9 @@ function getTimeBlock(date: Date): 'Morning' | 'Afternoon' | 'Evening' {
 }
 
 const timeBlockConfig = {
-  Morning: { emoji: '🌅', color: 'bg-amber-50 text-amber-700' },
-  Afternoon: { emoji: '☀️', color: 'bg-blue-50 text-blue-700' },
-  Evening: { emoji: '🌙', color: 'bg-indigo-50 text-indigo-700' },
+  Morning: { dotColor: 'bg-amber-400', color: 'bg-amber-50 text-amber-700' },
+  Afternoon: { dotColor: 'bg-blue-400', color: 'bg-blue-50 text-blue-700' },
+  Evening: { dotColor: 'bg-indigo-400', color: 'bg-indigo-50 text-indigo-700' },
 }
 
 const participationToPercent: Record<string, number> = {
@@ -335,13 +335,13 @@ export default function HomeView({
             <div className="absolute bottom-1 right-1 w-5 h-5 bg-mint-500 rounded-full border-3 border-white shadow-sm" style={{ borderWidth: '3px' }}></div>
           </div>
 
-          <h2 className="text-xl font-bold text-navy-900">{patient.name}</h2>
+          <h2 className="text-xl font-semibold text-navy-900">{patient.name}</h2>
           <p className="text-sm text-navy-500 mt-1">
             Room {patient.roomNumber} · Skilled Nursing
           </p>
 
           <div className="mt-4 inline-flex flex-col items-center">
-            <div className="px-5 py-2.5 bg-gradient-to-r from-primary-100 to-accent-100 rounded-2xl border border-primary-200/50">
+            <div className="px-5 py-2.5 bg-primary-50 rounded-2xl border border-primary-200/50">
               <p className="text-xs font-medium text-navy-500 uppercase tracking-wider">Stay Duration</p>
               <p className="text-2xl font-bold text-navy-900 mt-0.5">
                 {stayDuration} <span className="text-base font-medium text-navy-600">Days</span>
@@ -359,13 +359,13 @@ export default function HomeView({
             <div className="p-2 rounded-xl bg-red-50">
               <Heart className="h-4 w-4 text-red-500" />
             </div>
-            <h3 className="text-sm font-bold text-navy-900">Vitals Snapshot</h3>
+            <h3 className="text-sm font-semibold text-navy-900">Vitals Snapshot</h3>
           </div>
 
           {latestVitals?.vitals ? (
             <div className="grid grid-cols-2 gap-3">
               {latestVitals.vitals.bloodPressureSystolic != null && latestVitals.vitals.bloodPressureDiastolic != null && (
-                <div className="p-3 bg-white/60 rounded-xl">
+                <div className="p-3 bg-slate-50 rounded-xl">
                   <p className="text-[10px] font-medium text-navy-400 uppercase tracking-wider">Blood Pressure</p>
                   {isSimplifiedVitals ? (
                     <p className={`text-sm font-bold mt-1 ${getVitalStatus('bp', latestVitals.vitals.bloodPressureSystolic).color}`}>
@@ -385,7 +385,7 @@ export default function HomeView({
               )}
 
               {latestVitals.vitals.heartRate != null && (
-                <div className="p-3 bg-white/60 rounded-xl">
+                <div className="p-3 bg-slate-50 rounded-xl">
                   <p className="text-[10px] font-medium text-navy-400 uppercase tracking-wider">Heart Rate</p>
                   {isSimplifiedVitals ? (
                     <p className={`text-sm font-bold mt-1 ${getVitalStatus('hr', latestVitals.vitals.heartRate).color}`}>
@@ -405,7 +405,7 @@ export default function HomeView({
               )}
 
               {latestVitals.vitals.oxygenSaturation != null && (
-                <div className="p-3 bg-white/60 rounded-xl">
+                <div className="p-3 bg-slate-50 rounded-xl">
                   <p className="text-[10px] font-medium text-navy-400 uppercase tracking-wider">O2 Sat</p>
                   {isSimplifiedVitals ? (
                     <p className={`text-sm font-bold mt-1 ${getVitalStatus('o2', latestVitals.vitals.oxygenSaturation).color}`}>
@@ -425,7 +425,7 @@ export default function HomeView({
               )}
 
               {latestVitals.vitals.temperature != null && (
-                <div className="p-3 bg-white/60 rounded-xl">
+                <div className="p-3 bg-slate-50 rounded-xl">
                   <p className="text-[10px] font-medium text-navy-400 uppercase tracking-wider">Temp</p>
                   {isSimplifiedVitals ? (
                     <p className={`text-sm font-bold mt-1 ${getVitalStatus('temp', latestVitals.vitals.temperature).color}`}>
@@ -455,7 +455,7 @@ export default function HomeView({
             <div className="p-2 rounded-xl bg-purple-50">
               <Brain className="h-4 w-4 text-purple-500" />
             </div>
-            <h3 className="text-sm font-bold text-navy-900">Current Mood</h3>
+            <h3 className="text-sm font-semibold text-navy-900">Current Mood</h3>
           </div>
 
           {latestMood?.moodLog ? (
@@ -487,7 +487,7 @@ export default function HomeView({
               <div className="p-2 rounded-xl bg-blue-50">
                 <Calendar className="h-4 w-4 text-blue-500" />
               </div>
-              <h3 className="text-sm font-bold text-navy-900">Upcoming Appointments</h3>
+              <h3 className="text-sm font-semibold text-navy-900">Upcoming Appointments</h3>
             </div>
             <button
               onClick={onNavigateToCalendar}
@@ -509,7 +509,7 @@ export default function HomeView({
                     ? 'Tomorrow'
                     : format(eventDate, 'EEE, MMM d')
                 return (
-                  <div key={event.id} className="flex items-center gap-3 p-2.5 bg-white/60 rounded-xl">
+                  <div key={event.id} className="flex items-center gap-3 p-2.5 bg-slate-50 rounded-xl">
                     <span className="text-base">{config.emoji}</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-semibold text-navy-900 truncate">{event.title}</p>
@@ -534,7 +534,7 @@ export default function HomeView({
               <div className="p-2 rounded-xl bg-primary-50">
                 <Sparkles className="h-4 w-4 text-primary-500" />
               </div>
-              <h3 className="text-sm font-bold text-navy-900">Daily Digest</h3>
+              <h3 className="text-sm font-semibold text-navy-900">Daily Digest</h3>
             </div>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary-100 text-primary-600 text-[10px] font-semibold rounded-full uppercase tracking-wider">
               <Sparkles className="h-3 w-3" />
@@ -599,23 +599,23 @@ export default function HomeView({
                 return (
                   <div key={block} className="card-glass p-5">
                     <div className="flex items-center gap-2 mb-4">
-                      <span className="text-lg">{timeBlockConfig[block].emoji}</span>
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${timeBlockConfig[block].color}`}>
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${timeBlockConfig[block].color} inline-flex items-center gap-2`}>
+                        <span className={`w-2 h-2 rounded-full ${timeBlockConfig[block].dotColor} inline-block`} />
                         {block}
                       </span>
                       <span className="text-xs text-navy-400">{entries.length} update{entries.length > 1 ? 's' : ''}</span>
                     </div>
                     <div className="space-y-3">
                       {entries.map(entry => (
-                        <div key={entry.id} className="flex items-start gap-3 p-3 bg-white/60 rounded-xl">
+                        <div key={entry.id} className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl">
                           {entry.category === 'mood' && entry.moodLog ? (
                             <div className="flex items-center gap-3 flex-1">
                               <span className="text-2xl leading-none">{moodEmoji[entry.moodLog.mood] || '😐'}</span>
                               <div>
-                                <p className="font-semibold text-navy-900 text-sm">Well-being Check</p>
-                                <p className="text-navy-600 text-xs mt-0.5">{moodLabel[entry.moodLog.mood] || entry.moodLog.mood}</p>
+                                <p className="font-semibold text-slate-900 text-sm">Well-being Check</p>
+                                <p className="text-slate-600 text-xs mt-0.5">{moodLabel[entry.moodLog.mood] || entry.moodLog.mood}</p>
                                 {entry.moodLog.appetite && (
-                                  <p className="text-navy-400 text-xs">Appetite: {entry.moodLog.appetite}</p>
+                                  <p className="text-slate-400 text-xs">Appetite: {entry.moodLog.appetite}</p>
                                 )}
                               </div>
                             </div>
@@ -625,8 +625,8 @@ export default function HomeView({
                                 <Utensils className="h-4 w-4 text-green-600" />
                               </div>
                               <div>
-                                <p className="font-semibold text-navy-900 text-sm">{entry.title}</p>
-                                <p className="text-navy-600 text-xs mt-0.5">
+                                <p className="font-semibold text-slate-900 text-sm">{entry.title}</p>
+                                <p className="text-slate-600 text-xs mt-0.5">
                                   Meal — {participationToPercent[entry.activityLog.participation || 'moderate'] ?? 60}% eaten
                                 </p>
                               </div>
@@ -637,8 +637,8 @@ export default function HomeView({
                                 <Activity className="h-4 w-4 text-blue-600" />
                               </div>
                               <div>
-                                <p className="font-semibold text-navy-900 text-sm">{entry.title}</p>
-                                <p className="text-navy-600 text-xs mt-0.5 capitalize">
+                                <p className="font-semibold text-slate-900 text-sm">{entry.title}</p>
+                                <p className="text-slate-600 text-xs mt-0.5 capitalize">
                                   {entry.activityLog.activityType.replace('_', ' ')}
                                   {entry.activityLog.duration ? ` · ${entry.activityLog.duration} min` : ''}
                                   {entry.activityLog.participation ? ` · ${entry.activityLog.participation} participation` : ''}
@@ -662,7 +662,7 @@ export default function HomeView({
         {homeTab === 'plan' && (
           <div className="card-glass overflow-hidden">
             {/* Header */}
-            <div className="px-6 py-5 border-b border-primary-100/60 bg-gradient-to-r from-primary-50/60 to-accent-50/40">
+            <div className="px-6 py-5 border-b border-slate-200 bg-slate-50">
               <div className="flex items-start justify-between">
                 <div>
                   <h3 className="text-base font-bold text-navy-900">Care Plan</h3>
@@ -814,7 +814,7 @@ export default function HomeView({
                     { role: 'Dietitian', name: 'Rachel Kim, RD' },
                     { role: 'Social Worker', name: 'Tom Nguyen, MSW' },
                   ].map((member, i) => (
-                    <div key={i} className="p-2.5 bg-white/70 rounded-xl">
+                    <div key={i} className="p-2.5 bg-slate-50 rounded-xl">
                       <p className="text-[10px] text-navy-400 font-medium">{member.role}</p>
                       <p className="text-xs font-semibold text-navy-800 mt-0.5">{member.name}</p>
                     </div>
@@ -836,13 +836,13 @@ export default function HomeView({
                 <div className="p-2 rounded-xl bg-mint-50">
                   <TrendingUp className="h-4 w-4 text-mint-600" />
                 </div>
-                <h3 className="text-sm font-bold text-navy-900">Recovery Progress</h3>
+                <h3 className="text-sm font-semibold text-navy-900">Recovery Progress</h3>
               </div>
               <div className="space-y-6">
                 {demoGoals.map(goal => (
                   <div key={goal.id}>
                     <div className="flex justify-between items-center mb-1.5">
-                      <p className="font-semibold text-navy-900 text-sm">{goal.title}</p>
+                      <p className="font-semibold text-slate-900 text-sm">{goal.title}</p>
                       <span className={`text-sm font-bold ${
                         goal.progressPercent >= 70 ? 'text-mint-600'
                           : goal.progressPercent >= 40 ? 'text-amber-600'
@@ -888,20 +888,20 @@ export default function HomeView({
                 <div className="p-2 rounded-xl bg-primary-50">
                   <Activity className="h-4 w-4 text-primary-500" />
                 </div>
-                <h3 className="text-sm font-bold text-navy-900">Weekly Activity Summary</h3>
+                <h3 className="text-sm font-semibold text-navy-900">Weekly Activity Summary</h3>
               </div>
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div className="p-4 bg-blue-50 rounded-2xl text-center">
                   <p className="text-3xl font-bold text-blue-700">{weeklyStats.therapySessions}</p>
-                  <p className="text-xs font-medium text-blue-600 mt-1">Therapy Sessions</p>
-                  <p className="text-xs text-navy-500">this week</p>
+                  <p className="text-xs font-medium text-blue-600 uppercase tracking-wide mt-1">Therapy Sessions</p>
+                  <p className="text-xs text-slate-500">this week</p>
                 </div>
                 <div className="p-4 bg-green-50 rounded-2xl text-center">
                   <p className="text-3xl font-bold text-green-700">
                     {weeklyStats.avgMealParticipation > 0 ? `${weeklyStats.avgMealParticipation}%` : '—'}
                   </p>
-                  <p className="text-xs font-medium text-green-600 mt-1">Meal Participation</p>
-                  <p className="text-xs text-navy-500">avg this week</p>
+                  <p className="text-xs font-medium text-green-600 uppercase tracking-wide mt-1">Meal Participation</p>
+                  <p className="text-xs text-slate-500">avg this week</p>
                 </div>
               </div>
               <div className="p-4 bg-primary-50 rounded-2xl">

@@ -6,10 +6,8 @@ import {
   Calendar,
   Users,
   Shield,
-  Activity,
   Menu,
   X,
-  Heart,
   Home,
   ClipboardList,
 } from 'lucide-react'
@@ -31,7 +29,7 @@ export default function Navigation({ activeTab, onTabChange }: NavigationProps) 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <nav className="glass-strong sticky top-0 z-50 border-b border-white/40">
+    <nav className="bg-white border-b border-slate-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Logo */}
@@ -56,23 +54,24 @@ export default function Navigation({ activeTab, onTabChange }: NavigationProps) 
             {navItems.map((item) => {
               const Icon = item.icon
               const isActive = activeTab === item.id
-              const isLog = item.id === 'log'
               return (
                 <button
                   key={item.id}
                   onClick={() => onTabChange(item.id)}
                   className={`
-                    flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300
+                    relative flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors duration-200
                     ${isActive
-                      ? isLog
-                        ? 'bg-gradient-to-r from-primary-100 to-accent-100 text-primary-700 shadow-soft'
-                        : 'bg-primary-100 text-primary-700 shadow-soft'
-                      : 'text-navy-600 hover:bg-cream-100 hover:text-navy-800'
+                      ? 'text-primary-700 font-semibold'
+                      : 'text-slate-500 hover:text-slate-900'
                     }
                   `}
                 >
                   <Icon className={`h-4 w-4 ${isActive ? 'text-primary-600' : ''}`} />
                   {item.label}
+                  {/* Active indicator */}
+                  {isActive && (
+                    <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-primary-600 rounded-full" />
+                  )}
                 </button>
               )
             })}
@@ -82,7 +81,7 @@ export default function Navigation({ activeTab, onTabChange }: NavigationProps) 
           <div className="flex items-center md:hidden">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-xl text-navy-600 hover:bg-cream-100 transition-colors"
+              className="p-2 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors"
             >
               {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
@@ -92,7 +91,7 @@ export default function Navigation({ activeTab, onTabChange }: NavigationProps) 
 
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-primary-100/50 bg-white/95 backdrop-blur-xl animate-slide-down">
+        <div className="md:hidden border-t border-slate-200 bg-white">
           <div className="px-3 pt-2 pb-3 space-y-1">
             {navItems.map((item) => {
               const Icon = item.icon
@@ -105,10 +104,10 @@ export default function Navigation({ activeTab, onTabChange }: NavigationProps) 
                     setMobileMenuOpen(false)
                   }}
                   className={`
-                    flex items-center w-full gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all duration-200
+                    flex items-center w-full gap-3 px-4 py-3 rounded-lg text-base font-medium transition-colors duration-200
                     ${isActive
-                      ? 'bg-primary-100 text-primary-700'
-                      : 'text-navy-600 hover:bg-cream-100'
+                      ? 'text-primary-700 bg-primary-50 font-semibold'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                     }
                   `}
                 >

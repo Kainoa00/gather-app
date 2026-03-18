@@ -203,7 +203,7 @@ export default function ChatBot({
     if (!input.trim() || isLoading) return
 
     const userMessage: Message = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       role: 'user',
       content: input.trim(),
       timestamp: new Date(),
@@ -216,7 +216,7 @@ export default function ChatBot({
     try {
       const response = await generateResponse(userMessage.content)
       const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
+        id: crypto.randomUUID(),
         role: 'assistant',
         content: response,
         timestamp: new Date(),
@@ -224,7 +224,7 @@ export default function ChatBot({
       setMessages((prev) => [...prev, assistantMessage])
     } catch {
       const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
+        id: crypto.randomUUID(),
         role: 'assistant',
         content: "I'm sorry, I encountered an error. Please try again or contact the facility directly for assistance.",
         timestamp: new Date(),

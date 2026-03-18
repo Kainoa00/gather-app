@@ -32,7 +32,7 @@ export default function FacilityReview({
   const handleSubmit = () => {
     if (rating === 0) return
     const review: FacilityReviewEntry = {
-      id: `review-${Date.now()}`,
+      id: crypto.randomUUID(),
       authorId: currentUserId,
       authorName: currentUserName,
       rating,

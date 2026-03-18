@@ -1,6 +1,21 @@
 import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
 
+// Simple in-memory rate limiter — max 5 requests per IP per hour
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now()
+  const entry = rateLimitMap.get(ip)
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + 60 * 60 * 1000 })
+    return false
+  }
+  if (entry.count >= 5) return true
+  entry.count++
+  return false
+}
+
 interface DemoRequestBody {
   name: string
   email: string
@@ -97,6 +112,11 @@ function buildConfirmationHtml(name: string): string {
 }
 
 export async function POST(request: Request) {
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
+  if (isRateLimited(ip)) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+  }
+
   let body: DemoRequestBody
 
   try {
@@ -137,14 +157,14 @@ export async function POST(request: Request) {
     await Promise.all([
       // Notification to CareBridge team
       resend.emails.send({
-        from: 'CareBridge Connect <noreply@carebridgeconnect.ai>',
+        from: process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev',
         to: 'kai@carebridgeconnect.ai',
         subject: `New Demo Request — ${facilityName}`,
         html: buildTeamNotificationHtml(body, timestamp),
       }),
       // Confirmation to the prospect
       resend.emails.send({
-        from: 'CareBridge Connect <noreply@carebridgeconnect.ai>',
+        from: process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev',
         to: email,
         subject: "Your CareBridge Connect demo request — we'll be in touch!",
         html: buildConfirmationHtml(name),

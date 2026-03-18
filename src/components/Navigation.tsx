@@ -8,6 +8,7 @@ import {
   Home,
   ClipboardList,
   Settings,
+  LogOut,
 } from 'lucide-react'
 import { UserRole } from '@/types'
 
@@ -15,6 +16,7 @@ interface NavigationProps {
   activeTab: string
   onTabChange: (tab: string) => void
   userRole?: UserRole
+  onSignOut?: () => void
 }
 
 const baseNavItems = [
@@ -29,7 +31,7 @@ const baseNavItems = [
 // Add `pb-16 md:pb-0` to the main content container in the parent layout
 // (e.g., src/app/app/page.tsx) to prevent content from being hidden behind the tab bar.
 
-export default function Navigation({ activeTab, onTabChange, userRole }: NavigationProps) {
+export default function Navigation({ activeTab, onTabChange, userRole, onSignOut }: NavigationProps) {
   const navItems = userRole === 'admin'
     ? [...baseNavItems, { id: 'settings', label: 'Settings', icon: Settings }]
     : baseNavItems
@@ -83,6 +85,11 @@ export default function Navigation({ activeTab, onTabChange, userRole }: Navigat
                   </button>
                 )
               })}
+              {onSignOut && (
+                <button onClick={onSignOut} className="ml-4 p-2 text-slate-400 hover:text-slate-700 transition-colors rounded-lg hover:bg-slate-100" title="Sign out">
+                  <LogOut className="h-4 w-4" />
+                </button>
+              )}
             </div>
           </div>
         </div>

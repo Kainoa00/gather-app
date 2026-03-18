@@ -477,6 +477,12 @@ export default function Home() {
     }
   }
 
+  // Sign-out handler
+  const handleSignOut = () => {
+    setCurrentUser(null)
+    setActiveTab('login')
+  }
+
   // Review handler
   const handleAddReview = (review: FacilityReviewEntry) => {
     setInternalReviews(prev => [review, ...prev])
@@ -499,7 +505,7 @@ export default function Home() {
 
       {/* Navigation with Notification Bell */}
       <div className="glass-strong sticky top-0 z-50">
-        <Navigation activeTab={activeTab} onTabChange={setActiveTab} userRole={currentUserRole} />
+        <Navigation activeTab={activeTab} onTabChange={setActiveTab} userRole={currentUserRole} onSignOut={handleSignOut} />
         <div className="absolute right-4 top-0 h-16 flex items-center z-50">
               <NotificationCenter
                 notifications={notifications.filter(n => getVisibleNotificationTypes(currentUserRole).includes(n.type))}

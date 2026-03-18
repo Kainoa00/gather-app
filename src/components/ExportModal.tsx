@@ -36,7 +36,7 @@ export default function ExportModal({
 
   if (!isOpen) return null
 
-  const shareLink = `https://carebridge.app/share/${Math.random().toString(36).substring(7)}`
+  const shareLink = `https://carebridgeconnect.ai/share/${crypto.randomUUID()}`
 
   const copyLink = () => {
     navigator.clipboard.writeText(shareLink)

@@ -117,7 +117,7 @@ export async function POST(request: Request) {
 
   try {
     const { data, error } = await resend.emails.send({
-      from: 'CareBridge Connect <onboarding@resend.dev>',
+      from: process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev',
       to: [recipientEmail],
       subject,
       html: htmlBody,

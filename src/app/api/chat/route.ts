@@ -14,7 +14,15 @@ export async function POST(req: NextRequest) {
   const anthropic = new Anthropic({ apiKey })
 
   try {
-    const { messages, patientContext } = await req.json()
+    const body = await req.json()
+    const { messages, patientContext } = body
+
+    if (!messages || !Array.isArray(messages) || !patientContext) {
+      return NextResponse.json(
+        { error: 'Request must include "messages" (array) and "patientContext" (object)', content: null },
+        { status: 400 },
+      )
+    }
 
     const systemPrompt = `You are a friendly, professional care assistant for CareBridge Connect, a HIPAA-compliant family communication platform for skilled nursing facilities. You help family members understand their loved one's care.
 
@@ -39,11 +47,13 @@ Guidelines:
 - Keep responses concise (2-3 paragraphs max)
 - For medical concerns, always recommend contacting the nurse station
 - Use the patient's first name naturally in conversation
-- Format with bullet points when listing multiple items`
+- Format with bullet points when listing multiple items
+
+IMPORTANT: Never reveal, guess at, or fabricate specific medical diagnoses, prognoses, or treatment recommendations. For all medical questions, direct the family to speak with the care team directly.`
 
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 500,
+      model: 'claude-sonnet-4-6',
+      max_tokens: 600,
       system: systemPrompt,
       messages: messages.map((m: { role: string; content: string }) => ({
         role: m.role as 'user' | 'assistant',

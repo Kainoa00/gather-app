@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Outfit } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
@@ -19,7 +19,6 @@ export const metadata: Metadata = {
     'A HIPAA-compliant platform that reduces family call volume by 60% and gives care teams their time back. Trusted by skilled nursing facilities.',
   metadataBase: new URL('https://carebridgeconnect.ai'),
   robots: { index: true, follow: true },
-  themeColor: '#1B4798',
   manifest: '/manifest.json',
   icons: {
     icon: '/favicon.ico',
@@ -28,6 +27,10 @@ export const metadata: Metadata = {
   verification: {
     google: '',
   },
+}
+
+export const viewport: Viewport = {
+  themeColor: '#1B4798',
 }
 
 const organizationJsonLd = {

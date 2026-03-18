@@ -363,7 +363,7 @@ export default function HomeView({
           </div>
 
           {latestVitals?.vitals ? (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {latestVitals.vitals.bloodPressureSystolic != null && latestVitals.vitals.bloodPressureDiastolic != null && (
                 <div className="p-3 bg-slate-50 rounded-xl">
                   <p className="text-[10px] font-medium text-navy-400 uppercase tracking-wider">Blood Pressure</p>
@@ -491,7 +491,7 @@ export default function HomeView({
             </div>
             <button
               onClick={onNavigateToCalendar}
-              className="text-xs text-primary-600 hover:text-primary-700 font-medium flex items-center gap-0.5"
+              className="text-xs text-primary-600 hover:text-primary-700 font-medium flex items-center gap-0.5 min-h-[44px] px-2"
             >
               View All <ChevronRight className="h-3.5 w-3.5" />
             </button>
@@ -550,7 +550,7 @@ export default function HomeView({
         </div>
 
         {/* ----- Care Dashboard Tab Bar + Review Button ----- */}
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex gap-1 bg-cream-100 rounded-xl p-1">
             {([
               { id: 'log' as const, label: 'Log', icon: ClipboardList },
@@ -560,7 +560,7 @@ export default function HomeView({
               <button
                 key={tab.id}
                 onClick={() => setHomeTab(tab.id)}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all min-h-[44px] ${
                   homeTab === tab.id
                     ? 'bg-white text-primary-700 shadow-sm'
                     : 'text-navy-500 hover:text-navy-700'
@@ -574,7 +574,7 @@ export default function HomeView({
 
           <button
             onClick={() => setShowReviewModal(true)}
-            className="flex items-center gap-1.5 px-3 py-2 bg-amber-50 text-amber-700 border border-amber-200 rounded-xl text-sm font-medium hover:bg-amber-100 transition-colors whitespace-nowrap"
+            className="flex items-center gap-1.5 px-3 py-2 min-h-[44px] bg-amber-50 text-amber-700 border border-amber-200 rounded-xl text-sm font-medium hover:bg-amber-100 transition-colors whitespace-nowrap"
           >
             <Star className="h-3.5 w-3.5" />
             Leave a Review
@@ -805,7 +805,7 @@ export default function HomeView({
               {/* Care Team */}
               <div className="px-6 py-5 bg-cream-50/40">
                 <h4 className="text-xs font-bold text-navy-500 uppercase tracking-wider mb-3">Care Team</h4>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {[
                     { role: 'Attending Physician', name: 'Dr. Sarah Chen, MD' },
                     { role: 'Primary Nurse', name: 'Jane Doe, RN' },
@@ -890,7 +890,7 @@ export default function HomeView({
                 </div>
                 <h3 className="text-sm font-semibold text-navy-900">Weekly Activity Summary</h3>
               </div>
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-2 sm:grid-cols-2 gap-4 mb-4">
                 <div className="p-4 bg-blue-50 rounded-2xl text-center">
                   <p className="text-3xl font-bold text-blue-700">{weeklyStats.therapySessions}</p>
                   <p className="text-xs font-medium text-blue-600 uppercase tracking-wide mt-1">Therapy Sessions</p>

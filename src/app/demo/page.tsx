@@ -55,6 +55,7 @@ export default function DemoPage() {
   const [form, setForm] = useState<FormData>(initialForm)
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const isMounted = useRef(true)
 
   useEffect(() => () => { isMounted.current = false }, [])
@@ -70,21 +71,31 @@ export default function DemoPage() {
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setLoading(true)
+    setSubmitError(null)
 
-    // Simulate a brief async send (mailto fallback below)
-    await new Promise((res) => setTimeout(res, 600))
+    try {
+      const res = await fetch('/api/demo-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
 
-    if (!isMounted.current) return
+      if (!isMounted.current) return
 
-    // Open the user's mail client as a fallback delivery method
-    const body = encodeURIComponent(
-      `Name: ${form.name}\nEmail: ${form.email}\nFacility: ${form.facilityName}\nRole: ${form.role}\nResidents: ${form.residentCount}\n\nNotes:\n${form.notes}`
-    )
-    const subject = encodeURIComponent('CareBridge Connect — Demo Request')
-    window.location.href = `mailto:kai@carebridgeconnect.ai?subject=${subject}&body=${body}`
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({ error: 'Something went wrong. Please try again.' }))
+        setSubmitError(data.error || 'Something went wrong. Please try again.')
+        setLoading(false)
+        return
+      }
 
-    setLoading(false)
-    setSubmitted(true)
+      setLoading(false)
+      setSubmitted(true)
+    } catch {
+      if (!isMounted.current) return
+      setSubmitError('Network error. Please check your connection and try again.')
+      setLoading(false)
+    }
   }
 
   return (
@@ -273,6 +284,10 @@ export default function DemoPage() {
               >
                 {loading ? 'Sending…' : 'Request My Demo'}
               </button>
+
+              {submitError && (
+                <p className="text-red-600 text-sm mt-2">{submitError}</p>
+              )}
 
             </form>
 

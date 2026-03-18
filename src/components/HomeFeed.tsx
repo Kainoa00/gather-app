@@ -16,7 +16,10 @@ import {
   Star,
   Stethoscope,
   Users,
+  MessageSquare,
 } from 'lucide-react'
+import { FeedPostSkeleton } from '@/components/ui/LoadingSkeleton'
+import EmptyState from '@/components/ui/EmptyState'
 import { FeedPost, FeedComment, CareCircleMember } from '@/types'
 import { formatDistanceToNow } from 'date-fns'
 
@@ -27,6 +30,7 @@ interface HomeFeedProps {
   onAddPost: (post: Omit<FeedPost, 'id' | 'createdAt' | 'likes' | 'comments'>) => void
   onLikePost: (postId: string) => void
   onAddComment: (postId: string, comment: string) => void
+  loading?: boolean
 }
 
 const postTypeConfig = {
@@ -50,6 +54,7 @@ export default function HomeFeed({
   onAddPost,
   onLikePost,
   onAddComment,
+  loading,
 }: HomeFeedProps) {
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [newPost, setNewPost] = useState({
@@ -131,38 +136,38 @@ export default function HomeFeed({
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
       {/* Create Post Card */}
-      <div className="card-glass p-5 animate-slide-up">
-        <div className="flex items-center gap-4">
-          <div className={`h-12 w-12 rounded-2xl bg-gradient-to-br ${roleColors[currentMember?.role || 'family']} flex items-center justify-center flex-shrink-0 shadow-soft`}>
+      <div className="card-glass p-4 sm:p-5 animate-slide-up">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className={`h-11 w-11 sm:h-12 sm:w-12 rounded-2xl bg-gradient-to-br ${roleColors[currentMember?.role || 'family']} flex items-center justify-center flex-shrink-0 shadow-soft`}>
             <span className="text-white font-bold text-lg">
               {currentMember?.name.split(' ').map((n) => n[0]).join('') || 'Y'}
             </span>
           </div>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="flex-1 text-left px-5 py-3.5 bg-cream-100/80 hover:bg-cream-200/80 rounded-2xl text-navy-400 transition-all duration-300 border border-cream-200"
+            className="flex-1 text-left px-4 sm:px-5 py-3.5 min-h-[44px] bg-cream-100/80 hover:bg-cream-200/80 rounded-2xl text-navy-400 transition-all duration-300 border border-cream-200"
           >
             Share a visit, moment, or update...
           </button>
         </div>
-        <div className="flex items-center gap-2 mt-4 pt-4 border-t border-primary-100/50">
+        <div className="flex flex-wrap items-center gap-1 sm:gap-2 mt-4 pt-4 border-t border-primary-100/50">
           <button
             onClick={() => { setShowCreateModal(true); setTimeout(() => fileInputRef.current?.click(), 100) }}
-            className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-navy-600 hover:bg-mint-50 rounded-xl transition-all duration-300"
+            className="flex items-center gap-2 px-3 sm:px-4 py-2.5 min-h-[44px] text-sm font-medium text-navy-600 hover:bg-mint-50 rounded-xl transition-all duration-300"
           >
             <ImageIcon className="h-5 w-5 text-mint-500" />
             Photo
           </button>
           <button
             onClick={() => { setShowCreateModal(true); setTimeout(() => fileInputRef.current?.click(), 100) }}
-            className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-navy-600 hover:bg-primary-50 rounded-xl transition-all duration-300"
+            className="flex items-center gap-2 px-3 sm:px-4 py-2.5 min-h-[44px] text-sm font-medium text-navy-600 hover:bg-primary-50 rounded-xl transition-all duration-300"
           >
             <Video className="h-5 w-5 text-primary-500" />
             Video
           </button>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-navy-600 hover:bg-accent-50 rounded-xl transition-all duration-300"
+            className="flex items-center gap-2 px-3 sm:px-4 py-2.5 min-h-[44px] text-sm font-medium text-navy-600 hover:bg-accent-50 rounded-xl transition-all duration-300"
           >
             <MapPin className="h-5 w-5 text-accent-500" />
             Location
@@ -172,7 +177,16 @@ export default function HomeFeed({
 
       {/* Feed Posts */}
       <div className="space-y-6">
-        {posts.map((post, index) => {
+        {loading ? (
+          <>
+            <FeedPostSkeleton />
+            <FeedPostSkeleton />
+            <FeedPostSkeleton />
+          </>
+        ) : posts.length === 0 ? (
+          <EmptyState icon={MessageSquare} title="No updates yet" description="Care staff will post updates here. Check back soon." />
+        ) : null}
+        {!loading && posts.map((post, index) => {
           const isLiked = post.likes.includes(currentUserId)
           const showComments = expandedComments.has(post.id)
           const currentMediaIndex = mediaIndex[post.id] || 0
@@ -194,7 +208,7 @@ export default function HomeFeed({
               )}
 
               {/* Post Header */}
-              <div className="p-5 pb-3">
+              <div className="p-4 sm:p-5 pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className={`h-11 w-11 rounded-2xl bg-gradient-to-br ${roleColors[post.authorRole] || roleColors.family} flex items-center justify-center shadow-soft`}>
@@ -231,7 +245,7 @@ export default function HomeFeed({
 
               {/* Post Content */}
               {post.content && (
-                <div className="px-5 pb-4">
+                <div className="px-4 sm:px-5 pb-4">
                   <p className="text-navy-700 leading-relaxed whitespace-pre-wrap">{post.content}</p>
                 </div>
               )}
@@ -267,16 +281,16 @@ export default function HomeFeed({
               )}
 
               {/* Actions */}
-              <div className="px-5 py-4">
+              <div className="px-4 sm:px-5 py-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1">
                     <button onClick={() => onLikePost(post.id)}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 ${isLiked ? 'text-accent-600 bg-accent-50' : 'text-navy-600 hover:bg-cream-100'}`}>
+                      className={`flex items-center gap-2 px-4 py-2 min-h-[44px] rounded-xl transition-all duration-300 ${isLiked ? 'text-accent-600 bg-accent-50' : 'text-navy-600 hover:bg-cream-100'}`}>
                       <Heart className={`h-5 w-5 transition-all ${isLiked ? 'fill-accent-500 animate-heart-pop' : ''}`} />
                       <span className="font-medium">{post.likes.length}</span>
                     </button>
                     <button onClick={() => toggleComments(post.id)}
-                      className="flex items-center gap-2 px-4 py-2 rounded-xl text-navy-600 hover:bg-cream-100 transition-colors">
+                      className="flex items-center gap-2 px-4 py-2 min-h-[44px] rounded-xl text-navy-600 hover:bg-cream-100 transition-colors">
                       <MessageCircle className="h-5 w-5" />
                       <span className="font-medium">{post.comments.length}</span>
                     </button>
@@ -320,14 +334,14 @@ export default function HomeFeed({
                           {currentMember?.name.split(' ').map((n) => n[0]).join('') || 'Y'}
                         </span>
                       </div>
-                      <div className="flex-1 flex items-center gap-2 bg-cream-100/80 rounded-2xl px-4 py-2 border border-cream-200">
+                      <div className="flex-1 flex items-center gap-2 bg-cream-100/80 rounded-2xl px-3 sm:px-4 py-2 border border-cream-200">
                         <input type="text" value={commentInputs[post.id] || ''}
                           onChange={(e) => setCommentInputs((prev) => ({ ...prev, [post.id]: e.target.value }))}
                           onKeyPress={(e) => e.key === 'Enter' && handleComment(post.id)}
                           placeholder="Add a comment..."
-                          className="flex-1 bg-transparent text-sm text-navy-800 placeholder:text-navy-400 focus:outline-none" />
+                          className="flex-1 bg-transparent text-sm text-navy-800 placeholder:text-navy-400 focus:outline-none min-h-[44px]" />
                         <button onClick={() => handleComment(post.id)} disabled={!commentInputs[post.id]?.trim()}
-                          className="p-1 text-primary-500 disabled:text-navy-300 transition-colors">
+                          className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-primary-500 disabled:text-navy-300 transition-colors">
                           <Send className="h-5 w-5" />
                         </button>
                       </div>
@@ -381,7 +395,7 @@ export default function HomeFeed({
                 className="w-full h-32 px-4 py-3 bg-cream-50 border border-cream-200 rounded-2xl text-navy-800 placeholder:text-navy-400 focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent resize-none transition-all" />
 
               {newPost.media.length > 0 && (
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {newPost.media.map((item, i) => (
                     <div key={i} className="relative rounded-2xl overflow-hidden aspect-square">
                       {item.type === 'image' ? (

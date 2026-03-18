@@ -15,6 +15,7 @@ import QuickActions from '@/components/QuickActions'
 import ChatBot from '@/components/ChatBot'
 import LoginScreen from '@/components/LoginScreen'
 import HomeView from '@/components/HomeView'
+import ErrorBoundary from '@/components/ErrorBoundary'
 import { isDemoMode, DEMO_PATIENT_ID } from '@/lib/supabase'
 import {
   usePatient,
@@ -93,10 +94,10 @@ export default function Home() {
 
   // Supabase data hooks (fall back to demo data when isDemoMode)
   const { patient } = usePatient(DEMO_PATIENT_ID)
-  const { members, setMembers, refetch: refetchMembers } = useMembers(DEMO_PATIENT_ID)
-  const { events, setEvents, refetch: refetchEvents } = useEvents(DEMO_PATIENT_ID)
-  const { logEntries, setLogEntries, refetch: refetchLogs } = useLogEntries(DEMO_PATIENT_ID)
-  const { posts, setPosts, refetch: refetchPosts } = usePosts(DEMO_PATIENT_ID)
+  const { members, loading: membersLoading, setMembers, refetch: refetchMembers } = useMembers(DEMO_PATIENT_ID)
+  const { events, loading: eventsLoading, setEvents, refetch: refetchEvents } = useEvents(DEMO_PATIENT_ID)
+  const { logEntries, loading: logsLoading, setLogEntries, refetch: refetchLogs } = useLogEntries(DEMO_PATIENT_ID)
+  const { posts, loading: postsLoading, setPosts, refetch: refetchPosts } = usePosts(DEMO_PATIENT_ID)
   const { visits, setVisits, refetch: refetchVisits } = useVisits(DEMO_PATIENT_ID)
   const { notifications, setNotifications, refetch: refetchNotifications } = useNotifications(DEMO_PATIENT_ID)
   const { vault, setVault, refetch: refetchVault } = useVault(DEMO_PATIENT_ID)
@@ -492,13 +493,9 @@ export default function Home() {
     <div className="min-h-screen bg-slate-50">
 
       {/* Navigation with Notification Bell */}
-      <nav className="glass-strong sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
-
-            {/* Notification Bell */}
-            <div className="flex items-center">
+      <div className="glass-strong sticky top-0 z-50">
+        <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+        <div className="absolute right-4 top-0 h-16 flex items-center z-50">
               <NotificationCenter
                 notifications={notifications.filter(n => getVisibleNotificationTypes(currentUserRole).includes(n.type))}
                 currentUserId={currentUserId}
@@ -509,12 +506,10 @@ export default function Home() {
                   else if (sourceType === 'visit') { setActiveTab('home') }
                 }}
               />
-            </div>
-          </div>
         </div>
-      </nav>
+      </div>
 
-      <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-20 md:pb-8">
         {/* Role switcher + user banner */}
         <div className="mb-4 flex items-center gap-3 flex-wrap">
           <span className="text-sm text-navy-500">Viewing as:</span>
@@ -550,28 +545,33 @@ export default function Home() {
         </div>
 
         {activeTab === 'home' && (
-          <HomeView
-            patient={patient}
-            logEntries={logEntries}
-            events={events}
-            visits={visits}
-            members={members}
-            currentUserId={currentUserId}
-            currentUserName={currentUserName}
-            currentUserRole={currentUserRole}
-            reviews={internalReviews}
-            onClaimVisit={(eventId) => handleClaimEvent(eventId, currentUserName)}
-            onAddReview={handleAddReview}
-            onNavigateToCalendar={() => setActiveTab('calendar')}
-          />
+          <ErrorBoundary>
+            <HomeView
+              patient={patient}
+              logEntries={logEntries}
+              events={events}
+              visits={visits}
+              members={members}
+              currentUserId={currentUserId}
+              currentUserName={currentUserName}
+              currentUserRole={currentUserRole}
+              reviews={internalReviews}
+              onClaimVisit={(eventId) => handleClaimEvent(eventId, currentUserName)}
+              onAddReview={handleAddReview}
+              onNavigateToCalendar={() => setActiveTab('calendar')}
+            />
+          </ErrorBoundary>
         )}
 
         {activeTab === 'calendar' && (
-          <CareCalendar
-            events={events.filter(e => getVisibleCalendarEventTypes(currentUserRole).includes(e.type))}
-            onClaimEvent={handleClaimEvent}
-            onAddEvent={handleAddEvent}
-          />
+          <ErrorBoundary>
+            <CareCalendar
+              events={events.filter(e => getVisibleCalendarEventTypes(currentUserRole).includes(e.type))}
+              onClaimEvent={handleClaimEvent}
+              onAddEvent={handleAddEvent}
+              loading={eventsLoading}
+            />
+          </ErrorBoundary>
         )}
 
         {activeTab === 'log' && (
@@ -608,15 +608,18 @@ export default function Home() {
             </div>
 
             {logSubTab === 'timeline' && (
-              <CareLog
-                logEntries={logEntries}
-                currentUserRole={currentUserRole}
-                currentUserId={currentUserId}
-                currentUserName={currentUserName}
-                patientName={patient?.name ?? 'the patient'}
-                onAddLogEntry={handleAddLogEntry}
-                onAddComment={handleAddLogComment}
-              />
+              <ErrorBoundary>
+                <CareLog
+                  logEntries={logEntries}
+                  currentUserRole={currentUserRole}
+                  currentUserId={currentUserId}
+                  currentUserName={currentUserName}
+                  patientName={patient?.name ?? 'the patient'}
+                  onAddLogEntry={handleAddLogEntry}
+                  onAddComment={handleAddLogComment}
+                  loading={logsLoading}
+                />
+              </ErrorBoundary>
             )}
 
             {logSubTab === 'wellness' && <WellnessTrends days={wellnessDays} />}
@@ -773,25 +776,29 @@ export default function Home() {
         )}
 
         {activeTab === 'circle' && (
-          <CareCircle members={members} currentUserRole={currentUserRole} onAddMember={handleAddMember} />
+          <ErrorBoundary>
+            <CareCircle members={members} currentUserRole={currentUserRole} onAddMember={handleAddMember} loading={membersLoading} />
+          </ErrorBoundary>
         )}
 
         {activeTab === 'vault' && (
-          <VaultComponent vault={vault} onUpdateVault={setVault} currentUserRole={currentUserRole} />
+          <ErrorBoundary>
+            <VaultComponent vault={vault} onUpdateVault={setVault} currentUserRole={currentUserRole} />
+          </ErrorBoundary>
         )}
       </main>
 
       {/* Export Button - positioned above chatbot */}
       <button
         onClick={() => setShowExportModal(true)}
-        className="fixed bottom-24 right-6 p-3.5 bg-gradient-to-br from-navy-600 to-navy-700 text-white rounded-2xl shadow-float hover:shadow-float hover:-translate-y-0.5 transition-all duration-300 z-30"
+        className="fixed bottom-36 md:bottom-24 right-6 p-3.5 bg-gradient-to-br from-navy-600 to-navy-700 text-white rounded-2xl shadow-float hover:shadow-float hover:-translate-y-0.5 transition-all duration-300 z-30"
         title="Export & Share"
       >
         <Download className="h-5 w-5" />
       </button>
 
       {/* Demo Notice */}
-      <div className="fixed bottom-4 left-4 right-20 sm:left-auto sm:right-20 sm:w-auto">
+      <div className="fixed bottom-20 md:bottom-4 left-4 right-20 sm:left-auto sm:right-20 sm:w-auto">
         <div className="bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-lg flex items-center gap-3">
           <div className={`p-2 ${isDemoMode ? 'bg-primary-500' : 'bg-mint-500'} rounded-xl`}>
             <Sparkles className="h-4 w-4" />

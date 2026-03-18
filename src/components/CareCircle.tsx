@@ -13,6 +13,8 @@ import {
   Heart,
   Shield,
 } from 'lucide-react'
+import { MemberSkeleton } from '@/components/ui/LoadingSkeleton'
+import EmptyState from '@/components/ui/EmptyState'
 import { CareCircleMember, UserRole } from '@/types'
 import { canAddCareCircleMembers } from '@/lib/permissions'
 import { ShieldCheck } from 'lucide-react'
@@ -21,6 +23,7 @@ interface CareCircleProps {
   members: CareCircleMember[]
   currentUserRole: UserRole
   onAddMember: (member: Omit<CareCircleMember, 'id' | 'joinedAt'>) => void
+  loading?: boolean
 }
 
 const roleConfig: Record<UserRole, { label: string; color: string; gradient: string; icon: typeof Shield }> = {
@@ -50,7 +53,7 @@ const roleConfig: Record<UserRole, { label: string; color: string; gradient: str
   },
 }
 
-export default function CareCircle({ members, currentUserRole, onAddMember }: CareCircleProps) {
+export default function CareCircle({ members, currentUserRole, onAddMember, loading }: CareCircleProps) {
   const [showInviteModal, setShowInviteModal] = useState(false)
   const [inviteLink, setInviteLink] = useState('')
   const [copied, setCopied] = useState(false)
@@ -146,28 +149,40 @@ export default function CareCircle({ members, currentUserRole, onAddMember }: Ca
         )}
       </div>
 
-      {/* Family Members */}
-      <div>
-        <h3 className="text-lg font-semibold text-navy-800 mb-3 flex items-center gap-2">
-          <Heart className="h-5 w-5 text-accent-500" />
-          Family ({familyMembers.length})
-        </h3>
-        <div className="grid gap-4 md:grid-cols-2">
-          {familyMembers.map(renderMemberCard)}
-        </div>
-      </div>
-
-      {/* Staff Members */}
-      {staffMembers.length > 0 && (
-        <div>
-          <h3 className="text-lg font-semibold text-navy-800 mb-3 flex items-center gap-2">
-            <Stethoscope className="h-5 w-5 text-mint-500" />
-            Facility Staff ({staffMembers.length})
-          </h3>
-          <div className="grid gap-4 md:grid-cols-2">
-            {staffMembers.map(renderMemberCard)}
+      {loading ? (
+        <>
+          <MemberSkeleton />
+          <MemberSkeleton />
+          <MemberSkeleton />
+        </>
+      ) : members.length === 0 ? (
+        <EmptyState icon={Users} title="No circle members yet" description="Add family members and care staff to the care circle." />
+      ) : (
+        <>
+          {/* Family Members */}
+          <div>
+            <h3 className="text-lg font-semibold text-navy-800 mb-3 flex items-center gap-2">
+              <Heart className="h-5 w-5 text-accent-500" />
+              Family ({familyMembers.length})
+            </h3>
+            <div className="grid gap-4 md:grid-cols-2">
+              {familyMembers.map(renderMemberCard)}
+            </div>
           </div>
-        </div>
+
+          {/* Staff Members */}
+          {staffMembers.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold text-navy-800 mb-3 flex items-center gap-2">
+                <Stethoscope className="h-5 w-5 text-mint-500" />
+                Facility Staff ({staffMembers.length})
+              </h3>
+              <div className="grid gap-4 md:grid-cols-2">
+                {staffMembers.map(renderMemberCard)}
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* Invite Modal */}

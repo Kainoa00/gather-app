@@ -24,7 +24,10 @@ import {
   Frown,
   Meh,
   Upload,
+  ClipboardList,
 } from 'lucide-react'
+import { LogEntrySkeleton } from '@/components/ui/LoadingSkeleton'
+import EmptyState from '@/components/ui/EmptyState'
 import NurseNotesUpload from '@/components/NurseNotesUpload'
 import { LogEntry, LogEntryCategory, UserRole, LogComment } from '@/types'
 import { formatDistanceToNow, format } from 'date-fns'
@@ -73,6 +76,7 @@ interface CareLogProps {
   patientName?: string
   onAddLogEntry: (entry: Omit<LogEntry, 'id' | 'createdAt' | 'comments'>) => void
   onAddComment: (entryId: string, content: string) => void
+  loading?: boolean
 }
 
 const categoryConfig = {
@@ -149,6 +153,7 @@ export default function CareLog({
   patientName = 'the patient',
   onAddLogEntry,
   onAddComment,
+  loading,
 }: CareLogProps) {
   const [showAddModal, setShowAddModal] = useState(false)
   const [showNotesUpload, setShowNotesUpload] = useState(false)
@@ -419,11 +424,15 @@ export default function CareLog({
 
       {/* Log Entries grouped by date then time block */}
       <div className="space-y-8">
-        {Object.keys(groupedEntries).length === 0 ? (
-          <div className="text-center py-12 card-glass">
-            <Activity className="h-12 w-12 text-primary-300 mx-auto mb-3" />
-            <p className="text-navy-500">No log entries found</p>
-          </div>
+        {loading ? (
+          <>
+            <LogEntrySkeleton />
+            <LogEntrySkeleton />
+            <LogEntrySkeleton />
+            <LogEntrySkeleton />
+          </>
+        ) : Object.keys(groupedEntries).length === 0 ? (
+          <EmptyState icon={ClipboardList} title="No log entries yet" description="Care staff will log activities, medications, and notes here." />
         ) : (
           Object.entries(groupedEntries).map(([dateKey, blockGroups]) => {
             const totalEntries = Object.values(blockGroups).reduce((sum, arr) => sum + arr.length, 0)

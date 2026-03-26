@@ -35,4 +35,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-.vercel
+# Binary / sensitive files
+*.pdf
+*.mp4
+*.zip
+*.docx

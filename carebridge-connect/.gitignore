@@ -24,9 +24,8 @@ yarn-debug.log*
 yarn-error.log*
 
 # Local env files
-.env*
-!.env.example
-!.env*.example
+.env*.local
+.env
 
 # Vercel
 .vercel
@@ -35,8 +34,4 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Binary / sensitive files
-*.pdf
-*.mp4
-*.zip
-*.docx
+.vercel

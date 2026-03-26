@@ -77,7 +77,7 @@ export default function Home() {
   const currentUserRole: UserRole = currentUser?.role || 'primary'
 
   const [selectedPatientId, setSelectedPatientId] = useState(DEMO_PATIENT_ID)
-  const [selectedPatientName, setSelectedPatientName] = useState('Yuki Tanaka')
+  const [selectedPatientName, setSelectedPatientName] = useState('Kenji Clyde Shintaku')
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)

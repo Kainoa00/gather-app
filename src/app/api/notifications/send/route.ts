@@ -64,7 +64,8 @@ export async function POST(request: Request) {
   const safeSender = escapeHtml(senderLabel)
   const safePatient = escapeHtml(patientName)
   const safeMessage = escapeHtml(message)
-  const subject = `Update about ${patientName} \u2014 ${notificationType}`
+  // Strip newlines/control characters to prevent email header injection
+  const subject = `Update about ${patientName} \u2014 ${notificationType}`.replace(/[\r\n\x00-\x1f]/g, '')
 
   const htmlBody = `
 <!DOCTYPE html>

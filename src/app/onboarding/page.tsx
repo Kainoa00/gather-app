@@ -60,6 +60,26 @@ export default function OnboardingPage() {
   const [submitState, setSubmitState] = useState<SubmitState>('idle')
   const [errorMessage, setErrorMessage] = useState('')
 
+  const [validationErrors, setValidationErrors] = useState<string[]>([])
+
+  function validateStep1(): boolean {
+    const errors: string[] = []
+    if (!facility.name.trim()) errors.push('Facility name is required.')
+    if (!facility.address.trim()) errors.push('Address is required.')
+    if (!facility.phone.trim()) errors.push('Phone is required.')
+    setValidationErrors(errors)
+    return errors.length === 0
+  }
+
+  function validateStep2(): boolean {
+    const errors: string[] = []
+    if (!resident.name.trim()) errors.push('Resident name is required.')
+    if (!resident.dob) errors.push('Date of birth is required.')
+    if (!resident.roomNumber.trim()) errors.push('Room number is required.')
+    setValidationErrors(errors)
+    return errors.length === 0
+  }
+
   function addStaffRow() {
     setStaffInvites((prev) => [...prev, { email: '', role: ROLES[0] }])
   }
@@ -231,8 +251,14 @@ export default function OnboardingPage() {
                 </div>
               </div>
 
+              {validationErrors.length > 0 && (
+                <div className="mt-4 text-sm text-red-600 space-y-1">
+                  {validationErrors.map((err, i) => <p key={i}>{err}</p>)}
+                </div>
+              )}
+
               <button
-                onClick={() => setStep(2)}
+                onClick={() => { if (validateStep1()) { setValidationErrors([]); setStep(2) } }}
                 className="btn-primary w-full text-center mt-6"
               >
                 Continue
@@ -311,15 +337,21 @@ export default function OnboardingPage() {
                 </div>
               </div>
 
+              {validationErrors.length > 0 && (
+                <div className="mt-4 text-sm text-red-600 space-y-1">
+                  {validationErrors.map((err, i) => <p key={i}>{err}</p>)}
+                </div>
+              )}
+
               <div className="flex gap-3 mt-6">
                 <button
-                  onClick={() => setStep(1)}
+                  onClick={() => { setValidationErrors([]); setStep(1) }}
                   className="btn-secondary flex-1 text-center text-sm"
                 >
                   Back
                 </button>
                 <button
-                  onClick={() => setStep(3)}
+                  onClick={() => { if (validateStep2()) { setValidationErrors([]); setStep(3) } }}
                   className="btn-primary flex-1 text-center"
                 >
                   Continue

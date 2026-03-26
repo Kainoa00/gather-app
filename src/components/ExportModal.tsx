@@ -5,15 +5,21 @@ import {
   Download,
   FileText,
   Table,
-  Share2,
   X,
   Check,
-  Copy,
-  QrCode,
-  Mail,
-  Link
 } from 'lucide-react'
 import { Vault, LogEntry, CalendarEvent } from '@/types'
+import { escapeHtml } from '@/lib/utils'
+
+/** Sanitize a CSV cell: escape double-quotes and prefix formula characters */
+function csvSafe(value: string): string {
+  let escaped = value.replace(/"/g, '""')
+  // Prevent CSV formula injection in Excel
+  if (/^[=+\-@\t\r]/.test(escaped)) {
+    escaped = `'${escaped}`
+  }
+  return `"${escaped}"`
+}
 
 interface ExportModalProps {
   isOpen: boolean
@@ -30,26 +36,16 @@ export default function ExportModal({
   logEntries,
   events,
 }: ExportModalProps) {
-  const [activeTab, setActiveTab] = useState<'export' | 'share'>('export')
-  const [copied, setCopied] = useState(false)
   const [exportStatus, setExportStatus] = useState<string | null>(null)
 
   if (!isOpen) return null
-
-  const shareLink = `https://carebridgeconnect.ai/share/${crypto.randomUUID()}`
-
-  const copyLink = () => {
-    navigator.clipboard.writeText(shareLink)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
 
   const exportMedicationsCSV = () => {
     const headers = ['Medication', 'Dosage', 'Frequency', 'Prescribed By', 'Notes']
     const rows = vault.medications.map((med) => [
       med.name, med.dosage, med.frequency, med.prescribedBy || '', med.notes || '',
     ])
-    const csv = [headers, ...rows].map((row) => row.map((cell) => `"${cell}"`).join(',')).join('\n')
+    const csv = [headers.map(csvSafe), ...rows.map((row) => row.map(csvSafe))].map((r) => r.join(',')).join('\n')
     downloadFile(csv, 'medications.csv', 'text/csv')
     setExportStatus('Medications exported successfully!')
     setTimeout(() => setExportStatus(null), 3000)
@@ -64,7 +60,7 @@ export default function ExportModal({
       entry.notes || '',
       entry.enteredByName,
     ])
-    const csv = [headers, ...rows].map((row) => row.map((cell) => `"${cell}"`).join(',')).join('\n')
+    const csv = [headers.map(csvSafe), ...rows.map((row) => row.map(csvSafe))].map((r) => r.join(',')).join('\n')
     downloadFile(csv, 'care-log.csv', 'text/csv')
     setExportStatus('Care log exported successfully!')
     setTimeout(() => setExportStatus(null), 3000)
@@ -109,14 +105,15 @@ export default function ExportModal({
   }
 
   const generateCareSummary = () => {
+    const e = escapeHtml // alias for readability
     let html = '<h1>Care Summary</h1>'
-    html += `<p><strong>Facility:</strong> ${vault.facilityInfo.facilityName} | <strong>Room:</strong> ${vault.facilityInfo.roomNumber}</p>`
+    html += `<p><strong>Facility:</strong> ${e(vault.facilityInfo.facilityName)} | <strong>Room:</strong> ${e(vault.facilityInfo.roomNumber)}</p>`
 
     html += '<div class="section"><h2>Current Medications</h2>'
     if (vault.medications.length > 0) {
       html += '<table><tr><th>Medication</th><th>Dosage</th><th>Frequency</th></tr>'
       vault.medications.forEach((med) => {
-        html += `<tr><td>${med.name}</td><td>${med.dosage}</td><td>${med.frequency}</td></tr>`
+        html += `<tr><td>${e(med.name)}</td><td>${e(med.dosage)}</td><td>${e(med.frequency)}</td></tr>`
       })
       html += '</table>'
     } else {
@@ -126,7 +123,7 @@ export default function ExportModal({
 
     html += '<div class="section"><h2>Insurance Information</h2>'
     vault.insuranceCards.forEach((card) => {
-      html += `<p><strong>${card.name}</strong>: Member ID ${card.memberId}${card.groupNumber ? `, Group #${card.groupNumber}` : ''}</p>`
+      html += `<p><strong>${e(card.name)}</strong>: Member ID ${e(card.memberId)}${card.groupNumber ? `, Group #${e(card.groupNumber)}` : ''}</p>`
     })
     html += '</div>'
 
@@ -134,7 +131,7 @@ export default function ExportModal({
     if (vault.providers.length > 0) {
       html += '<table><tr><th>Provider</th><th>Specialty</th><th>Phone</th></tr>'
       vault.providers.forEach((provider) => {
-        html += `<tr><td>${provider.name}</td><td>${provider.specialty}</td><td>${provider.phone}</td></tr>`
+        html += `<tr><td>${e(provider.name)}</td><td>${e(provider.specialty)}</td><td>${e(provider.phone)}</td></tr>`
       })
       html += '</table>'
     }
@@ -144,7 +141,7 @@ export default function ExportModal({
     const recentEntries = logEntries.slice(0, 10)
     if (recentEntries.length > 0) {
       recentEntries.forEach((entry) => {
-        html += `<p><strong>${new Date(entry.createdAt).toLocaleDateString()}</strong> [${entry.category}] - ${entry.title}: ${entry.notes || ''}</p>`
+        html += `<p><strong>${new Date(entry.createdAt).toLocaleDateString()}</strong> [${e(entry.category)}] - ${e(entry.title)}: ${e(entry.notes || '')}</p>`
       })
     }
     html += '</div>'
@@ -175,18 +172,9 @@ export default function ExportModal({
         </div>
 
         <div className="flex gap-2 mb-6">
-          <button onClick={() => setActiveTab('export')}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-              activeTab === 'export' ? 'bg-primary-100 text-primary-700' : 'text-navy-600 hover:bg-cream-100'
-            }`}>
-            <Download className="h-4 w-4" /> Export
-          </button>
-          <button onClick={() => setActiveTab('share')}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-              activeTab === 'share' ? 'bg-primary-100 text-primary-700' : 'text-navy-600 hover:bg-cream-100'
-            }`}>
-            <Share2 className="h-4 w-4" /> Share
-          </button>
+          <div className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium bg-primary-100 text-primary-700">
+            <Download className="h-4 w-4" /> Export Data
+          </div>
         </div>
 
         {exportStatus && (
@@ -195,8 +183,7 @@ export default function ExportModal({
           </div>
         )}
 
-        {activeTab === 'export' && (
-          <div className="space-y-3">
+        <div className="space-y-3">
             <button onClick={exportCareSummaryPDF}
               className="w-full flex items-center gap-4 p-4 border border-primary-100 rounded-2xl hover:border-primary-300 hover:bg-cream-50 transition-all duration-200 text-left">
               <div className="p-3 bg-primary-100 rounded-xl">
@@ -228,35 +215,6 @@ export default function ExportModal({
               </div>
             </button>
           </div>
-        )}
-
-        {activeTab === 'share' && (
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-navy-700 mb-2">Share Link (View Only)</label>
-              <div className="flex gap-2">
-                <input type="text" value={shareLink} readOnly
-                  className="flex-1 px-3 py-2.5 bg-cream-50 border border-primary-200 rounded-xl text-sm text-navy-600" />
-                <button onClick={copyLink}
-                  className="px-4 py-2.5 bg-primary-100 text-primary-700 rounded-xl hover:bg-primary-200 transition-colors">
-                  {copied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
-                </button>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <button onClick={() => window.open(`mailto:?subject=CareBridge Connect Care Updates&body=View care updates: ${encodeURIComponent(shareLink)}`)}
-                className="flex items-center justify-center gap-2 p-4 border border-primary-100 rounded-2xl hover:border-primary-300 hover:bg-cream-50 transition-all duration-200">
-                <Mail className="h-5 w-5 text-navy-600" />
-                <span className="font-medium text-navy-700">Email</span>
-              </button>
-              <button onClick={copyLink}
-                className="flex items-center justify-center gap-2 p-4 border border-primary-100 rounded-2xl hover:border-primary-300 hover:bg-cream-50 transition-all duration-200">
-                <Link className="h-5 w-5 text-navy-600" />
-                <span className="font-medium text-navy-700">Copy Link</span>
-              </button>
-            </div>
-          </div>
-        )}
 
         <button onClick={onClose}
           className="w-full mt-6 px-4 py-2.5 border border-primary-200 text-navy-700 rounded-xl hover:bg-cream-50 transition-colors">

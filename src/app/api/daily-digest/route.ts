@@ -17,13 +17,18 @@ interface PrimaryMember {
 }
 
 export async function GET(request: Request) {
-  // Auth check — require CRON_SECRET in production
+  // Auth check — require CRON_SECRET. When unset, reject all requests
+  // to prevent unauthenticated access to the digest endpoint.
   const cronSecret = process.env.CRON_SECRET
-  if (cronSecret) {
-    const authHeader = request.headers.get('authorization')
-    if (authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+  if (!cronSecret) {
+    return NextResponse.json(
+      { error: 'CRON_SECRET not configured — endpoint disabled' },
+      { status: 503 }
+    )
+  }
+  const authHeader = request.headers.get('authorization')
+  if (authHeader !== `Bearer ${cronSecret}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   const apiKey = process.env.RESEND_API_KEY

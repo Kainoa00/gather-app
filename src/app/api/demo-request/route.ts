@@ -3,10 +3,22 @@ import { Resend } from 'resend'
 import { escapeHtml, getClientIp } from '@/lib/utils'
 
 // Simple in-memory rate limiter — max 5 requests per IP per hour
+// Bounded to 10 000 entries to prevent memory leak in long-running processes.
+const MAX_RATE_LIMIT_ENTRIES = 10_000
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
 
 function isRateLimited(ip: string): boolean {
   const now = Date.now()
+
+  // Periodic cleanup: evict expired entries when map grows large
+  if (rateLimitMap.size > MAX_RATE_LIMIT_ENTRIES) {
+    const keys = Array.from(rateLimitMap.keys())
+    for (const key of keys) {
+      const val = rateLimitMap.get(key)
+      if (val && now > val.resetAt) rateLimitMap.delete(key)
+    }
+  }
+
   const entry = rateLimitMap.get(ip)
   if (!entry || now > entry.resetAt) {
     rateLimitMap.set(ip, { count: 1, resetAt: now + 60 * 60 * 1000 })

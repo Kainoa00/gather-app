@@ -9,12 +9,12 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // ── Demo-mode escape hatch (development only) ───────────────────
+  // ── Demo-mode bypass ────────────────────────────────────────────
   const isDemoEnv = process.env.NEXT_PUBLIC_DEMO_MODE === 'true'
   const hasDemoCookie = request.cookies.get('demo')?.value === 'true'
 
-  // Only honour the demo cookie in non-production environments
-  // to prevent trivial auth bypass in production.
+  // NEXT_PUBLIC_DEMO_MODE=true works in all environments (including production).
+  // The demo cookie only works in non-production to prevent trivial auth bypass.
   const isProduction = process.env.NODE_ENV === 'production'
   if (isDemoEnv || (!isProduction && hasDemoCookie)) {
     return NextResponse.next()

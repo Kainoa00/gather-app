@@ -2,9 +2,17 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
+import { isDemoMode } from '@/lib/supabase'
 import { getSupabaseBrowserClient } from '@/lib/supabase/browser'
 
 type FormState = 'idle' | 'loading' | 'success' | 'error'
+
+// Demo admin credentials (display only — no real auth in demo mode)
+const DEMO_ADMIN = {
+  email: 'admin@carebridge.demo',
+  name: 'Demo Administrator',
+  role: 'Facility Admin',
+}
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -15,6 +23,13 @@ export default function LoginPage() {
     e.preventDefault()
     setFormState('loading')
     setErrorMessage('')
+
+    // In demo mode, any email → straight into the app
+    if (isDemoMode) {
+      document.cookie = 'demo=true; path=/; max-age=86400; samesite=lax'
+      window.location.href = '/app'
+      return
+    }
 
     try {
       const supabase = getSupabaseBrowserClient()
@@ -43,6 +58,111 @@ export default function LoginPage() {
     window.location.href = '/app'
   }
 
+  // ── Demo mode login page ──────────────────────────────────────────
+  if (isDemoMode) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white px-4">
+        <div className="w-full max-w-md">
+          {/* Logo */}
+          <div className="flex justify-center mb-8">
+            <Image
+              src="/logos/Logo 1 (color).png"
+              alt="CareBridge Connect"
+              width={200}
+              height={56}
+              priority
+            />
+          </div>
+
+          {/* Demo badge */}
+          <div className="flex justify-center mb-4">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium"
+                  style={{ background: 'var(--primary-50)', color: 'var(--primary-700)' }}>
+              <span className="w-2 h-2 rounded-full" style={{ background: 'var(--primary-500)' }} />
+              Demo Environment
+            </span>
+          </div>
+
+          {/* Card */}
+          <div className="card-glass p-8">
+            <h1 className="text-2xl font-semibold text-center mb-1"
+                style={{ color: 'var(--navy-800)' }}>
+              Welcome to CareBridge
+            </h1>
+            <p className="text-sm text-center mb-6"
+               style={{ color: 'var(--navy-600)' }}>
+              Sign in with demo credentials to explore the platform
+            </p>
+
+            {/* Demo credentials card */}
+            <div className="rounded-xl p-4 mb-6"
+                 style={{ background: 'var(--navy-50)', border: '1px solid var(--navy-100)' }}>
+              <p className="text-xs font-medium mb-2" style={{ color: 'var(--navy-500)' }}>
+                DEMO CREDENTIALS
+              </p>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs" style={{ color: 'var(--navy-500)' }}>Email</span>
+                  <span className="text-sm font-medium" style={{ color: 'var(--navy-800)' }}>{DEMO_ADMIN.email}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs" style={{ color: 'var(--navy-500)' }}>Role</span>
+                  <span className="text-sm font-medium" style={{ color: 'var(--navy-800)' }}>{DEMO_ADMIN.role}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs" style={{ color: 'var(--navy-500)' }}>Password</span>
+                  <span className="text-sm font-medium" style={{ color: 'var(--navy-800)' }}>Not required</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Pre-filled email form */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium mb-1.5"
+                       style={{ color: 'var(--navy-700)' }}>
+                  Email address
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  value={email || DEMO_ADMIN.email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder={DEMO_ADMIN.email}
+                  className="w-full px-4 py-2.5 rounded-xl border text-sm"
+                  style={{
+                    borderColor: 'var(--navy-200)',
+                    color: 'var(--navy-800)',
+                    background: 'var(--navy-50)',
+                  }}
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={formState === 'loading'}
+                className="btn-primary w-full text-center disabled:opacity-60"
+              >
+                {formState === 'loading' ? 'Signing in...' : 'Sign in to Demo'}
+              </button>
+            </form>
+
+            <p className="text-xs text-center mt-4" style={{ color: 'var(--navy-400)' }}>
+              This is a demo environment with sample patient data.
+              No real patient information is stored or transmitted.
+            </p>
+          </div>
+
+          {/* Footer */}
+          <p className="text-xs text-center mt-6" style={{ color: 'var(--navy-400)' }}>
+            By continuing you agree to our Terms of Service and Privacy Policy.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Production login page (Supabase OTP) ──────────────────────────
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-4">
       <div className="w-full max-w-md">

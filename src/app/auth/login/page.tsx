@@ -136,30 +136,6 @@ function LoginForm() {
             </button>
           </form>
 
-          {/* Demo credentials hint */}
-          {isDemoMode && (
-            <div className="mt-6 rounded-xl p-4"
-                 style={{ background: 'var(--navy-50)', border: '1px solid var(--navy-100)' }}>
-              <p className="text-xs font-semibold mb-2 uppercase tracking-wide"
-                 style={{ color: 'var(--navy-500)' }}>
-                Demo Credentials
-              </p>
-              <div className="space-y-1">
-                <div className="flex justify-between text-sm">
-                  <span style={{ color: 'var(--navy-500)' }}>Email</span>
-                  <span className="font-medium" style={{ color: 'var(--navy-800)' }}>{DEMO_EMAIL}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span style={{ color: 'var(--navy-500)' }}>Password</span>
-                  <span className="font-medium" style={{ color: 'var(--navy-800)' }}>{DEMO_PASSWORD}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span style={{ color: 'var(--navy-500)' }}>Role</span>
-                  <span className="font-medium" style={{ color: 'var(--navy-800)' }}>Facility Admin</span>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Footer */}
@@ -169,11 +145,6 @@ function LoginForm() {
           {' '}and{' '}
           <span className="underline cursor-pointer">Privacy Policy</span>.
         </p>
-        {isDemoMode && (
-          <p className="text-xs text-center mt-2" style={{ color: 'var(--navy-400)' }}>
-            Demo environment — sample data only. No real patient information is stored.
-          </p>
-        )}
       </div>
     </div>
   )

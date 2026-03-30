@@ -118,57 +118,67 @@ export default function ResidentDirectory({
                         Rm {r.roomNumber}
                       </span>
                     </div>
-                    <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--navy-400)' }}>
-                      {r.primaryDiagnosis}
-                    </p>
+                    {!isAdmin && (
+                      <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--navy-400)' }}>
+                        {r.primaryDiagnosis}
+                      </p>
+                    )}
                   </div>
                 </div>
 
-                {/* Vitals snapshot */}
-                <div
-                  className="rounded-xl p-3 grid grid-cols-3 gap-2"
-                  style={{ background: 'var(--navy-50)' }}
-                >
-                  <div className="flex flex-col items-center gap-0.5">
-                    <Activity className="h-3.5 w-3.5" style={{ color: 'var(--navy-400)' }} />
-                    <p className="text-xs font-semibold" style={{ color: 'var(--navy-800)' }}>
-                      {r.lastVitals.bp}
-                    </p>
-                    <p className="text-[10px]" style={{ color: 'var(--navy-400)' }}>BP</p>
+                {/* Vitals snapshot — nurses only, not admins */}
+                {!isAdmin && (
+                  <div
+                    className="rounded-xl p-3 grid grid-cols-3 gap-2"
+                    style={{ background: 'var(--navy-50)' }}
+                  >
+                    <div className="flex flex-col items-center gap-0.5">
+                      <Activity className="h-3.5 w-3.5" style={{ color: 'var(--navy-400)' }} />
+                      <p className="text-xs font-semibold" style={{ color: 'var(--navy-800)' }}>
+                        {r.lastVitals.bp}
+                      </p>
+                      <p className="text-[10px]" style={{ color: 'var(--navy-400)' }}>BP</p>
+                    </div>
+                    <div className="flex flex-col items-center gap-0.5">
+                      <Heart className="h-3.5 w-3.5" style={{ color: 'var(--navy-400)' }} />
+                      <p className="text-xs font-semibold" style={{ color: 'var(--navy-800)' }}>
+                        {r.lastVitals.heartRate > 0 ? r.lastVitals.heartRate : '—'}
+                      </p>
+                      <p className="text-[10px]" style={{ color: 'var(--navy-400)' }}>HR</p>
+                    </div>
+                    <div className="flex flex-col items-center gap-0.5">
+                      <Wind className="h-3.5 w-3.5" style={{ color: 'var(--navy-400)' }} />
+                      <p className="text-xs font-semibold" style={{ color: 'var(--navy-800)' }}>
+                        {r.lastVitals.o2 > 0 ? `${r.lastVitals.o2}%` : '—'}
+                      </p>
+                      <p className="text-[10px]" style={{ color: 'var(--navy-400)' }}>O₂</p>
+                    </div>
                   </div>
-                  <div className="flex flex-col items-center gap-0.5">
-                    <Heart className="h-3.5 w-3.5" style={{ color: 'var(--navy-400)' }} />
-                    <p className="text-xs font-semibold" style={{ color: 'var(--navy-800)' }}>
-                      {r.lastVitals.heartRate > 0 ? r.lastVitals.heartRate : '—'}
-                    </p>
-                    <p className="text-[10px]" style={{ color: 'var(--navy-400)' }}>HR</p>
-                  </div>
-                  <div className="flex flex-col items-center gap-0.5">
-                    <Wind className="h-3.5 w-3.5" style={{ color: 'var(--navy-400)' }} />
-                    <p className="text-xs font-semibold" style={{ color: 'var(--navy-800)' }}>
-                      {r.lastVitals.o2 > 0 ? `${r.lastVitals.o2}%` : '—'}
-                    </p>
-                    <p className="text-[10px]" style={{ color: 'var(--navy-400)' }}>O₂</p>
-                  </div>
-                </div>
+                )}
 
-                {/* Bottom row: mood + admitted + view button */}
+                {/* Bottom row: mood (nurses only) + view button */}
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
-                      style={{ background: mood.bg, color: mood.color }}
-                    >
+                  {!isAdmin ? (
+                    <div className="flex items-center gap-2">
                       <span
-                        className="w-1.5 h-1.5 rounded-full"
-                        style={{ background: mood.color }}
-                      />
-                      {mood.label}
-                    </span>
-                    <span className="text-[10px]" style={{ color: 'var(--navy-400)' }}>
-                      {vitalsAge === 0 ? 'Just now' : `${vitalsAge}h ago`}
-                    </span>
-                  </div>
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
+                        style={{ background: mood.bg, color: mood.color }}
+                      >
+                        <span
+                          className="w-1.5 h-1.5 rounded-full"
+                          style={{ background: mood.color }}
+                        />
+                        {mood.label}
+                      </span>
+                      <span className="text-[10px]" style={{ color: 'var(--navy-400)' }}>
+                        {vitalsAge === 0 ? 'Just now' : `${vitalsAge}h ago`}
+                      </span>
+                    </div>
+                  ) : (
+                    <p className="text-xs" style={{ color: 'var(--navy-400)' }}>
+                      Admitted {format(r.admissionDate, 'MMM d, yyyy')}
+                    </p>
+                  )}
                   <button
                     onClick={() => onViewResident(r.id, r.name)}
                     className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors"
@@ -178,10 +188,12 @@ export default function ResidentDirectory({
                   </button>
                 </div>
 
-                {/* Admitted date */}
-                <p className="text-[10px]" style={{ color: 'var(--navy-400)' }}>
-                  Admitted {format(r.admissionDate, 'MMM d, yyyy')}
-                </p>
+                {/* Admitted date — nurses only (admin shows it inline above) */}
+                {!isAdmin && (
+                  <p className="text-[10px]" style={{ color: 'var(--navy-400)' }}>
+                    Admitted {format(r.admissionDate, 'MMM d, yyyy')}
+                  </p>
+                )}
               </div>
             )
           })}

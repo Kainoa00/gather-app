@@ -68,7 +68,7 @@ export default function Navbar() {
         {/* Desktop CTAs */}
         <div className="hidden md:flex items-center gap-2">
           <Link
-            href="/app"
+            href="/auth/login"
             className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors rounded-lg hover:bg-slate-50"
           >
             Sign In
@@ -114,7 +114,7 @@ export default function Navbar() {
                 </button>
               ))}
               <div className="mt-3 pt-3 border-t border-slate-100 flex flex-col gap-2">
-                <Link href="/app" className="px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-50 rounded-lg transition-colors" onClick={() => setMobileOpen(false)}>
+                <Link href="/auth/login" className="px-3 py-3 text-base font-medium text-slate-700 hover:bg-slate-50 rounded-lg transition-colors" onClick={() => setMobileOpen(false)}>
                   Sign In
                 </Link>
                 <Link

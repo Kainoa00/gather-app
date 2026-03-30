@@ -35,7 +35,15 @@ export interface AuditEvent {
  */
 export async function logAuditEvent(event: AuditEvent): Promise<void> {
   if (isDemoMode) {
-    console.info('[AUDIT]', new Date().toISOString(), event)
+    // In demo mode log only non-PHI metadata (IDs + action), never names or content
+    console.info('[AUDIT]', new Date().toISOString(), {
+      action: event.action,
+      actorId: event.actorId,
+      actorRole: event.actorRole,
+      patientId: event.patientId,
+      resourceType: event.resourceType,
+      resourceId: event.resourceId,
+    })
     return
   }
 
@@ -53,11 +61,18 @@ export async function logAuditEvent(event: AuditEvent): Promise<void> {
     })
 
     if (error) {
-      // Never silently fail on audit logging — surface to monitoring
-      console.error('[AUDIT ERROR] Failed to write audit event:', error, event)
+      // Log only IDs + action, never PHI content, even in error paths
+      console.error('[AUDIT ERROR] Failed to write audit event:', error.message, {
+        action: event.action,
+        actorId: event.actorId,
+        patientId: event.patientId,
+      })
     }
   } catch (err) {
-    console.error('[AUDIT ERROR] Unexpected error writing audit event:', err, event)
+    console.error('[AUDIT ERROR] Unexpected error writing audit event:', err instanceof Error ? err.message : String(err), {
+      action: event.action,
+      actorId: event.actorId,
+    })
   }
 }
 

@@ -9,6 +9,7 @@ import {
   ClipboardList,
   Settings,
   LogOut,
+  LayoutGrid,
 } from 'lucide-react'
 import { UserRole } from '@/types'
 
@@ -32,9 +33,16 @@ const baseNavItems = [
 // (e.g., src/app/app/page.tsx) to prevent content from being hidden behind the tab bar.
 
 export default function Navigation({ activeTab, onTabChange, userRole, onSignOut }: NavigationProps) {
-  const navItems = userRole === 'admin'
-    ? [...baseNavItems, { id: 'settings', label: 'Settings', icon: Settings }]
-    : baseNavItems
+  const navItems = (() => {
+    const items = [...baseNavItems]
+    if (userRole === 'admin') {
+      items.push({ id: 'residents', label: 'Residents', icon: LayoutGrid })
+      items.push({ id: 'settings', label: 'Settings', icon: Settings })
+    } else if (userRole === 'nurse') {
+      items.push({ id: 'residents', label: 'Patients', icon: LayoutGrid })
+    }
+    return items
+  })()
 
   return (
     <>

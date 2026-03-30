@@ -18,6 +18,8 @@ import ChatBot from '@/components/ChatBot'
 import LoginScreen from '@/components/LoginScreen'
 import HomeView from '@/components/HomeView'
 import ErrorBoundary from '@/components/ErrorBoundary'
+import ResidentDirectory from '@/components/ResidentDirectory'
+import AddResidentModal, { NewResidentData } from '@/components/AddResidentModal'
 import { isDemoMode, DEMO_PATIENT_ID } from '@/lib/supabase'
 import {
   usePatient,
@@ -48,7 +50,7 @@ import {
 import { CareCircleMember, CalendarEvent, Vault, LogEntry, FeedPost, UserRole, Visit, Notification, FacilityReviewEntry } from '@/types'
 import { Heart, Shield, Calendar, Users, ClipboardList, Sparkles, Download, Lock, CheckCircle2, MessageSquare, TrendingUp, Star, CheckSquare } from 'lucide-react'
 import { format } from 'date-fns'
-import { demoGoals } from '@/lib/demo-data'
+import { demoGoals, demoAllResidents, ResidentSnapshot } from '@/lib/demo-data'
 import { auditPatient } from '@/lib/audit'
 import {
   canUseQuickActions,
@@ -81,10 +83,27 @@ export default function Home() {
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showAddResidentModal, setShowAddResidentModal] = useState(false)
+  const [demoResidents, setDemoResidents] = useState<ResidentSnapshot[]>(demoAllResidents)
 
   const showError = (msg: string) => {
     setErrorMsg(msg)
     setTimeout(() => setErrorMsg(null), 5000)
+  }
+
+  function handleAddResident(data: NewResidentData) {
+    const newResident: ResidentSnapshot = {
+      id: `demo-resident-${Date.now()}`,
+      name: data.name,
+      roomNumber: data.roomNumber,
+      primaryDiagnosis: data.primaryDiagnosis || 'No diagnosis recorded',
+      admissionDate: data.admissionDate,
+      dateOfBirth: data.dateOfBirth,
+      lastVitals: { bp: '—', heartRate: 0, o2: 0, recordedAt: new Date() },
+      currentMood: 'good',
+      status: 'active',
+    }
+    setDemoResidents((prev) => [...prev, newResident])
   }
 
   // HIPAA audit logging on login
@@ -530,6 +549,7 @@ export default function Home() {
             setSelectedPatientName(name)
           }}
           userRole={currentUserRole}
+          onAddResident={() => setShowAddResidentModal(true)}
         />
       )}
 
@@ -816,6 +836,21 @@ export default function Home() {
             <FacilitySettings />
           </ErrorBoundary>
         )}
+
+        {activeTab === 'residents' && (currentUserRole === 'admin' || currentUserRole === 'nurse') && (
+          <ErrorBoundary>
+            <ResidentDirectory
+              residents={demoResidents}
+              currentUserRole={currentUserRole}
+              onViewResident={(id, name) => {
+                setSelectedPatientId(id)
+                setSelectedPatientName(name)
+                setActiveTab('home')
+              }}
+              onAddResident={() => setShowAddResidentModal(true)}
+            />
+          </ErrorBoundary>
+        )}
       </main>
 
       {/* Export Button - positioned above chatbot */}
@@ -839,6 +874,16 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* Add Resident Modal */}
+      <AddResidentModal
+        isOpen={showAddResidentModal}
+        onClose={() => setShowAddResidentModal(false)}
+        onAdd={(data) => {
+          handleAddResident(data)
+          setShowAddResidentModal(false)
+        }}
+      />
 
       {/* Export Modal */}
       <ExportModal

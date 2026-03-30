@@ -17,6 +17,7 @@ interface ResidentSelectorProps {
   currentPatientName: string
   onSelectResident: (patientId: string, patientName: string) => void
   userRole: UserRole
+  onAddResident?: () => void
 }
 
 export default function ResidentSelector({
@@ -24,6 +25,7 @@ export default function ResidentSelector({
   currentPatientName,
   onSelectResident,
   userRole,
+  onAddResident,
 }: ResidentSelectorProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [residents, setResidents] = useState<Resident[]>([])
@@ -165,9 +167,7 @@ export default function ResidentSelector({
         {userRole === 'admin' && (
           <button
             className="flex items-center gap-1.5 min-h-[44px] px-3 py-1.5 text-sm font-medium text-primary-600 hover:bg-primary-50 rounded-xl transition-colors"
-            onClick={() => {
-              // Placeholder: would open add resident modal
-            }}
+            onClick={() => onAddResident?.()}
           >
             <Plus className="h-4 w-4" />
             <span className="hidden sm:inline">Add Resident</span>

@@ -1160,3 +1160,64 @@ export const demoGoals = [
     milestones: ['Assisted exercises 3x/week', 'Partial independent exercises', 'Full independent exercises'],
   },
 ]
+
+// ─── Resident Directory ──────────────────────────────────────────────────────
+
+export interface ResidentSnapshot {
+  id: string
+  name: string
+  roomNumber: string
+  primaryDiagnosis: string
+  admissionDate: Date
+  dateOfBirth: Date
+  lastVitals: { bp: string; heartRate: number; o2: number; recordedAt: Date }
+  currentMood: 'great' | 'good' | 'fair' | 'poor'
+  status: 'active' | 'discharged'
+}
+
+export const demoAllResidents: ResidentSnapshot[] = [
+  {
+    id: '00000000-0000-0000-0000-000000000001',
+    name: 'Kenji Clyde Shintaku',
+    roomNumber: '114',
+    primaryDiagnosis: 'Recovering from intensive heart surgery',
+    admissionDate: new Date('2026-01-01'),
+    dateOfBirth: new Date('1956-12-29'),
+    lastVitals: { bp: '118/76', heartRate: 68, o2: 97, recordedAt: new Date(Date.now() - 2 * 60 * 60 * 1000) },
+    currentMood: 'good',
+    status: 'active',
+  },
+  {
+    id: 'demo-patient-2',
+    name: 'Margaret Chen',
+    roomNumber: '206',
+    primaryDiagnosis: "Alzheimer's Disease — Stage 2",
+    admissionDate: new Date('2025-09-15'),
+    dateOfBirth: new Date('1942-03-11'),
+    lastVitals: { bp: '132/84', heartRate: 74, o2: 96, recordedAt: new Date(Date.now() - 4 * 60 * 60 * 1000) },
+    currentMood: 'fair',
+    status: 'active',
+  },
+  {
+    id: 'demo-patient-3',
+    name: 'Robert Johnson',
+    roomNumber: '118',
+    primaryDiagnosis: 'Post-Hip Replacement Recovery',
+    admissionDate: new Date('2026-02-10'),
+    dateOfBirth: new Date('1950-07-22'),
+    lastVitals: { bp: '124/80', heartRate: 72, o2: 98, recordedAt: new Date(Date.now() - 1 * 60 * 60 * 1000) },
+    currentMood: 'great',
+    status: 'active',
+  },
+  {
+    id: 'demo-patient-4',
+    name: 'Dorothy Williams',
+    roomNumber: '302',
+    primaryDiagnosis: 'Type 2 Diabetes & Hypertension',
+    admissionDate: new Date('2025-11-03'),
+    dateOfBirth: new Date('1948-11-30'),
+    lastVitals: { bp: '142/90', heartRate: 80, o2: 95, recordedAt: new Date(Date.now() - 6 * 60 * 60 * 1000) },
+    currentMood: 'good',
+    status: 'active',
+  },
+]

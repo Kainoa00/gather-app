@@ -9,26 +9,16 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // ── Demo-mode bypass ────────────────────────────────────────────
+  // ── Demo-mode escape hatch ───────────────────────────────────────
   const isDemoEnv = process.env.NEXT_PUBLIC_DEMO_MODE === 'true'
   const hasDemoCookie = request.cookies.get('demo')?.value === 'true'
 
-  // NEXT_PUBLIC_DEMO_MODE=true works in all environments (including production).
-  // The demo cookie only works in non-production to prevent trivial auth bypass.
-  const isProduction = process.env.NODE_ENV === 'production'
-  if (isDemoEnv || (!isProduction && hasDemoCookie)) {
+  if (isDemoEnv || hasDemoCookie) {
     return NextResponse.next()
   }
 
   // ── Only protect /app routes ─────────────────────────────────────
   if (!pathname.startsWith('/app')) {
-    return NextResponse.next()
-  }
-
-  // ── When Supabase is not configured, allow all requests (demo mode) ──
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  if (!supabaseUrl || !supabaseAnonKey) {
     return NextResponse.next()
   }
 
@@ -38,8 +28,8 @@ export async function middleware(request: NextRequest) {
   })
 
   const supabase = createServerClient(
-    supabaseUrl,
-    supabaseAnonKey,
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
         get(name: string) {
@@ -66,10 +56,10 @@ export async function middleware(request: NextRequest) {
   )
 
   const {
-    data: { user },
-  } = await supabase.auth.getUser()
+    data: { session },
+  } = await supabase.auth.getSession()
 
-  if (!user) {
+  if (!session) {
     const loginUrl = request.nextUrl.clone()
     loginUrl.pathname = '/auth/login'
     loginUrl.searchParams.set('redirect', pathname)

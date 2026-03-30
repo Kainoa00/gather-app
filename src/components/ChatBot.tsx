@@ -85,11 +85,7 @@ export default function ChatBot({
       latestMood,
       medications: vault.medications,
       providers: vault.providers,
-      // Strip sensitive fields (wifi password, etc.) before sending to AI
-      facilityInfo: {
-        ...vault.facilityInfo,
-        wifiPassword: undefined,
-      },
+      facilityInfo: vault.facilityInfo,
       recentLogs: recentLogs.map((l) => ({
         category: l.category,
         title: l.title,
@@ -150,13 +146,12 @@ export default function ChatBot({
   )
 
   // Generate response: try real AI API first, fall back to mock
-  // Accept currentMessages as parameter to avoid stale closure over `messages` state
   const generateResponse = useCallback(
-    async (userMessage: string, currentMessages: Message[]): Promise<string> => {
+    async (userMessage: string): Promise<string> => {
       const context = buildPatientContext()
 
       // Build message history for the API (last 10 messages)
-      const apiMessages = currentMessages
+      const apiMessages = messages
         .slice(-10)
         .map((m) => ({ role: m.role, content: m.content }))
       apiMessages.push({ role: 'user' as const, content: userMessage })
@@ -201,7 +196,7 @@ export default function ChatBot({
         return fallbackResponse(userMessage)
       }
     },
-    [buildPatientContext, fallbackResponse],
+    [buildPatientContext, messages, fallbackResponse],
   )
 
   const handleSend = async () => {
@@ -214,13 +209,12 @@ export default function ChatBot({
       timestamp: new Date(),
     }
 
-    const updatedMessages = [...messages, userMessage]
-    setMessages(updatedMessages)
+    setMessages((prev) => [...prev, userMessage])
     setInput('')
     setIsLoading(true)
 
     try {
-      const response = await generateResponse(userMessage.content, updatedMessages)
+      const response = await generateResponse(userMessage.content)
       const assistantMessage: Message = {
         id: crypto.randomUUID(),
         role: 'assistant',
@@ -341,11 +335,14 @@ export default function ChatBot({
                             {line.replace(/\*\*/g, '')}
                           </strong>
                         ) : line.includes('**') ? (
-                          <span>
-                            {line.split(/\*\*(.*?)\*\*/g).map((part, j) =>
-                              j % 2 === 1 ? <strong key={j}>{part}</strong> : part
-                            )}
-                          </span>
+                          <span
+                            dangerouslySetInnerHTML={{
+                              __html: line.replace(
+                                /\*\*(.*?)\*\*/g,
+                                '<strong>$1</strong>'
+                              ),
+                            }}
+                          />
                         ) : (
                           line
                         )}

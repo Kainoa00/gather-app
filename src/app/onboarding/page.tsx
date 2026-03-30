@@ -4,8 +4,6 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 
-type SubmitState = 'idle' | 'loading' | 'error'
-
 // ── Types ──────────────────────────────────────────────────────────
 
 interface FacilityDetails {
@@ -57,29 +55,6 @@ export default function OnboardingPage() {
     { email: '', role: ROLES[0] },
   ])
 
-  const [submitState, setSubmitState] = useState<SubmitState>('idle')
-  const [errorMessage, setErrorMessage] = useState('')
-
-  const [validationErrors, setValidationErrors] = useState<string[]>([])
-
-  function validateStep1(): boolean {
-    const errors: string[] = []
-    if (!facility.name.trim()) errors.push('Facility name is required.')
-    if (!facility.address.trim()) errors.push('Address is required.')
-    if (!facility.phone.trim()) errors.push('Phone is required.')
-    setValidationErrors(errors)
-    return errors.length === 0
-  }
-
-  function validateStep2(): boolean {
-    const errors: string[] = []
-    if (!resident.name.trim()) errors.push('Resident name is required.')
-    if (!resident.dob) errors.push('Date of birth is required.')
-    if (!resident.roomNumber.trim()) errors.push('Room number is required.')
-    setValidationErrors(errors)
-    return errors.length === 0
-  }
-
   function addStaffRow() {
     setStaffInvites((prev) => [...prev, { email: '', role: ROLES[0] }])
   }
@@ -94,32 +69,9 @@ export default function OnboardingPage() {
     setStaffInvites((prev) => prev.filter((_, i) => i !== index))
   }
 
-  async function handleComplete() {
-    setSubmitState('loading')
-    setErrorMessage('')
-
-    try {
-      const res = await fetch('/api/onboarding', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ facility, resident, staffInvites }),
-      })
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
-        throw new Error(data.error ?? 'Setup failed. Please try again.')
-      }
-
-      router.push('/app')
-    } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : 'Something went wrong.')
-      setSubmitState('error')
-    }
-  }
-
-  function handleSkipInvites() {
-    // Skip invites but still save facility + resident
-    handleComplete()
+  function handleComplete() {
+    // TODO: Persist onboarding data to Supabase
+    router.push('/app')
   }
 
   // ── Shared field styles ──────────────────────────────────────────
@@ -251,14 +203,8 @@ export default function OnboardingPage() {
                 </div>
               </div>
 
-              {validationErrors.length > 0 && (
-                <div className="mt-4 text-sm text-red-600 space-y-1">
-                  {validationErrors.map((err, i) => <p key={i}>{err}</p>)}
-                </div>
-              )}
-
               <button
-                onClick={() => { if (validateStep1()) { setValidationErrors([]); setStep(2) } }}
+                onClick={() => setStep(2)}
                 className="btn-primary w-full text-center mt-6"
               >
                 Continue
@@ -337,21 +283,15 @@ export default function OnboardingPage() {
                 </div>
               </div>
 
-              {validationErrors.length > 0 && (
-                <div className="mt-4 text-sm text-red-600 space-y-1">
-                  {validationErrors.map((err, i) => <p key={i}>{err}</p>)}
-                </div>
-              )}
-
               <div className="flex gap-3 mt-6">
                 <button
-                  onClick={() => { setValidationErrors([]); setStep(1) }}
+                  onClick={() => setStep(1)}
                   className="btn-secondary flex-1 text-center text-sm"
                 >
                   Back
                 </button>
                 <button
-                  onClick={() => { if (validateStep2()) { setValidationErrors([]); setStep(3) } }}
+                  onClick={() => setStep(3)}
                   className="btn-primary flex-1 text-center"
                 >
                   Continue
@@ -416,31 +356,24 @@ export default function OnboardingPage() {
                 + Add another
               </button>
 
-              {submitState === 'error' && (
-                <p className="text-sm text-red-600 mt-4">{errorMessage}</p>
-              )}
-
               <div className="flex gap-3 mt-6">
                 <button
                   onClick={() => setStep(2)}
-                  disabled={submitState === 'loading'}
-                  className="btn-secondary flex-1 text-center text-sm disabled:opacity-50"
+                  className="btn-secondary flex-1 text-center text-sm"
                 >
                   Back
                 </button>
                 <button
                   onClick={handleComplete}
-                  disabled={submitState === 'loading'}
-                  className="btn-primary flex-1 text-center disabled:opacity-60"
+                  className="btn-primary flex-1 text-center"
                 >
-                  {submitState === 'loading' ? 'Saving...' : 'Finish setup'}
+                  Finish setup
                 </button>
               </div>
 
               <button
-                onClick={handleSkipInvites}
-                disabled={submitState === 'loading'}
-                className="w-full text-center text-sm mt-3 hover:underline disabled:opacity-50"
+                onClick={handleComplete}
+                className="w-full text-center text-sm mt-3 hover:underline"
                 style={{ color: 'var(--navy-400)' }}
               >
                 Skip for now

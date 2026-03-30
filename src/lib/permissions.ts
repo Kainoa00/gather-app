@@ -61,6 +61,10 @@ export function getVisibleLogCategories(role: UserRole): LogEntryCategory[] {
     case 'primary':
     case 'nurse':
       return ['vitals', 'medication', 'activity', 'mood', 'incident']
+    case 'admin':
+      return ['mood', 'activity']
+    case 'family':
+      return ['mood', 'activity']
     default:
       return ['mood', 'activity']
   }
@@ -105,6 +109,8 @@ export function getVisibleCalendarEventTypes(role: UserRole): EventType[] {
     case 'admin':
     case 'nurse':
       return ['doctor_visit', 'therapy_session', 'facility_event', 'family_visit']
+    case 'family':
+      return ['facility_event', 'family_visit']
     default:
       return ['facility_event', 'family_visit']
   }

@@ -79,7 +79,7 @@ export default function Home() {
   const currentUserRole: UserRole = currentUser?.role || 'primary'
 
   const [selectedPatientId, setSelectedPatientId] = useState(DEMO_PATIENT_ID)
-  const [selectedPatientName, setSelectedPatientName] = useState('Kenji Clyde Shintaku')
+  const [selectedPatientName, setSelectedPatientName] = useState('Yuki Tanaka')
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -853,6 +853,16 @@ export default function Home() {
         )}
       </main>
 
+      {/* Add Resident Modal */}
+      <AddResidentModal
+        isOpen={showAddResidentModal}
+        onClose={() => setShowAddResidentModal(false)}
+        onAdd={(data) => {
+          handleAddResident(data)
+          setShowAddResidentModal(false)
+        }}
+      />
+
       {/* Export Button - positioned above chatbot */}
       <button
         onClick={() => setShowExportModal(true)}
@@ -874,16 +884,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-
-      {/* Add Resident Modal */}
-      <AddResidentModal
-        isOpen={showAddResidentModal}
-        onClose={() => setShowAddResidentModal(false)}
-        onAdd={(data) => {
-          handleAddResident(data)
-          setShowAddResidentModal(false)
-        }}
-      />
 
       {/* Export Modal */}
       <ExportModal

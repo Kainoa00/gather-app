@@ -1,4 +1,4 @@
-import { createClient, createServiceRoleClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
@@ -7,20 +7,11 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = createClient()
-    const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+    const { error } = await supabase.auth.exchangeCodeForSession(code)
 
-    if (!error && data.user?.email) {
-      // Check if this user is already in any care circle (i.e. not a new user)
-      const db = createServiceRoleClient()
-      const { data: membership } = await db
-        .from('care_circle_members')
-        .select('id')
-        .eq('email', data.user.email)
-        .limit(1)
-        .maybeSingle()
-
-      const destination = membership ? '/app' : '/onboarding'
-      return NextResponse.redirect(new URL(destination, requestUrl.origin))
+    if (!error) {
+      // Redirect to the app dashboard on successful auth
+      return NextResponse.redirect(new URL('/app', requestUrl.origin))
     }
   }
 

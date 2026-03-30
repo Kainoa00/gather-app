@@ -1,6 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 
 const SYSTEM_PROMPT = `You are a clinical note parser for CareBridge Connect, a skilled nursing facility care platform.
 
@@ -84,13 +83,6 @@ Rules:
 - Return ONLY valid JSON, no markdown, no explanation text`
 
 export async function POST(req: NextRequest) {
-  // Auth check — prevent unauthenticated access
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) {
     return NextResponse.json({ error: 'API key not configured' }, { status: 503 })
@@ -106,7 +98,6 @@ export async function POST(req: NextRequest) {
     const anthropic = new Anthropic({ apiKey })
 
     // Use generic identifiers when sending to third-party AI to minimize PHI transmission.
-    // Patient name is never included; nurse name is omitted to reduce identifiers in the prompt.
     const userMessage = `Parse the following nurse shift notes. Extract structured log entries following the schema provided.
 
 NURSE NOTES:

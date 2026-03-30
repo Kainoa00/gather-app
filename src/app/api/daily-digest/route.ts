@@ -1,10 +1,8 @@
 import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
-import { createServiceRoleClient } from '@/lib/supabase/server'
-import { escapeHtml } from '@/lib/utils'
+import { supabase, isDemoMode } from '@/lib/supabase'
 
 interface DigestEntry {
-  patient_id: string
   created_at: string
   category: string
   title: string
@@ -17,18 +15,17 @@ interface PrimaryMember {
 }
 
 export async function GET(request: Request) {
-  // Auth check — require CRON_SECRET. When unset, reject all requests
-  // to prevent unauthenticated access to the digest endpoint.
+  // Auth check — skip if CRON_SECRET is not set (local dev)
   const cronSecret = process.env.CRON_SECRET
-  if (!cronSecret) {
-    return NextResponse.json(
-      { error: 'CRON_SECRET not configured — endpoint disabled' },
-      { status: 503 }
-    )
+  if (cronSecret) {
+    const authHeader = request.headers.get('authorization')
+    if (authHeader !== `Bearer ${cronSecret}`) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
   }
-  const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  if (isDemoMode) {
+    return NextResponse.json({ sent: 0, skipped: 0, message: 'Demo mode — no emails sent' })
   }
 
   const apiKey = process.env.RESEND_API_KEY
@@ -36,8 +33,6 @@ export async function GET(request: Request) {
     return NextResponse.json({ sent: 0, skipped: 0, message: 'RESEND_API_KEY not configured' })
   }
 
-  // Use service-role client — this is a server-side cron job, not a user request
-  const supabase = createServiceRoleClient()
   const resend = new Resend(apiKey)
 
   // Fetch all primary-role family members
@@ -57,9 +52,11 @@ export async function GET(request: Request) {
 
   const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
 
+  let sent = 0
+  let skipped = 0
+
   // Group members by patient_id
   const membersByPatient = new Map<string, PrimaryMember[]>()
-  let skipped = 0
   for (const member of primaryMembers as PrimaryMember[]) {
     if (!member.email) {
       skipped++
@@ -71,41 +68,32 @@ export async function GET(request: Request) {
   }
 
   const patientIds = Array.from(membersByPatient.keys())
-
-  // Batch fetch all log entries for all patients in a single query (fixes N+1)
-  const { data: allEntries, error: entriesError } = await supabase
-    .from('log_entries')
-    .select('patient_id, created_at, category, title')
-    .in('patient_id', patientIds)
-    .gte('created_at', twentyFourHoursAgo)
-    .order('created_at', { ascending: false })
-
-  if (entriesError) {
-    console.error('[daily-digest] Error fetching entries:', entriesError)
-    return NextResponse.json({ error: 'Failed to fetch entries' }, { status: 500 })
-  }
-
-  // Group entries by patient_id in memory
-  const entriesByPatient = new Map<string, DigestEntry[]>()
-  for (const entry of (allEntries ?? []) as DigestEntry[]) {
-    const arr = entriesByPatient.get(entry.patient_id) || []
-    arr.push(entry)
-    entriesByPatient.set(entry.patient_id, arr)
-  }
-
-  // Send emails concurrently (instead of sequentially)
-  const emailPromises: Promise<{ success: boolean }>[] = []
-
   for (const patientId of patientIds) {
     const members = membersByPatient.get(patientId)!
-    const entries = entriesByPatient.get(patientId)
+
+    // Fetch last 24 hours of log entries for this patient
+    const { data: entries, error: entriesError } = await supabase
+      .from('log_entries')
+      .select('created_at, category, title')
+      .eq('patient_id', patientId)
+      .gte('created_at', twentyFourHoursAgo)
+      .order('created_at', { ascending: false })
+
+    if (entriesError) {
+      console.error(`[daily-digest] Error fetching entries for patient ${patientId}:`, entriesError)
+      skipped += members.length
+      continue
+    }
+
     if (!entries || entries.length === 0) {
       skipped += members.length
       continue
     }
 
-    // Build digest HTML with escaped values
-    const entriesHtml = entries
+    const typedEntries = entries as DigestEntry[]
+
+    // Build digest HTML
+    const entriesHtml = typedEntries
       .map((e) => {
         const time = new Date(e.created_at).toLocaleTimeString('en-US', {
           hour: 'numeric',
@@ -113,14 +101,14 @@ export async function GET(request: Request) {
         })
         return `<tr>
           <td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:14px;white-space:nowrap;">${time}</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;color:#1B4798;font-size:14px;font-weight:600;">${escapeHtml(e.category)}</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;color:#1e293b;font-size:14px;">${escapeHtml(e.title)}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;color:#1B4798;font-size:14px;font-weight:600;">${e.category}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;color:#1e293b;font-size:14px;">${e.title}</td>
         </tr>`
       })
       .join('')
 
+    // Send to each primary member for this patient
     for (const member of members) {
-      const safeName = escapeHtml(member.name)
       const html = `
 <!DOCTYPE html>
 <html lang="en">
@@ -139,10 +127,10 @@ export async function GET(request: Request) {
           <tr>
             <td style="padding:32px;">
               <p style="margin:0 0 16px;color:#1e293b;font-size:16px;line-height:1.6;">
-                Hi ${safeName},
+                Hi ${member.name},
               </p>
               <p style="margin:0 0 20px;color:#1e293b;font-size:16px;line-height:1.6;">
-                Here's a summary of ${entries.length} care update${entries.length !== 1 ? 's' : ''} from the last 24 hours:
+                Here's a summary of ${typedEntries.length} care update${typedEntries.length !== 1 ? 's' : ''} from the last 24 hours:
               </p>
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;">
                 <tr style="background-color:#f1f5f9;">
@@ -179,25 +167,20 @@ export async function GET(request: Request) {
 </body>
 </html>`.trim()
 
-      emailPromises.push(
-        resend.emails.send({
-          from: process.env.RESEND_FROM_EMAIL ?? 'CareBridge Connect <onboarding@resend.dev>',
+      try {
+        await resend.emails.send({
+          from: 'CareBridge Connect <onboarding@resend.dev>',
           to: [member.email],
-          subject: `Daily Care Digest \u2014 ${entries.length} update${entries.length !== 1 ? 's' : ''}`,
+          subject: `Daily Care Digest \u2014 ${typedEntries.length} update${typedEntries.length !== 1 ? 's' : ''}`,
           html,
-        }).then(() => ({ success: true as const }))
-          .catch((err) => {
-            console.error(`[daily-digest] Failed to send to ${member.email}:`, err)
-            return { success: false as const }
-          })
-      )
+        })
+        sent++
+      } catch (err) {
+        console.error(`[daily-digest] Failed to send to ${member.email}:`, err)
+        skipped++
+      }
     }
   }
-
-  // Send all emails concurrently
-  const results = await Promise.all(emailPromises)
-  const sent = results.filter(r => r.success).length
-  skipped += results.filter(r => !r.success).length
 
   return NextResponse.json({ sent, skipped })
 }

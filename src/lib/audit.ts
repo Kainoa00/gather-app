@@ -1,5 +1,4 @@
-import { isDemoMode, DEMO_PATIENT_ID } from '@/lib/supabase'
-import { getSupabaseBrowserClient } from '@/lib/supabase/browser'
+import { supabase, isDemoMode, DEMO_PATIENT_ID } from '@/lib/supabase'
 
 export type AuditAction =
   | 'view_patient'
@@ -49,7 +48,7 @@ export async function logAuditEvent(event: AuditEvent): Promise<void> {
   }
 
   try {
-    const { error } = await getSupabaseBrowserClient().from('audit_log').insert({
+    const { error } = await supabase.from('audit_log').insert({
       patient_id: event.patientId,
       actor_id: event.actorId,
       actor_name: event.actorName,

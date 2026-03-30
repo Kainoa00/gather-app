@@ -235,7 +235,6 @@ export function useLogEntries(patientId: string = DEMO_PATIENT_ID) {
       `)
       .eq('patient_id', patientId)
       .order('created_at', { ascending: false })
-      .limit(100)
 
     if (error) {
       console.error('Error fetching log entries:', error)
@@ -268,13 +267,13 @@ export function useLogEntries(patientId: string = DEMO_PATIENT_ID) {
 
         if (vitals) {
           entry.vitals = {
-            bloodPressureSystolic: vitals.blood_pressure_systolic ?? undefined,
-            bloodPressureDiastolic: vitals.blood_pressure_diastolic ?? undefined,
-            heartRate: vitals.heart_rate ?? undefined,
-            temperature: vitals.temperature != null ? Number(vitals.temperature) : undefined,
-            oxygenSaturation: vitals.oxygen_saturation ?? undefined,
-            weight: vitals.weight != null ? Number(vitals.weight) : undefined,
-            respiratoryRate: vitals.respiratory_rate ?? undefined,
+            bloodPressureSystolic: vitals.blood_pressure_systolic || undefined,
+            bloodPressureDiastolic: vitals.blood_pressure_diastolic || undefined,
+            heartRate: vitals.heart_rate || undefined,
+            temperature: vitals.temperature ? Number(vitals.temperature) : undefined,
+            oxygenSaturation: vitals.oxygen_saturation || undefined,
+            weight: vitals.weight ? Number(vitals.weight) : undefined,
+            respiratoryRate: vitals.respiratory_rate || undefined,
           }
         }
 
@@ -301,8 +300,8 @@ export function useLogEntries(patientId: string = DEMO_PATIENT_ID) {
             mood: moodLog.mood as MoodData['mood'],
             alertness: moodLog.alertness as MoodData['alertness'],
             appetite: moodLog.appetite as MoodData['appetite'],
-            painLevel: moodLog.pain_level ?? undefined,
-            notes: moodLog.notes ?? undefined,
+            painLevel: moodLog.pain_level || undefined,
+            notes: moodLog.notes || undefined,
           }
         }
 
@@ -363,7 +362,6 @@ export function usePosts(patientId: string = DEMO_PATIENT_ID) {
       .select(`*, feed_comments(*)`)
       .eq('patient_id', patientId)
       .order('created_at', { ascending: false })
-      .limit(50)
 
     if (error) {
       console.error('Error fetching posts:', error)
@@ -434,7 +432,6 @@ export function useVisits(patientId: string = DEMO_PATIENT_ID) {
       .select('*')
       .eq('patient_id', patientId)
       .order('check_in_time', { ascending: false })
-      .limit(50)
 
     if (error) {
       console.error('Error fetching visits:', error)
@@ -494,7 +491,6 @@ export function useNotifications(patientId: string = DEMO_PATIENT_ID) {
       .select('*')
       .eq('patient_id', patientId)
       .order('created_at', { ascending: false })
-      .limit(100)
 
     if (error) {
       console.error('Error fetching notifications:', error)

@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
-import { createClient } from '@/lib/supabase/server'
-import { escapeHtml } from '@/lib/utils'
 
 interface NotificationBody {
   recipientEmail: string
@@ -14,13 +12,6 @@ interface NotificationBody {
 }
 
 export async function POST(request: Request) {
-  // Auth check
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
   let body: NotificationBody
 
   try {
@@ -54,14 +45,8 @@ export async function POST(request: Request) {
   const resend = new Resend(apiKey)
 
   const senderLabel = senderName || 'A care team member'
-
-  // Escape all user-supplied values before embedding in HTML
-  const safeRecipient = escapeHtml(recipientName)
-  const safeSender = escapeHtml(senderLabel)
-  const safePatient = escapeHtml(patientName)
-  const safeMessage = escapeHtml(message)
-  // Strip newlines/control characters to prevent email header injection
-  const subject = `Update about ${patientName} \u2014 ${notificationType}`.replace(/[\r\n\x00-\x1f]/g, '')
+  const facilityLabel = facilityName || 'your care facility'
+  const subject = `Update about ${patientName} \u2014 ${notificationType}`
 
   const htmlBody = `
 <!DOCTYPE html>
@@ -84,14 +69,14 @@ export async function POST(request: Request) {
           <tr>
             <td style="padding:32px;">
               <p style="margin:0 0 16px;color:#1e293b;font-size:16px;line-height:1.6;">
-                Hi ${safeRecipient},
+                Hi ${recipientName},
               </p>
               <p style="margin:0 0 16px;color:#1e293b;font-size:16px;line-height:1.6;">
-                ${safeSender} posted an update about <strong>${safePatient}</strong>:
+                ${senderLabel} posted an update about <strong>${patientName}</strong>:
               </p>
               <blockquote style="margin:0 0 24px;padding:16px 20px;border-left:4px solid #1B4798;background-color:#f1f5f9;border-radius:0 4px 4px 0;">
                 <p style="margin:0;color:#334155;font-size:15px;line-height:1.6;">
-                  ${safeMessage}
+                  ${message}
                 </p>
               </blockquote>
               <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
@@ -110,7 +95,7 @@ export async function POST(request: Request) {
           <tr>
             <td style="padding:20px 32px;border-top:1px solid #e2e8f0;">
               <p style="margin:0 0 8px;color:#64748b;font-size:13px;line-height:1.5;">
-                You're receiving this because you're a member of ${safePatient}'s care circle on CareBridge Connect.
+                You're receiving this because you're a member of ${patientName}'s care circle on CareBridge Connect.
               </p>
               <p style="margin:0;color:#94a3b8;font-size:12px;line-height:1.5;">
                 If you no longer wish to receive these notifications, you can update your preferences in your

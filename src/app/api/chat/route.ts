@@ -1,15 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 
 export async function POST(req: NextRequest) {
-  // Auth check — prevent unauthenticated access to AI endpoint
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized', content: null }, { status: 401 })
-  }
-
   const apiKey = process.env.ANTHROPIC_API_KEY
 
   if (!apiKey) {

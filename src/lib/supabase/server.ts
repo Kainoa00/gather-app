@@ -2,10 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 
-/**
- * Create a service-role Supabase client that bypasses RLS.
- * Use only in server-side API routes for privileged operations.
- */
+/** Service-role client — bypasses RLS. Use only in server-side cron jobs and admin routes. */
 export function createServiceRoleClient() {
   return createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

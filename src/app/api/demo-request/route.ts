@@ -1,24 +1,11 @@
 import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
-import { escapeHtml, getClientIp } from '@/lib/utils'
 
 // Simple in-memory rate limiter — max 5 requests per IP per hour
-// Bounded to 10 000 entries to prevent memory leak in long-running processes.
-const MAX_RATE_LIMIT_ENTRIES = 10_000
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
 
 function isRateLimited(ip: string): boolean {
   const now = Date.now()
-
-  // Periodic cleanup: evict expired entries when map grows large
-  if (rateLimitMap.size > MAX_RATE_LIMIT_ENTRIES) {
-    const keys = Array.from(rateLimitMap.keys())
-    for (const key of keys) {
-      const val = rateLimitMap.get(key)
-      if (val && now > val.resetAt) rateLimitMap.delete(key)
-    }
-  }
-
   const entry = rateLimitMap.get(ip)
   if (!entry || now > entry.resetAt) {
     rateLimitMap.set(ip, { count: 1, resetAt: now + 60 * 60 * 1000 })
@@ -41,14 +28,6 @@ interface DemoRequestBody {
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 function buildTeamNotificationHtml(data: DemoRequestBody, timestamp: string): string {
-  const safe = {
-    name: escapeHtml(data.name),
-    email: escapeHtml(data.email),
-    facilityName: escapeHtml(data.facilityName),
-    role: escapeHtml(data.role),
-    residentCount: escapeHtml(data.residentCount),
-    notes: data.notes ? escapeHtml(data.notes) : '<em style="color:#999;">None provided</em>',
-  }
   return `
 <!DOCTYPE html>
 <html>
@@ -62,27 +41,27 @@ function buildTeamNotificationHtml(data: DemoRequestBody, timestamp: string): st
       <table style="width:100%;border-collapse:collapse;font-size:14px;color:#333;">
         <tr>
           <td style="padding:10px 12px;font-weight:600;color:#1e3a5f;border-bottom:1px solid #eef0f3;width:140px;">Name</td>
-          <td style="padding:10px 12px;border-bottom:1px solid #eef0f3;">${safe.name}</td>
+          <td style="padding:10px 12px;border-bottom:1px solid #eef0f3;">${data.name}</td>
         </tr>
         <tr>
           <td style="padding:10px 12px;font-weight:600;color:#1e3a5f;border-bottom:1px solid #eef0f3;">Email</td>
-          <td style="padding:10px 12px;border-bottom:1px solid #eef0f3;"><a href="mailto:${safe.email}" style="color:#2563eb;">${safe.email}</a></td>
+          <td style="padding:10px 12px;border-bottom:1px solid #eef0f3;"><a href="mailto:${data.email}" style="color:#2563eb;">${data.email}</a></td>
         </tr>
         <tr>
           <td style="padding:10px 12px;font-weight:600;color:#1e3a5f;border-bottom:1px solid #eef0f3;">Facility</td>
-          <td style="padding:10px 12px;border-bottom:1px solid #eef0f3;">${safe.facilityName}</td>
+          <td style="padding:10px 12px;border-bottom:1px solid #eef0f3;">${data.facilityName}</td>
         </tr>
         <tr>
           <td style="padding:10px 12px;font-weight:600;color:#1e3a5f;border-bottom:1px solid #eef0f3;">Role</td>
-          <td style="padding:10px 12px;border-bottom:1px solid #eef0f3;">${safe.role}</td>
+          <td style="padding:10px 12px;border-bottom:1px solid #eef0f3;">${data.role}</td>
         </tr>
         <tr>
           <td style="padding:10px 12px;font-weight:600;color:#1e3a5f;border-bottom:1px solid #eef0f3;">Residents</td>
-          <td style="padding:10px 12px;border-bottom:1px solid #eef0f3;">${safe.residentCount}</td>
+          <td style="padding:10px 12px;border-bottom:1px solid #eef0f3;">${data.residentCount}</td>
         </tr>
         <tr>
           <td style="padding:10px 12px;font-weight:600;color:#1e3a5f;border-bottom:1px solid #eef0f3;">Notes</td>
-          <td style="padding:10px 12px;border-bottom:1px solid #eef0f3;">${safe.notes}</td>
+          <td style="padding:10px 12px;border-bottom:1px solid #eef0f3;">${data.notes || '<em style="color:#999;">None provided</em>'}</td>
         </tr>
         <tr>
           <td style="padding:10px 12px;font-weight:600;color:#1e3a5f;">Submitted</td>
@@ -96,7 +75,6 @@ function buildTeamNotificationHtml(data: DemoRequestBody, timestamp: string): st
 }
 
 function buildConfirmationHtml(name: string): string {
-  const safeName = escapeHtml(name)
   return `
 <!DOCTYPE html>
 <html>
@@ -107,7 +85,7 @@ function buildConfirmationHtml(name: string): string {
       <h1 style="margin:0;color:#ffffff;font-size:20px;font-weight:600;">CareBridge Connect</h1>
     </div>
     <div style="padding:32px;">
-      <h2 style="margin:0 0 16px;color:#1e3a5f;font-size:18px;">Hi ${safeName},</h2>
+      <h2 style="margin:0 0 16px;color:#1e3a5f;font-size:18px;">Hi ${name},</h2>
       <p style="color:#444;font-size:14px;line-height:1.7;margin:0 0 16px;">
         Thank you for requesting a demo of CareBridge Connect! We're excited to show you how our platform can transform communication at your facility.
       </p>
@@ -134,7 +112,7 @@ function buildConfirmationHtml(name: string): string {
 }
 
 export async function POST(request: Request) {
-  const ip = getClientIp(request) ?? 'unknown'
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
   if (isRateLimited(ip)) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
   }

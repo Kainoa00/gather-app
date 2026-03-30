@@ -1,11 +1,4 @@
-import { DEMO_PATIENT_ID } from '@/lib/supabase'
-import { getSupabaseBrowserClient } from '@/lib/supabase/browser'
-
-// Use the SSR-aware browser client so auth cookies (JWT) are sent,
-// allowing RLS policies to work correctly.
-function getClient() {
-  return getSupabaseBrowserClient()
-}
+import { supabase, DEMO_PATIENT_ID } from '@/lib/supabase'
 import { notifyFamilyMembers } from '@/lib/notifications'
 import {
   CareCircleMember,
@@ -24,7 +17,7 @@ export async function addMemberToDb(
   member: Omit<CareCircleMember, 'id' | 'joinedAt'>,
   patientId: string = DEMO_PATIENT_ID
 ) {
-  const { data, error } = await getClient()
+  const { data, error } = await supabase
     .from('care_circle_members')
     .insert({
       patient_id: patientId,
@@ -51,7 +44,7 @@ export async function addEventToDb(
   createdBy: string,
   patientId: string = DEMO_PATIENT_ID
 ) {
-  const { data, error } = await getClient()
+  const { data, error } = await supabase
     .from('calendar_events')
     .insert({
       patient_id: patientId,
@@ -79,7 +72,7 @@ export async function claimEventInDb(
   claimedBy: string,
   claimedByName: string
 ) {
-  const { data, error } = await getClient()
+  const { data, error } = await supabase
     .from('calendar_events')
     .update({
       claimed_by: claimedBy,
@@ -102,7 +95,7 @@ export async function addLogEntryToDb(
   patientId: string = DEMO_PATIENT_ID
 ): Promise<{ id: string }> {
   // Insert main log entry
-  const { data: logData, error: logError } = await getClient()
+  const { data: logData, error: logError } = await supabase
     .from('log_entries')
     .insert({
       patient_id: patientId,
@@ -121,7 +114,7 @@ export async function addLogEntryToDb(
 
   // Notify family members (non-blocking)
   Promise.resolve(
-    getClient()
+    supabase
       .from('care_circle_members')
       .select('name, email, role')
       .eq('patient_id', patientId)
@@ -146,20 +139,20 @@ export async function addLogEntryToDb(
 
   // Insert category-specific data
   if (entry.category === 'vitals' && entry.vitals) {
-    await getClient().from('vitals_data').insert({
+    await supabase.from('vitals_data').insert({
       log_entry_id: logData.id,
-      blood_pressure_systolic: entry.vitals.bloodPressureSystolic ?? null,
-      blood_pressure_diastolic: entry.vitals.bloodPressureDiastolic ?? null,
-      heart_rate: entry.vitals.heartRate ?? null,
-      temperature: entry.vitals.temperature ?? null,
-      oxygen_saturation: entry.vitals.oxygenSaturation ?? null,
-      weight: entry.vitals.weight ?? null,
-      respiratory_rate: entry.vitals.respiratoryRate ?? null,
+      blood_pressure_systolic: entry.vitals.bloodPressureSystolic || null,
+      blood_pressure_diastolic: entry.vitals.bloodPressureDiastolic || null,
+      heart_rate: entry.vitals.heartRate || null,
+      temperature: entry.vitals.temperature || null,
+      oxygen_saturation: entry.vitals.oxygenSaturation || null,
+      weight: entry.vitals.weight || null,
+      respiratory_rate: entry.vitals.respiratoryRate || null,
     })
   }
 
   if (entry.category === 'medication' && entry.medicationLog) {
-    await getClient().from('medication_log_data').insert({
+    await supabase.from('medication_log_data').insert({
       log_entry_id: logData.id,
       medication_name: entry.medicationLog.medicationName,
       dosage: entry.medicationLog.dosage,
@@ -169,7 +162,7 @@ export async function addLogEntryToDb(
   }
 
   if (entry.category === 'activity' && entry.activityLog) {
-    await getClient().from('activity_log_data').insert({
+    await supabase.from('activity_log_data').insert({
       log_entry_id: logData.id,
       activity_type: entry.activityLog.activityType,
       description: entry.activityLog.description,
@@ -179,18 +172,18 @@ export async function addLogEntryToDb(
   }
 
   if (entry.category === 'mood' && entry.moodLog) {
-    await getClient().from('mood_log_data').insert({
+    await supabase.from('mood_log_data').insert({
       log_entry_id: logData.id,
       mood: entry.moodLog.mood,
       alertness: entry.moodLog.alertness,
       appetite: entry.moodLog.appetite,
-      pain_level: entry.moodLog.painLevel ?? null,
+      pain_level: entry.moodLog.painLevel || null,
       notes: entry.moodLog.notes || null,
     })
   }
 
   if (entry.category === 'incident' && entry.incidentLog) {
-    await getClient().from('incident_log_data').insert({
+    await supabase.from('incident_log_data').insert({
       log_entry_id: logData.id,
       incident_type: entry.incidentLog.incidentType,
       severity: entry.incidentLog.severity,
@@ -210,7 +203,7 @@ export async function addLogCommentToDb(
   authorName: string,
   content: string
 ) {
-  const { data, error } = await getClient()
+  const { data, error } = await supabase
     .from('log_comments')
     .insert({
       log_entry_id: entryId,
@@ -233,7 +226,7 @@ export async function addPostToDb(
   post: Omit<FeedPost, 'id' | 'createdAt' | 'likes' | 'comments'>,
   patientId: string = DEMO_PATIENT_ID
 ) {
-  const { data, error } = await getClient()
+  const { data, error } = await supabase
     .from('feed_posts')
     .insert({
       patient_id: patientId,
@@ -256,11 +249,25 @@ export async function addPostToDb(
 }
 
 export async function likePostInDb(postId: string, userId: string) {
-  // Atomic toggle via RPC — prevents race conditions
-  const { error } = await getClient().rpc('toggle_like', {
-    p_post_id: postId,
-    p_user_id: userId,
-  })
+  // Fetch current likes
+  const { data: post, error: fetchError } = await supabase
+    .from('feed_posts')
+    .select('likes')
+    .eq('id', postId)
+    .single()
+
+  if (fetchError) throw fetchError
+
+  const currentLikes: string[] = (post?.likes as string[]) || []
+  const isLiked = currentLikes.includes(userId)
+  const newLikes = isLiked
+    ? currentLikes.filter(id => id !== userId)
+    : [...currentLikes, userId]
+
+  const { error } = await supabase
+    .from('feed_posts')
+    .update({ likes: newLikes })
+    .eq('id', postId)
 
   if (error) throw error
 }
@@ -271,7 +278,7 @@ export async function addPostCommentToDb(
   authorName: string,
   content: string
 ) {
-  const { data, error } = await getClient()
+  const { data, error } = await supabase
     .from('feed_comments')
     .insert({
       post_id: postId,
@@ -296,7 +303,7 @@ export async function checkInToDb(
   visitorRelationship: string | undefined,
   patientId: string = DEMO_PATIENT_ID
 ) {
-  const { data, error } = await getClient()
+  const { data, error } = await supabase
     .from('visits')
     .insert({
       patient_id: patientId,
@@ -318,7 +325,7 @@ export async function checkOutInDb(
   note: string,
   duration: number
 ) {
-  const { data, error } = await getClient()
+  const { data, error } = await supabase
     .from('visits')
     .update({
       check_out_time: new Date().toISOString(),
@@ -342,7 +349,7 @@ export async function createNotificationInDb(
   notification: Omit<Notification, 'id' | 'createdAt' | 'readBy'>,
   patientId: string = DEMO_PATIENT_ID
 ) {
-  const { data, error } = await getClient()
+  const { data, error } = await supabase
     .from('notifications')
     .insert({
       patient_id: patientId,
@@ -363,11 +370,22 @@ export async function markNotificationReadInDb(
   notificationId: string,
   userId: string
 ) {
-  // Atomic mark-read via RPC — prevents race conditions
-  const { error } = await getClient().rpc('mark_notification_read', {
-    p_notification_id: notificationId,
-    p_user_id: userId,
-  })
+  // Fetch current readBy
+  const { data: notif, error: fetchError } = await supabase
+    .from('notifications')
+    .select('read_by')
+    .eq('id', notificationId)
+    .single()
+
+  if (fetchError) throw fetchError
+
+  const currentReadBy: string[] = (notif?.read_by as string[]) || []
+  if (currentReadBy.includes(userId)) return
+
+  const { error } = await supabase
+    .from('notifications')
+    .update({ read_by: [...currentReadBy, userId] })
+    .eq('id', notificationId)
 
   if (error) throw error
 }
@@ -376,11 +394,23 @@ export async function markAllNotificationsReadInDb(
   patientId: string,
   userId: string
 ) {
-  // Atomic bulk mark-read via RPC — single query instead of N+1
-  const { error } = await getClient().rpc('mark_all_notifications_read', {
-    p_patient_id: patientId,
-    p_user_id: userId,
-  })
+  // Fetch all unread notifications for this patient
+  const { data: notifs, error: fetchError } = await supabase
+    .from('notifications')
+    .select('id, read_by')
+    .eq('patient_id', patientId)
 
-  if (error) throw error
+  if (fetchError) throw fetchError
+
+  // Update each that doesn't include this user
+  const updates = (notifs || [])
+    .filter(n => !(n.read_by as string[]).includes(userId))
+    .map(n =>
+      supabase
+        .from('notifications')
+        .update({ read_by: [...(n.read_by as string[]), userId] })
+        .eq('id', n.id)
+    )
+
+  await Promise.all(updates)
 }

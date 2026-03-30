@@ -70,15 +70,10 @@ export default function HomeFeed({
 
   const currentMember = members.find((m) => m.id === currentUserId)
 
-  const MAX_FILE_SIZE_MB = 10
   const handleMediaUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files) return
     Array.from(files).forEach((file) => {
-      if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
-        alert(`File "${file.name}" exceeds ${MAX_FILE_SIZE_MB}MB limit and was skipped.`)
-        return
-      }
       const reader = new FileReader()
       reader.onload = (event) => {
         const type = file.type.startsWith('video/') ? 'video' : 'image'
@@ -342,7 +337,7 @@ export default function HomeFeed({
                       <div className="flex-1 flex items-center gap-2 bg-cream-100/80 rounded-2xl px-3 sm:px-4 py-2 border border-cream-200">
                         <input type="text" value={commentInputs[post.id] || ''}
                           onChange={(e) => setCommentInputs((prev) => ({ ...prev, [post.id]: e.target.value }))}
-                          onKeyDown={(e) => e.key === 'Enter' && handleComment(post.id)}
+                          onKeyPress={(e) => e.key === 'Enter' && handleComment(post.id)}
                           placeholder="Add a comment..."
                           className="flex-1 bg-transparent text-sm text-navy-800 placeholder:text-navy-400 focus:outline-none min-h-[44px]" />
                         <button onClick={() => handleComment(post.id)} disabled={!commentInputs[post.id]?.trim()}

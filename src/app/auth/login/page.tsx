@@ -26,7 +26,7 @@ function LoginForm() {
 
     if (isDemoMode) {
       if (email === DEMO_EMAIL && password === DEMO_PASSWORD) {
-        document.cookie = 'demo=true; path=/; max-age=86400; samesite=lax'
+        document.cookie = 'demo=true; path=/; max-age=86400; samesite=strict; secure'
         router.push(redirect)
       } else {
         setError('Invalid credentials. Please check your email and password.')

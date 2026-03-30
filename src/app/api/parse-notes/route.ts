@@ -105,7 +105,9 @@ export async function POST(req: NextRequest) {
 
     const anthropic = new Anthropic({ apiKey })
 
-    const userMessage = `Parse the following nurse notes for patient ${patientName || 'the patient'}. The nurse's name is ${nurseName || 'the nurse on duty'}.
+    // Use generic identifiers when sending to third-party AI to minimize PHI transmission.
+    // Patient name is never included; nurse name is omitted to reduce identifiers in the prompt.
+    const userMessage = `Parse the following nurse shift notes. Extract structured log entries following the schema provided.
 
 NURSE NOTES:
 ${notes.trim()}`
@@ -126,7 +128,8 @@ ${notes.trim()}`
     try {
       parsed = JSON.parse(jsonText)
     } catch {
-      console.error('Failed to parse Claude JSON output:', rawText)
+      // Do NOT log rawText — it may contain PHI from the clinical notes
+      console.error('[parse-notes] Failed to parse JSON response (length:', rawText.length, ')')
       return NextResponse.json({ error: 'Agent returned malformed response. Please try again.' }, { status: 422 })
     }
 

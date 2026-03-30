@@ -47,11 +47,7 @@ export async function POST(request: Request) {
   const apiKey = process.env.RESEND_API_KEY
 
   if (!apiKey) {
-    console.log('[notifications/send] RESEND_API_KEY not set, skipping email:', {
-      recipientEmail,
-      patientName,
-      notificationType,
-    })
+    console.log('[notifications/send] RESEND_API_KEY not set — skipping email (type:', notificationType, ')')
     return NextResponse.json({ success: true, queued: false })
   }
 
@@ -146,12 +142,7 @@ export async function POST(request: Request) {
       )
     }
 
-    console.log('[notifications/send] Email sent:', {
-      emailId: data?.id,
-      recipientEmail,
-      patientName,
-      notificationType,
-    })
+    console.log('[notifications/send] Email sent (id:', data?.id, ', type:', notificationType, ')')
 
     return NextResponse.json({
       success: true,

@@ -24,8 +24,12 @@ export async function POST(req: NextRequest) {
     .update(rawBody)
     .digest('hex')
 
-  if (signature !== expected && process.env.NODE_ENV === 'production') {
-    return new NextResponse('Forbidden', { status: 403 })
+  if (signature !== expected) {
+    if (process.env.SKIP_WEBHOOK_AUTH === 'true') {
+      console.warn('[pcc webhook] Signature verification skipped — SKIP_WEBHOOK_AUTH is set')
+    } else {
+      return new NextResponse('Forbidden', { status: 403 })
+    }
   }
 
   let payload: Record<string, unknown>

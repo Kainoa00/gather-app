@@ -1,6 +1,7 @@
 // src/app/api/residents/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { rateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
 export async function GET(req: NextRequest) {
@@ -28,6 +29,12 @@ const CreateResidentSchema = z.object({
 })
 
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get('x-forwarded-for') ?? 'unknown'
+  const { allowed } = rateLimit(`residents:${ip}`, 10, 60000) // 10 per minute
+  if (!allowed) {
+    return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 })
+  }
+
   const body = await req.json()
   const parsed = CreateResidentSchema.safeParse(body)
   if (!parsed.success) return NextResponse.json({ error: parsed.error }, { status: 400 })

@@ -2,11 +2,18 @@
 import { prisma } from '@/lib/prisma'
 import { sendConsentRequest } from '@/lib/sms'
 import { revalidatePath } from 'next/cache'
+import { headers } from 'next/headers'
 import { ConsentCategory, ConsentStatus } from '@prisma/client'
 
 const ALL_CATEGORIES = Object.values(ConsentCategory) as ConsentCategory[]
 
 export async function sendConsentSMS(contactId: string): Promise<{ success: boolean; error?: string }> {
+  const origin = (await headers()).get('origin')
+  const host = (await headers()).get('host')
+  if (origin && host && !origin.includes(host)) {
+    return { success: false, error: 'Invalid request origin' }
+  }
+
   const contact = await prisma.familyContact.findUnique({
     where: { id: contactId },
     include: {

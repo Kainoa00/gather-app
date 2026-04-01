@@ -2,6 +2,7 @@
 import twilio from 'twilio'
 import { prisma } from './prisma'
 import { ConsentStatus, MessageDirection, MessageStatus, AuditActor } from '@prisma/client'
+import { revalidatePath } from 'next/cache'
 
 let _client: ReturnType<typeof twilio> | null = null
 
@@ -43,7 +44,13 @@ export async function sendSMS({
     return 'SMS_DISABLED_NO_TWILIO'
   }
 
-  const msg = await client.messages.create({ from: getFromNumber(), to, body })
+  const callbackUrl = process.env.TWILIO_STATUS_CALLBACK_URL
+  const msg = await client.messages.create({
+    from: getFromNumber(),
+    to,
+    body,
+    ...(callbackUrl ? { statusCallback: callbackUrl } : {}),
+  })
 
   await prisma.message.update({
     where: { id: messageId },
@@ -116,80 +123,91 @@ export async function handleInboundSMS({
 }) {
   const normalised = body.trim().toUpperCase()
 
-  const contact = await prisma.familyContact.findFirst({
+  const contacts = await prisma.familyContact.findMany({
     where: { phone: from },
     include: { resident: { include: { facility: true } } },
   })
 
-  if (!contact) return { status: 'UNKNOWN_CONTACT' }
+  if (contacts.length === 0) return { status: 'UNKNOWN_CONTACT' }
 
-  const facilityId = contact.resident.facilityId
+  // Process for all matching contacts (handles phone number collisions)
+  const results = []
+  for (const contact of contacts) {
+    const facilityId = contact.resident.facilityId
 
-  if (normalised === 'YES') {
-    // Activate only PENDING consents for this contact
-    const updated = await prisma.consent.updateMany({
-      where: { contactId: contact.id, status: ConsentStatus.PENDING },
-      data: { status: ConsentStatus.ACTIVE, consentedAt: new Date() },
-    })
+    if (normalised === 'YES') {
+      const updated = await prisma.consent.updateMany({
+        where: { contactId: contact.id, status: ConsentStatus.PENDING },
+        data: { status: ConsentStatus.ACTIVE, consentedAt: new Date() },
+      })
 
-    await prisma.auditLog.create({
-      data: {
-        facilityId,
-        actorType: AuditActor.FAMILY_CONTACT,
-        action: 'CONSENT_GRANTED',
-        entityType: 'FamilyContact',
-        entityId: contact.id,
-        metadata: { from, twilioSid, categoriesActivated: updated.count },
-      },
-    })
+      await prisma.auditLog.create({
+        data: {
+          facilityId,
+          actorType: AuditActor.FAMILY_CONTACT,
+          action: 'CONSENT_GRANTED',
+          entityType: 'FamilyContact',
+          entityId: contact.id,
+          metadata: { from, twilioSid, categoriesActivated: updated.count },
+        },
+      })
 
-    await prisma.message.create({
-      data: {
-        residentId: contact.residentId,
-        contactId: contact.id,
-        direction: MessageDirection.INBOUND,
-        body,
-        status: MessageStatus.DELIVERED,
-        twilioSid,
-        deliveredAt: new Date(),
-      },
-    })
+      await prisma.message.create({
+        data: {
+          residentId: contact.residentId,
+          contactId: contact.id,
+          direction: MessageDirection.INBOUND,
+          body,
+          status: MessageStatus.DELIVERED,
+          twilioSid,
+          deliveredAt: new Date(),
+        },
+      })
 
-    return { status: 'CONSENT_GRANTED', contactId: contact.id, count: updated.count }
+      revalidatePath('/consent')
+      results.push({ contactId: contact.id, count: updated.count })
+    } else if (normalised === 'STOP') {
+      await prisma.consent.updateMany({
+        where: { contactId: contact.id },
+        data: { status: ConsentStatus.REVOKED, revokedAt: new Date() },
+      })
+
+      await prisma.auditLog.create({
+        data: {
+          facilityId,
+          actorType: AuditActor.FAMILY_CONTACT,
+          action: 'CONSENT_REVOKED_STOP',
+          entityType: 'FamilyContact',
+          entityId: contact.id,
+          metadata: { from, twilioSid },
+        },
+      })
+
+      revalidatePath('/consent')
+      results.push({ contactId: contact.id })
+    } else {
+      // Generic inbound message — store for staff review
+      await prisma.message.create({
+        data: {
+          residentId: contact.residentId,
+          contactId: contact.id,
+          direction: MessageDirection.INBOUND,
+          body,
+          status: MessageStatus.DELIVERED,
+          twilioSid,
+          deliveredAt: new Date(),
+        },
+      })
+
+      results.push({ contactId: contact.id })
+    }
   }
 
-  if (normalised === 'STOP') {
-    await prisma.consent.updateMany({
-      where: { contactId: contact.id },
-      data: { status: ConsentStatus.REVOKED, revokedAt: new Date() },
-    })
+  revalidatePath('/messages')
+  revalidatePath('/')
 
-    await prisma.auditLog.create({
-      data: {
-        facilityId,
-        actorType: AuditActor.FAMILY_CONTACT,
-        action: 'CONSENT_REVOKED_STOP',
-        entityType: 'FamilyContact',
-        entityId: contact.id,
-        metadata: { from, twilioSid },
-      },
-    })
-
-    return { status: 'OPT_OUT', contactId: contact.id }
+  return {
+    status: normalised === 'YES' ? 'CONSENT_GRANTED' : normalised === 'STOP' ? 'OPT_OUT' : 'MESSAGE_STORED',
+    contacts: results.length,
   }
-
-  // Generic inbound message — store for staff review
-  await prisma.message.create({
-    data: {
-      residentId: contact.residentId,
-      contactId: contact.id,
-      direction: MessageDirection.INBOUND,
-      body,
-      status: MessageStatus.DELIVERED,
-      twilioSid,
-      deliveredAt: new Date(),
-    },
-  })
-
-  return { status: 'MESSAGE_STORED', contactId: contact.id }
 }

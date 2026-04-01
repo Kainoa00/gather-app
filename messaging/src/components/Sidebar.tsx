@@ -11,9 +11,12 @@ interface SidebarProps {
   eventCount: number
   inboundCount: number
   consentGaps: number
+  facilityName?: string
+  userName?: string
+  userRole?: string
 }
 
-export function Sidebar({ eventCount, inboundCount, consentGaps }: SidebarProps) {
+export function Sidebar({ eventCount, inboundCount, consentGaps, facilityName = 'Facility', userName = 'Staff', userRole = 'ADMIN' }: SidebarProps) {
   const path = usePathname()
 
   const nav = [
@@ -52,7 +55,7 @@ export function Sidebar({ eventCount, inboundCount, consentGaps }: SidebarProps)
           </div>
           <div>
             <p className="text-sm font-medium leading-none">CB Messaging</p>
-            <p className="text-[11px] text-gray-400 mt-0.5">Sunrise SNF</p>
+            <p className="text-[11px] text-gray-400 mt-0.5">{facilityName}</p>
           </div>
         </div>
       </div>
@@ -96,10 +99,10 @@ export function Sidebar({ eventCount, inboundCount, consentGaps }: SidebarProps)
       {/* Footer */}
       <div className="p-3 border-t border-gray-100">
         <div className="flex items-center gap-2 px-1">
-          <div className="w-6 h-6 rounded-full bg-brand-50 flex items-center justify-center text-[10px] font-medium text-brand-600">SM</div>
+          <div className="w-6 h-6 rounded-full bg-brand-50 flex items-center justify-center text-[10px] font-medium text-brand-600">{userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}</div>
           <div className="flex-1 min-w-0">
-            <p className="text-[12px] font-medium truncate">Sarah Mitchell</p>
-            <p className="text-[10px] text-gray-400">Admin</p>
+            <p className="text-[12px] font-medium truncate">{userName}</p>
+            <p className="text-[10px] text-gray-400">{userRole.charAt(0) + userRole.slice(1).toLowerCase()}</p>
           </div>
           <ChevronRight className="w-3 h-3 text-gray-300" />
         </div>

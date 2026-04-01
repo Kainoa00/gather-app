@@ -1,6 +1,7 @@
 // src/app/events/page.tsx
 import { prisma } from '@/lib/prisma'
-import { EventType, MessageStatus } from '@prisma/client'
+import { getFacilityId } from '@/lib/facility'
+import { EventType, MessageStatus, Prisma } from '@prisma/client'
 import { formatTime } from '@/lib/format'
 import Link from 'next/link'
 
@@ -41,24 +42,24 @@ export default async function EventsPage({
   searchParams: Promise<{ q?: string; type?: string; page?: string }>
 }) {
   const params = await searchParams
-  const facilityId = (await prisma.facility.findFirst())?.id ?? ''
+  const facilityId = await getFacilityId()
   const query = params.q ?? ''
   const typeFilter = params.type ?? ''
   const page = Math.max(1, parseInt(params.page ?? '1', 10) || 1)
 
-  const where: any = { resident: { facilityId } }
+  const where: Prisma.CareEventWhereInput = { resident: { facilityId } }
   if (typeFilter && Object.values(EventType).includes(typeFilter as EventType)) {
     where.type = typeFilter as EventType
   }
   if (query) {
     where.resident = {
-      ...where.resident,
+      facilityId,
       OR: [
         { firstName: { contains: query, mode: 'insensitive' } },
         { lastName: { contains: query, mode: 'insensitive' } },
         { roomNumber: { contains: query, mode: 'insensitive' } },
       ],
-    }
+    } as Prisma.ResidentWhereInput
   }
 
   const [events, totalCount] = await Promise.all([
@@ -168,7 +169,7 @@ export default async function EventsPage({
                 <div className="flex items-center gap-2 mb-0.5">
                   <p className="text-[13px] font-medium">{EVENT_TYPE_LABELS[ev.type] ?? ev.type.replace(/_/g, ' ')}</p>
                   {ev.pccNoteWritten && (
-                    <span className="text-[10px] bg-green-50 text-green-700 rounded px-1.5 py-0.5">PCC note written</span>
+                    <span className="text-[10px] bg-amber-50 text-amber-700 rounded px-1.5 py-0.5">Write-back pending</span>
                   )}
                 </div>
                 <p className="text-[11px] text-gray-400">

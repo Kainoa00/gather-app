@@ -186,6 +186,7 @@ async function main() {
     { name: 'Immunization notice', type: EventType.IMMUNIZATION, body: 'Hi {{contactFirstName}}, we want to inform you that {{residentName}} received their {{immunizationName}} vaccine today at {{facilityName}}.' },
     { name: 'Weight change alert', type: EventType.WEIGHT_CHANGE, body: "Hi {{contactFirstName}}, our care team has noted a weight change for {{residentName}} and wants to keep you informed. Please call {{facilityPhone}} if you'd like to discuss." },
     { name: 'Room transfer notice', type: EventType.ROOM_TRANSFER, body: 'Hi {{contactFirstName}}, {{residentName}} has been moved to room {{roomNumber}} at {{facilityName}}. Please update your records. Call us with any questions.' },
+    { name: 'Manual update', type: EventType.MANUAL, body: 'Hi {{contactFirstName}}, this is {{facilityName}} with an update regarding {{residentName}}. Please call us at {{facilityPhone}} if you have any questions.' },
   ]
 
   for (const t of templates) {

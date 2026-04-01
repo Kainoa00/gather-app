@@ -30,7 +30,7 @@ export async function processEventNotifications({
 }): Promise<ProcessEventResult[]> {
   const resident = await prisma.resident.findUnique({
     where: { id: residentId },
-    include: { contacts: { where: { isPrimary: true } }, facility: true },
+    include: { contacts: true, facility: true },
   })
   if (!resident) return []
 
@@ -43,7 +43,7 @@ export async function processEventNotifications({
       where: { eventType, isDefault: true },
     })
 
-    const body = template
+    let body = template
       ? interpolate(template.body, {
           contactFirstName: contact.name.split(' ')[0],
           residentName: `${resident.firstName} ${resident.lastName}`,
@@ -53,6 +53,11 @@ export async function processEventNotifications({
           immunizationName: (details as Record<string, string>)?.vaccineName ?? 'vaccine',
         })
       : `Update for ${resident.firstName} ${resident.lastName} from ${resident.facility.name}.`
+
+    // For MANUAL events, use the nurse's note as the message body
+    if (eventType === EventType.MANUAL && details.note) {
+      body = `${resident.facility.name}: ${details.note as string} — regarding ${resident.firstName} ${resident.lastName}.`
+    }
 
     const msg = await prisma.message.create({
       data: {

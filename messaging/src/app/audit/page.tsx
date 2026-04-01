@@ -1,5 +1,7 @@
 // src/app/audit/page.tsx
 import { prisma } from '@/lib/prisma'
+import { getFacilityId } from '@/lib/facility'
+import { Prisma } from '@prisma/client'
 import { formatDate } from '@/lib/format'
 import Link from 'next/link'
 
@@ -11,11 +13,11 @@ export default async function AuditPage({
   searchParams: Promise<{ q?: string; page?: string }>
 }) {
   const params = await searchParams
-  const facilityId = (await prisma.facility.findFirst())?.id ?? ''
+  const facilityId = await getFacilityId()
   const query = params.q ?? ''
   const page = Math.max(1, parseInt(params.page ?? '1', 10) || 1)
 
-  const where: any = { facilityId }
+  const where: Prisma.AuditLogWhereInput = { facilityId }
   if (query) {
     where.OR = [
       { action: { contains: query, mode: 'insensitive' } },

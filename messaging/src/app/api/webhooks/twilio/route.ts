@@ -17,8 +17,12 @@ export async function POST(req: NextRequest) {
     params
   )
 
-  if (!valid && process.env.NODE_ENV === 'production') {
-    return new NextResponse('Forbidden', { status: 403 })
+  if (!valid) {
+    if (process.env.SKIP_WEBHOOK_AUTH === 'true') {
+      console.warn('[twilio webhook] Signature verification skipped — SKIP_WEBHOOK_AUTH is set')
+    } else {
+      return new NextResponse('Forbidden', { status: 403 })
+    }
   }
 
   const from     = params['From']

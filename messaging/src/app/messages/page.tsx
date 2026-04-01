@@ -1,9 +1,23 @@
 // src/app/messages/page.tsx
 import { prisma } from '@/lib/prisma'
+import { getFacilityId } from '@/lib/facility'
 import { MessageDirection } from '@prisma/client'
+import { formatTime } from '@/lib/format'
+import Link from 'next/link'
 
-export default async function MessagesPage() {
-  const facilityId = (await prisma.facility.findFirst())?.id ?? ''
+const RESIDENTS_PER_PAGE = 10
+
+export default async function MessagesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>
+}) {
+  const params = await searchParams
+  const facilityId = await getFacilityId()
+  const page = Math.max(1, parseInt(params.page ?? '1', 10) || 1)
+
+  const totalResidents = await prisma.resident.count({ where: { facilityId, status: 'ACTIVE' } })
+  const totalPages = Math.max(1, Math.ceil(totalResidents / RESIDENTS_PER_PAGE))
 
   const residents = await prisma.resident.findMany({
     where: { facilityId, status: 'ACTIVE' },
@@ -11,10 +25,13 @@ export default async function MessagesPage() {
       messages: {
         include: { contact: true },
         orderBy: { createdAt: 'desc' },
+        take: 6,
       },
       contacts: { where: { isPrimary: true } },
     },
     orderBy: { lastName: 'asc' },
+    skip: (page - 1) * RESIDENTS_PER_PAGE,
+    take: RESIDENTS_PER_PAGE,
   })
 
   const statusColor: Record<string, string> = {
@@ -27,7 +44,7 @@ export default async function MessagesPage() {
 
   return (
     <div className="p-6">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {residents.map(resident => {
           const msgs = resident.messages
           const primary = resident.contacts[0]
@@ -50,7 +67,7 @@ export default async function MessagesPage() {
                 {msgs.length === 0 ? (
                   <p className="text-[11px] text-gray-400 text-center py-4">No messages yet</p>
                 ) : (
-                  msgs.slice(0, 6).map(msg => (
+                  msgs.map(msg => (
                     <div key={msg.id} className={`flex ${msg.direction === MessageDirection.OUTBOUND ? 'justify-end' : 'justify-start'}`}>
                       <div className={`max-w-[85%] px-3 py-2 rounded-lg text-[11px] leading-relaxed ${
                         msg.direction === MessageDirection.OUTBOUND
@@ -60,7 +77,7 @@ export default async function MessagesPage() {
                         <p>{msg.body}</p>
                         <p className={`text-[9px] mt-1 ${msg.direction === MessageDirection.OUTBOUND ? 'text-brand-100 opacity-70' : 'text-gray-400'} ${statusColor[msg.status] ?? ''}`}>
                           {msg.direction === MessageDirection.OUTBOUND ? msg.status.toLowerCase() : 'received'} ·{' '}
-                          {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          {formatTime(msg.createdAt)}
                         </p>
                       </div>
                     </div>
@@ -74,6 +91,33 @@ export default async function MessagesPage() {
 
       {residents.length === 0 && (
         <p className="text-sm text-gray-400 text-center py-12">No active residents. Run the seed script to add demo data.</p>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between mt-4">
+          <p className="text-[11px] text-gray-400">
+            Page {page} of {totalPages} ({totalResidents} residents)
+          </p>
+          <div className="flex items-center gap-2">
+            {page > 1 && (
+              <Link
+                href={`/messages?page=${page - 1}`}
+                className="text-[11px] font-medium px-2.5 py-1 rounded-md bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+              >
+                Previous
+              </Link>
+            )}
+            {page < totalPages && (
+              <Link
+                href={`/messages?page=${page + 1}`}
+                className="text-[11px] font-medium px-2.5 py-1 rounded-md bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+              >
+                Next
+              </Link>
+            )}
+          </div>
+        </div>
       )}
     </div>
   )

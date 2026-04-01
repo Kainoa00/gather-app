@@ -1,10 +1,11 @@
 // src/app/consent/page.tsx
 import { prisma } from '@/lib/prisma'
+import { getFacilityId } from '@/lib/facility'
 import { ConsentStatus } from '@prisma/client'
 import { SendConsentButton } from './SendConsentButton'
 
 export default async function ConsentPage() {
-  const facilityId = (await prisma.facility.findFirst())?.id ?? ''
+  const facilityId = await getFacilityId()
 
   const contacts = await prisma.familyContact.findMany({
     where: { resident: { facilityId, status: 'ACTIVE' } },

@@ -1,10 +1,11 @@
 // src/app/residents/page.tsx
 import { prisma } from '@/lib/prisma'
+import { getFacilityId } from '@/lib/facility'
 import { ConsentStatus } from '@prisma/client'
 import { SendUpdateButton } from './SendUpdateButton'
 
 export default async function ResidentsPage() {
-  const facilityId = (await prisma.facility.findFirst())?.id ?? ''
+  const facilityId = await getFacilityId()
 
   const residents = await prisma.resident.findMany({
     where: { facilityId, status: 'ACTIVE' },

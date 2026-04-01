@@ -1,6 +1,10 @@
 'use client'
 
 export default function ErrorPage({ error, reset }: { error: Error; reset: () => void }) {
+  const safeMessage = process.env.NODE_ENV === 'production'
+    ? 'An unexpected error occurred. Please try again or contact support.'
+    : error.message
+
   return (
     <div className="flex flex-col items-center justify-center py-24 px-6">
       <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-4">
@@ -8,7 +12,7 @@ export default function ErrorPage({ error, reset }: { error: Error; reset: () =>
       </div>
       <h2 className="text-lg font-medium text-gray-800 mb-2">Something went wrong</h2>
       <p className="text-sm text-gray-500 mb-6 text-center max-w-md">
-        {error.message || 'An unexpected error occurred. Please try again.'}
+        {safeMessage || 'An unexpected error occurred. Please try again.'}
       </p>
       <button
         onClick={reset}

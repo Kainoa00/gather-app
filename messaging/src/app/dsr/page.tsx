@@ -1,30 +1,31 @@
 // src/app/dsr/page.tsx
 import { prisma } from '@/lib/prisma'
+import { getFacilityId } from '@/lib/facility'
 import { DSRStatus } from '@prisma/client'
+import { DSRStatusSelect } from './DSRStatusSelect'
+import { NewDSRForm } from './NewDSRForm'
 
 export default async function DSRPage() {
-  const facilityId = (await prisma.facility.findFirst())?.id ?? ''
+  const facilityId = await getFacilityId()
 
   const requests = await prisma.dataSubjectRequest.findMany({
     where: { facilityId },
     orderBy: { receivedAt: 'desc' },
   })
 
-  const statusClass: Record<string, string> = {
-    OPEN:        'bg-blue-50 text-blue-700',
-    IN_PROGRESS: 'bg-amber-50 text-amber-700',
-    COMPLETED:   'bg-green-50 text-green-700',
-    DENIED:      'bg-red-50 text-red-700',
-  }
-
   const now = new Date()
 
   return (
     <div className="p-6">
+      {/* New DSR button/form */}
+      <div className="mb-4">
+        <NewDSRForm facilityId={facilityId} />
+      </div>
+
       <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
         <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
           <h2 className="text-sm font-medium">Data subject rights requests</h2>
-          <span className="text-xs text-gray-400">30-day SLA per HIPAA 45 CFR §164.528</span>
+          <span className="text-xs text-gray-400">30-day SLA per HIPAA 45 CFR &sect;164.528</span>
         </div>
 
         <table className="w-full text-[12px]">
@@ -36,6 +37,7 @@ export default async function DSRPage() {
               <th className="text-left px-5 py-2.5">Received</th>
               <th className="text-left px-5 py-2.5">Due</th>
               <th className="text-left px-5 py-2.5">Status</th>
+              <th className="text-left px-5 py-2.5">Notes</th>
             </tr>
           </thead>
           <tbody>
@@ -51,19 +53,20 @@ export default async function DSRPage() {
                   <td className="px-5 py-3 text-gray-600">{req.residentName}</td>
                   <td className="px-5 py-3 text-gray-500">{new Date(req.receivedAt).toLocaleDateString()}</td>
                   <td className={`px-5 py-3 font-medium ${overdue ? 'text-red-600' : 'text-gray-600'}`}>
-                    {new Date(req.dueAt).toLocaleDateString()}{overdue ? ' ⚠' : ''}
+                    {new Date(req.dueAt).toLocaleDateString()}{overdue ? ' (overdue)' : ''}
                   </td>
                   <td className="px-5 py-3">
-                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${statusClass[req.status] ?? 'bg-gray-100 text-gray-600'}`}>
-                      {req.status.replace(/_/g, ' ')}
-                    </span>
+                    <DSRStatusSelect dsrId={req.id} currentStatus={req.status} />
+                  </td>
+                  <td className="px-5 py-3 text-[11px] text-gray-500 max-w-[200px] truncate">
+                    {req.notes ?? '-'}
                   </td>
                 </tr>
               )
             })}
             {requests.length === 0 && (
               <tr>
-                <td colSpan={6} className="text-center py-8 text-gray-400">No DSR requests on file.</td>
+                <td colSpan={7} className="text-center py-8 text-gray-400">No DSR requests on file.</td>
               </tr>
             )}
           </tbody>

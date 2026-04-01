@@ -1,14 +1,15 @@
 // src/app/page.tsx
 import { prisma } from '@/lib/prisma'
+import { getFacility } from '@/lib/facility'
 import { MessageStatus, ConsentStatus } from '@prisma/client'
 import { AlertTriangle, TrendingUp, CheckCircle, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import { formatTime } from '@/lib/format'
 
 export default async function DashboardPage() {
-  const facility = await prisma.facility.findFirst()
-  const facilityId = facility?.id ?? ''
-  const facilityName = facility?.name ?? 'Facility'
+  const facility = await getFacility()
+  const facilityId = facility.id
+  const facilityName = facility.name
 
   const sevenDaysAgo = new Date(Date.now() - 7 * 86400000)
   const fourteenDaysAgo = new Date(Date.now() - 14 * 86400000)
@@ -90,7 +91,7 @@ export default async function DashboardPage() {
       )}
 
       {/* Metrics */}
-      <div className="grid grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         {[
           { label: 'Residents tracked', value: residentCount, sub: facilityName, color: '' },
           { label: 'Messages (7d)',     value: messagesThisWeek, sub: weekDiffLabel, color: 'text-brand-600' },

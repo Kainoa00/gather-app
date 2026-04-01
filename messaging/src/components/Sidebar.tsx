@@ -7,34 +7,40 @@ import {
   ShieldCheck, FileText, ScrollText, Server, ChevronRight
 } from 'lucide-react'
 
-const nav = [
-  {
-    section: 'Core',
-    items: [
-      { label: 'Dashboard',    href: '/',           icon: LayoutDashboard },
-      { label: 'EHR Events',   href: '/events',     icon: Clock,          badge: '12' },
-      { label: 'Messages',     href: '/messages',   icon: MessageSquare,  badgeRed: '3' },
-      { label: 'Residents',    href: '/residents',  icon: Users },
-    ]
-  },
-  {
-    section: 'Compliance',
-    items: [
-      { label: 'Consent manager',      href: '/consent',  icon: ShieldCheck,  badgeAmber: '2' },
-      { label: 'Data subject rights',  href: '/dsr',      icon: FileText },
-      { label: 'Audit log',            href: '/audit',    icon: ScrollText },
-    ]
-  },
-  {
-    section: 'Infrastructure',
-    items: [
-      { label: 'Subprocessors & BAA',  href: '/infra',    icon: Server },
-    ]
-  },
-]
+interface SidebarProps {
+  eventCount: number
+  inboundCount: number
+  consentGaps: number
+}
 
-export function Sidebar() {
+export function Sidebar({ eventCount, inboundCount, consentGaps }: SidebarProps) {
   const path = usePathname()
+
+  const nav = [
+    {
+      section: 'Core',
+      items: [
+        { label: 'Dashboard',    href: '/',           icon: LayoutDashboard },
+        { label: 'EHR Events',   href: '/events',     icon: Clock,          badge: eventCount > 0 ? String(eventCount) : undefined },
+        { label: 'Messages',     href: '/messages',   icon: MessageSquare,  badgeRed: inboundCount > 0 ? String(inboundCount) : undefined },
+        { label: 'Residents',    href: '/residents',  icon: Users },
+      ]
+    },
+    {
+      section: 'Compliance',
+      items: [
+        { label: 'Consent manager',      href: '/consent',  icon: ShieldCheck,  badgeAmber: consentGaps > 0 ? String(consentGaps) : undefined },
+        { label: 'Data subject rights',  href: '/dsr',      icon: FileText },
+        { label: 'Audit log',            href: '/audit',    icon: ScrollText },
+      ]
+    },
+    {
+      section: 'Infrastructure',
+      items: [
+        { label: 'Subprocessors & BAA',  href: '/infra',    icon: Server },
+      ]
+    },
+  ]
 
   return (
     <aside className="w-56 shrink-0 bg-white border-r border-gray-100 flex flex-col">

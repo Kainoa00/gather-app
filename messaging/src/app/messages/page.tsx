@@ -31,7 +31,6 @@ export default async function MessagesPage() {
         {residents.map(resident => {
           const msgs = resident.messages
           const primary = resident.contacts[0]
-          if (msgs.length === 0) return null
 
           return (
             <div key={resident.id} className="bg-white border border-gray-100 rounded-xl overflow-hidden">
@@ -48,29 +47,33 @@ export default async function MessagesPage() {
 
               {/* Thread */}
               <div className="px-4 py-3 space-y-2 max-h-48 overflow-y-auto bg-gray-50/50">
-                {msgs.slice(0, 6).map(msg => (
-                  <div key={msg.id} className={`flex ${msg.direction === MessageDirection.OUTBOUND ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[85%] px-3 py-2 rounded-lg text-[11px] leading-relaxed ${
-                      msg.direction === MessageDirection.OUTBOUND
-                        ? 'bg-brand-600 text-white rounded-br-sm'
-                        : 'bg-white border border-gray-100 text-gray-700 rounded-bl-sm'
-                    }`}>
-                      <p>{msg.body}</p>
-                      <p className={`text-[9px] mt-1 ${msg.direction === MessageDirection.OUTBOUND ? 'text-brand-100 opacity-70' : 'text-gray-400'} ${statusColor[msg.status] ?? ''}`}>
-                        {msg.direction === MessageDirection.OUTBOUND ? msg.status.toLowerCase() : 'received'} ·{' '}
-                        {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </p>
+                {msgs.length === 0 ? (
+                  <p className="text-[11px] text-gray-400 text-center py-4">No messages yet</p>
+                ) : (
+                  msgs.slice(0, 6).map(msg => (
+                    <div key={msg.id} className={`flex ${msg.direction === MessageDirection.OUTBOUND ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`max-w-[85%] px-3 py-2 rounded-lg text-[11px] leading-relaxed ${
+                        msg.direction === MessageDirection.OUTBOUND
+                          ? 'bg-brand-600 text-white rounded-br-sm'
+                          : 'bg-white border border-gray-100 text-gray-700 rounded-bl-sm'
+                      }`}>
+                        <p>{msg.body}</p>
+                        <p className={`text-[9px] mt-1 ${msg.direction === MessageDirection.OUTBOUND ? 'text-brand-100 opacity-70' : 'text-gray-400'} ${statusColor[msg.status] ?? ''}`}>
+                          {msg.direction === MessageDirection.OUTBOUND ? msg.status.toLowerCase() : 'received'} ·{' '}
+                          {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           )
         })}
       </div>
 
-      {residents.every(r => r.messages.length === 0) && (
-        <p className="text-sm text-gray-400 text-center py-12">No messages yet. Messages appear here after EHR events trigger notifications.</p>
+      {residents.length === 0 && (
+        <p className="text-sm text-gray-400 text-center py-12">No active residents. Run the seed script to add demo data.</p>
       )}
     </div>
   )

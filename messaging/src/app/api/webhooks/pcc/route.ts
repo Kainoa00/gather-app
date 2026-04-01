@@ -3,6 +3,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { processPccEvent } from '@/lib/pcc'
 import crypto from 'crypto'
+import { z } from 'zod'
+
+const PccWebhookSchema = z.object({
+  eventId:    z.string().min(1, 'eventId is required'),
+  eventType:  z.string().min(1, 'eventType is required'),
+  patientId:  z.string().min(1, 'patientId is required'),
+  occurredAt: z.string().optional(),
+  details:    z.record(z.unknown()).optional(),
+}).passthrough()
 
 export async function POST(req: NextRequest) {
   // Verify PCC webhook signature (HMAC-SHA256)
@@ -26,8 +35,16 @@ export async function POST(req: NextRequest) {
     return new NextResponse('Bad Request', { status: 400 })
   }
 
-  const pccEventId = payload.eventId as string
-  if (!pccEventId) return new NextResponse('Missing eventId', { status: 400 })
+  // Validate payload structure
+  const parsed = PccWebhookSchema.safeParse(payload)
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: 'Invalid webhook payload', details: parsed.error.flatten() },
+      { status: 422 },
+    )
+  }
+
+  const pccEventId = parsed.data.eventId
 
   // Store raw webhook event
   await prisma.pccWebhookEvent.upsert({
@@ -35,7 +52,7 @@ export async function POST(req: NextRequest) {
     update: {},
     create: {
       pccEventId,
-      eventType: payload.eventType as string,
+      eventType: parsed.data.eventType,
       payload: payload as any,
       processed: false,
     },

@@ -3,23 +3,33 @@ import { prisma } from '@/lib/prisma'
 import { MessageStatus, ConsentStatus } from '@prisma/client'
 import { AlertTriangle, TrendingUp, CheckCircle, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
+import { formatTime } from '@/lib/format'
 
 export default async function DashboardPage() {
-  const facilityId = (await prisma.facility.findFirst())?.id ?? ''
+  const facility = await prisma.facility.findFirst()
+  const facilityId = facility?.id ?? ''
+  const facilityName = facility?.name ?? 'Facility'
+
+  const sevenDaysAgo = new Date(Date.now() - 7 * 86400000)
+  const fourteenDaysAgo = new Date(Date.now() - 14 * 86400000)
 
   const [
     residentCount,
     messagesThisWeek,
+    messagesLastWeek,
     deliveredCount,
     consentGaps,
     recentEvents,
   ] = await Promise.all([
     prisma.resident.count({ where: { facilityId, status: 'ACTIVE' } }),
     prisma.message.count({
-      where: { resident: { facilityId }, createdAt: { gte: new Date(Date.now() - 7 * 86400000) } }
+      where: { resident: { facilityId }, createdAt: { gte: sevenDaysAgo } }
     }),
     prisma.message.count({
-      where: { resident: { facilityId }, status: MessageStatus.DELIVERED }
+      where: { resident: { facilityId }, createdAt: { gte: fourteenDaysAgo, lt: sevenDaysAgo } }
+    }),
+    prisma.message.count({
+      where: { resident: { facilityId }, status: MessageStatus.DELIVERED, createdAt: { gte: sevenDaysAgo } }
     }),
     prisma.familyContact.count({
       where: {
@@ -38,6 +48,13 @@ export default async function DashboardPage() {
   const deliveryRate = messagesThisWeek > 0
     ? Math.round((deliveredCount / messagesThisWeek) * 1000) / 10
     : 0
+
+  const weekDiff = messagesThisWeek - messagesLastWeek
+  const weekDiffLabel = messagesLastWeek === 0
+    ? 'No data last week'
+    : weekDiff >= 0
+      ? `+${weekDiff} vs last week`
+      : `${weekDiff} vs last week`
 
   const statusColor: Record<string, string> = {
     DELIVERED: 'bg-green-50 text-green-700',
@@ -75,8 +92,8 @@ export default async function DashboardPage() {
       {/* Metrics */}
       <div className="grid grid-cols-4 gap-3 mb-6">
         {[
-          { label: 'Residents tracked', value: residentCount, sub: 'East Wing', color: '' },
-          { label: 'Messages (7d)',     value: messagesThisWeek, sub: '↑ vs last week', color: 'text-brand-600' },
+          { label: 'Residents tracked', value: residentCount, sub: facilityName, color: '' },
+          { label: 'Messages (7d)',     value: messagesThisWeek, sub: weekDiffLabel, color: 'text-brand-600' },
           { label: 'Delivery rate',    value: `${deliveryRate}%`, sub: 'All carriers nominal', color: 'text-brand-600' },
           { label: 'Consent gaps',     value: consentGaps, sub: consentGaps > 0 ? 'Notifications paused' : 'All clear', color: consentGaps > 0 ? 'text-red-500' : 'text-brand-600' },
         ].map(m => (
@@ -111,7 +128,7 @@ export default async function DashboardPage() {
                 {status === 'SUPPRESSED' ? 'No consent' : status.toLowerCase()}
               </span>
               <span className="text-[10px] text-gray-300 shrink-0">
-                {new Date(ev.occurredAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                {formatTime(ev.occurredAt)}
               </span>
             </div>
           )

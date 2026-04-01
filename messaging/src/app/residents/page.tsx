@@ -1,6 +1,7 @@
 // src/app/residents/page.tsx
 import { prisma } from '@/lib/prisma'
 import { ConsentStatus } from '@prisma/client'
+import { SendUpdateButton } from './SendUpdateButton'
 
 export default async function ResidentsPage() {
   const facilityId = (await prisma.facility.findFirst())?.id ?? ''
@@ -19,7 +20,7 @@ export default async function ResidentsPage() {
     <div className="p-6">
       <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
         <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
-          <h2 className="text-sm font-medium">Residents — East Wing</h2>
+          <h2 className="text-sm font-medium">Residents</h2>
           <span className="text-xs text-gray-400">{residents.length} active</span>
         </div>
 
@@ -32,6 +33,7 @@ export default async function ResidentsPage() {
               <th className="text-left px-5 py-2.5">Consent</th>
               <th className="text-left px-5 py-2.5">Last event</th>
               <th className="text-left px-5 py-2.5">Admitted</th>
+              <th className="text-left px-5 py-2.5">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -77,12 +79,15 @@ export default async function ResidentsPage() {
                     ) : '—'}
                   </td>
                   <td className="px-5 py-3 text-gray-400">{new Date(r.admittedAt).toLocaleDateString()}</td>
+                  <td className="px-5 py-3">
+                    <SendUpdateButton residentId={r.id} residentName={`${r.firstName} ${r.lastName}`} />
+                  </td>
                 </tr>
               )
             })}
             {residents.length === 0 && (
               <tr>
-                <td colSpan={6} className="text-center py-8 text-gray-400">No active residents. Run the seed script to add demo data.</td>
+                <td colSpan={7} className="text-center py-8 text-gray-400">No active residents. Run the seed script to add demo data.</td>
               </tr>
             )}
           </tbody>

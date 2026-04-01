@@ -3,14 +3,8 @@
 // Ingests EHR events, creates CareEvent records, triggers notifications.
 
 import { prisma } from './prisma'
-import { checkConsent, suppressMessage } from './compliance'
-import { sendSMS } from './sms'
-import { EventType, MessageDirection, MessageStatus, AuditActor } from '@prisma/client'
-
-// Template variable interpolation
-function interpolate(template: string, vars: Record<string, string>): string {
-  return template.replace(/{{(\w+)}}/g, (_, key) => vars[key] ?? `{{${key}}}`)
-}
+import { processEventNotifications } from './events'
+import { EventType, AuditActor } from '@prisma/client'
 
 // Main event processor — called after PCC webhook is verified
 export async function processPccEvent(pccEventId: string) {
@@ -45,7 +39,7 @@ export async function processPccEvent(pccEventId: string) {
   // Find resident by PCC patient ID
   const resident = await prisma.resident.findUnique({
     where: { pccPatientId },
-    include: { contacts: { where: { isPrimary: true } }, facility: true },
+    include: { facility: true },
   })
 
   if (!resident) {
@@ -68,66 +62,17 @@ export async function processPccEvent(pccEventId: string) {
     },
   })
 
-  // Notify all primary contacts
-  for (const contact of resident.contacts) {
-    const consentCheck = await checkConsent({ contactId: contact.id, eventType })
-
-    // Get matching template
-    const template = await prisma.messageTemplate.findFirst({
-      where: { eventType, isDefault: true },
-    })
-
-    const body = template
-      ? interpolate(template.body, {
-          contactFirstName: contact.name.split(' ')[0],
-          residentName: `${resident.firstName} ${resident.lastName}`,
-          roomNumber: resident.roomNumber,
-          facilityName: resident.facility.name,
-          facilityPhone: resident.facility.phone,
-          immunizationName: (payload.details as Record<string, string>)?.vaccineName ?? 'vaccine',
-        })
-      : `Update for ${resident.firstName} ${resident.lastName} from ${resident.facility.name}.`
-
-    // Create message record
-    const message = await prisma.message.create({
-      data: {
-        residentId: resident.id,
-        contactId: contact.id,
-        eventId: event.id,
-        direction: MessageDirection.OUTBOUND,
-        body,
-        status: MessageStatus.QUEUED,
-      },
-    })
-
-    if (!consentCheck.allowed) {
-      await suppressMessage({
-        messageId: message.id,
-        facilityId: resident.facilityId,
-        reason: consentCheck.reason ?? 'NO_CONSENT',
-      })
-      continue
-    }
-
-    // Send via Twilio
-    try {
-      await sendSMS({
-        to: contact.phone,
-        body,
-        messageId: message.id,
-        facilityId: resident.facilityId,
-      })
-    } catch (err) {
-      await prisma.message.update({
-        where: { id: message.id },
-        data: { status: MessageStatus.FAILED, failedAt: new Date(), failureReason: String(err) },
-      })
-    }
-  }
+  // Notify all primary contacts using shared pipeline
+  const results = await processEventNotifications({
+    residentId: resident.id,
+    eventId: event.id,
+    eventType,
+    details: (payload.details ?? {}) as Record<string, unknown>,
+  })
 
   // Write progress note back to PCC (stub — implement PCC write API)
   await writePccProgressNote({ pccPatientId, event: eventTypeRaw, resident })
-  await prisma.careEvent.update({ where: { id: event.id }, data: { pccNoteWritten: true } })
+  // PCC write-back not yet implemented — don't mark as written
 
   await prisma.pccWebhookEvent.update({
     where: { pccEventId },
@@ -142,7 +87,7 @@ export async function processPccEvent(pccEventId: string) {
       action: 'PCC_EVENT_PROCESSED',
       entityType: 'CareEvent',
       entityId: event.id,
-      metadata: { pccEventId, eventType, residentId: resident.id },
+      metadata: { pccEventId, eventType, residentId: resident.id, results: JSON.parse(JSON.stringify(results)) },
     },
   })
 }

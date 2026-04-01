@@ -3,12 +3,23 @@ import twilio from 'twilio'
 import { prisma } from './prisma'
 import { ConsentStatus, MessageDirection, MessageStatus, AuditActor } from '@prisma/client'
 
-const client = twilio(
-  process.env.TWILIO_ACCOUNT_SID!,
-  process.env.TWILIO_AUTH_TOKEN!
-)
+let _client: ReturnType<typeof twilio> | null = null
 
-const FROM = process.env.TWILIO_PHONE_NUMBER!
+function getTwilioClient() {
+  if (_client) return _client
+  const sid = process.env.TWILIO_ACCOUNT_SID
+  const token = process.env.TWILIO_AUTH_TOKEN
+  if (!sid || !token) {
+    console.warn('[sms] TWILIO_ACCOUNT_SID or TWILIO_AUTH_TOKEN not set — SMS disabled')
+    return null
+  }
+  _client = twilio(sid, token)
+  return _client
+}
+
+function getFromNumber() {
+  return process.env.TWILIO_PHONE_NUMBER ?? ''
+}
 
 // ─── Send an SMS (after consent verified) ────────────────────────────────────
 export async function sendSMS({
@@ -22,15 +33,21 @@ export async function sendSMS({
   messageId: string
   facilityId: string
 }) {
-  const msg = await client.messages.create({ from: FROM, to, body })
+  const client = getTwilioClient()
+  if (!client) {
+    console.warn('[sms] Twilio not configured — skipping SMS to', to.slice(0, 6) + '...')
+    await prisma.message.update({
+      where: { id: messageId },
+      data: { status: MessageStatus.SENT, sentAt: new Date() },
+    })
+    return 'SMS_DISABLED_NO_TWILIO'
+  }
+
+  const msg = await client.messages.create({ from: getFromNumber(), to, body })
 
   await prisma.message.update({
     where: { id: messageId },
-    data: {
-      twilioSid: msg.sid,
-      status: MessageStatus.SENT,
-      sentAt: new Date(),
-    },
+    data: { twilioSid: msg.sid, status: MessageStatus.SENT, sentAt: new Date() },
   })
 
   await prisma.auditLog.create({
@@ -63,7 +80,15 @@ export async function sendConsentRequest({
 }) {
   const body = `Hi, this is ${facilityName}. To receive important care updates via SMS for ${residentName}, reply YES to consent. Reply STOP at any time to unsubscribe. Msg & data rates may apply.`
 
-  const msg = await client.messages.create({ from: FROM, to, body })
+  const client = getTwilioClient()
+  let sid = 'SMS_DISABLED_NO_TWILIO'
+
+  if (client) {
+    const msg = await client.messages.create({ from: getFromNumber(), to, body })
+    sid = msg.sid
+  } else {
+    console.warn('[sms] Twilio not configured — consent request logged but not sent')
+  }
 
   await prisma.auditLog.create({
     data: {
@@ -72,11 +97,11 @@ export async function sendConsentRequest({
       action: 'CONSENT_REQUEST_SENT',
       entityType: 'FamilyContact',
       entityId: contactId,
-      metadata: { to, twilioSid: msg.sid },
+      metadata: { to, twilioSid: sid },
     },
   })
 
-  return msg.sid
+  return sid
 }
 
 // ─── Handle inbound SMS (YES / STOP / other) ──────────────────────────────────
@@ -101,8 +126,8 @@ export async function handleInboundSMS({
   const facilityId = contact.resident.facilityId
 
   if (normalised === 'YES') {
-    // Activate all pending consents for this contact
-    await prisma.consent.updateMany({
+    // Activate only PENDING consents for this contact
+    const updated = await prisma.consent.updateMany({
       where: { contactId: contact.id, status: ConsentStatus.PENDING },
       data: { status: ConsentStatus.ACTIVE, consentedAt: new Date() },
     })
@@ -114,11 +139,10 @@ export async function handleInboundSMS({
         action: 'CONSENT_GRANTED',
         entityType: 'FamilyContact',
         entityId: contact.id,
-        metadata: { from, twilioSid },
+        metadata: { from, twilioSid, categoriesActivated: updated.count },
       },
     })
 
-    // Save inbound message
     await prisma.message.create({
       data: {
         residentId: contact.residentId,
@@ -131,11 +155,10 @@ export async function handleInboundSMS({
       },
     })
 
-    return { status: 'CONSENT_GRANTED', contactId: contact.id }
+    return { status: 'CONSENT_GRANTED', contactId: contact.id, count: updated.count }
   }
 
   if (normalised === 'STOP') {
-    // Revoke all consents (TCPA compliance)
     await prisma.consent.updateMany({
       where: { contactId: contact.id },
       data: { status: ConsentStatus.REVOKED, revokedAt: new Date() },

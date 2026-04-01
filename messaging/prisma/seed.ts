@@ -126,39 +126,51 @@ async function main() {
 
     // Create a sample care event and message for consented residents
     if (r.consented) {
-      const event = await prisma.careEvent.create({
-        data: {
+      const eventId = `event-${r.lastName.toLowerCase()}`
+      const event = await prisma.careEvent.upsert({
+        where: { pccEventId: `seed-${r.lastName.toLowerCase()}` },
+        update: {},
+        create: {
+          id: eventId,
           residentId: resident.id,
+          pccEventId: `seed-${r.lastName.toLowerCase()}`,
           type: EventType.LAB_RESULT,
           details: { test: 'BMP Panel', result: 'Normal', note: 'All values within range' },
           occurredAt: new Date(Date.now() - 1000 * 60 * 60 * 2),
           processedAt: new Date(Date.now() - 1000 * 60 * 60 * 2 + 5000),
-          pccNoteWritten: true,
+          pccNoteWritten: false,
         }
       })
 
-      await prisma.message.create({
-        data: {
+      const msgSid = `SM-seed-${r.lastName.toLowerCase()}`
+      await prisma.message.upsert({
+        where: { twilioSid: msgSid },
+        update: {},
+        create: {
           residentId: resident.id,
           contactId: contact.id,
           eventId: event.id,
           direction: MessageDirection.OUTBOUND,
           body: `Hi ${r.contact.name.split(' ')[0]}, this is Sunrise SNF. ${r.firstName}'s recent lab results are back and all values are within normal range. Please call us if you have any questions.`,
           status: MessageStatus.DELIVERED,
-          twilioSid: `SM${Math.random().toString(36).substring(2, 36)}`,
+          twilioSid: msgSid,
           sentAt: new Date(Date.now() - 1000 * 60 * 60 * 2),
           deliveredAt: new Date(Date.now() - 1000 * 60 * 90),
         }
       })
     } else {
-      // Eleanor — suppressed message
-      await prisma.message.create({
-        data: {
+      // Eleanor — suppressed message (use a stable twilioSid for upsert)
+      const suppressedSid = `SM-seed-suppressed-${r.lastName.toLowerCase()}`
+      await prisma.message.upsert({
+        where: { twilioSid: suppressedSid },
+        update: {},
+        create: {
           residentId: resident.id,
           contactId: contact.id,
           direction: MessageDirection.OUTBOUND,
           body: `Hi Jen, this is Sunrise SNF. Eleanor had a medication update today.`,
           status: MessageStatus.SUPPRESSED,
+          twilioSid: suppressedSid,
         }
       })
     }
@@ -177,39 +189,57 @@ async function main() {
   ]
 
   for (const t of templates) {
-    await prisma.messageTemplate.create({
-      data: {
-        name: t.name,
-        eventType: t.type,
-        body: t.body,
-        isDefault: true,
-      }
+    // Use name as natural key for idempotency
+    const existing = await prisma.messageTemplate.findFirst({
+      where: { name: t.name, eventType: t.type },
     })
+    if (!existing) {
+      await prisma.messageTemplate.create({
+        data: {
+          name: t.name,
+          eventType: t.type,
+          body: t.body,
+          isDefault: true,
+        }
+      })
+    }
   }
 
   // ─── Sample audit logs ───────────────────────────────────────────────────
-  await prisma.auditLog.createMany({
-    data: [
-      { facilityId: facility.id, actorType: AuditActor.SYSTEM, action: 'SMS_DELIVERED', entityType: 'Message', entityId: 'demo', metadata: { to: '+18015550192', resident: 'Dorothy Hayes' } },
-      { facilityId: facility.id, actorType: AuditActor.WEBHOOK, action: 'PCC_SYNC', entityType: 'PccWebhookEvent', entityId: 'demo', metadata: { eventsIngested: 4 } },
-      { facilityId: facility.id, actorType: AuditActor.SYSTEM, action: 'NOTIFICATION_SUPPRESSED', entityType: 'Message', entityId: 'demo', metadata: { reason: 'NO_CONSENT', resident: 'Eleanor Park' } },
-      { facilityId: facility.id, actorId: admin.id, actorType: AuditActor.STAFF, action: 'STAFF_LOGIN', entityType: 'StaffUser', entityId: admin.id, metadata: { mfa: true } },
-    ]
-  })
+  const auditEntries = [
+    { facilityId: facility.id, actorType: AuditActor.SYSTEM, action: 'SMS_DELIVERED', entityType: 'Message', entityId: 'demo-sms', metadata: { to: '+18015550192', resident: 'Dorothy Hayes' } },
+    { facilityId: facility.id, actorType: AuditActor.WEBHOOK, action: 'PCC_SYNC', entityType: 'PccWebhookEvent', entityId: 'demo-sync', metadata: { eventsIngested: 4 } },
+    { facilityId: facility.id, actorType: AuditActor.SYSTEM, action: 'NOTIFICATION_SUPPRESSED', entityType: 'Message', entityId: 'demo-suppressed', metadata: { reason: 'NO_CONSENT', resident: 'Eleanor Park' } },
+    { facilityId: facility.id, actorId: admin.id, actorType: AuditActor.STAFF, action: 'STAFF_LOGIN', entityType: 'StaffUser', entityId: admin.id, metadata: { mfa: true } },
+  ]
+
+  for (const entry of auditEntries) {
+    const existing = await prisma.auditLog.findFirst({
+      where: { action: entry.action, entityId: entry.entityId },
+    })
+    if (!existing) {
+      await prisma.auditLog.create({ data: entry })
+    }
+  }
 
   // ─── Sample DSR ──────────────────────────────────────────────────────────
-  await prisma.dataSubjectRequest.create({
-    data: {
-      facilityId: facility.id,
-      requestType: DSRType.ACCESS,
-      requestorName: 'Carol Hayes',
-      requestorPhone: '+18015550192',
-      residentName: 'Dorothy Hayes',
-      status: DSRStatus.IN_PROGRESS,
-      receivedAt: new Date('2026-03-15'),
-      dueAt: new Date('2026-04-14'),
-    }
+  const existingDsr = await prisma.dataSubjectRequest.findFirst({
+    where: { requestorName: 'Carol Hayes', residentName: 'Dorothy Hayes', requestType: DSRType.ACCESS },
   })
+  if (!existingDsr) {
+    await prisma.dataSubjectRequest.create({
+      data: {
+        facilityId: facility.id,
+        requestType: DSRType.ACCESS,
+        requestorName: 'Carol Hayes',
+        requestorPhone: '+18015550192',
+        residentName: 'Dorothy Hayes',
+        status: DSRStatus.IN_PROGRESS,
+        receivedAt: new Date('2026-03-15'),
+        dueAt: new Date('2026-04-14'),
+      }
+    })
+  }
 
   console.log('Seed complete.')
 }

@@ -65,6 +65,8 @@ model Resident {
   contacts     FamilyContact[]
   events       CareEvent[]
   messages     Message[]
+
+  @@index([facilityId])
 }
 
 enum ResidentStatus {
@@ -88,6 +90,8 @@ model FamilyContact {
   resident     Resident        @relation(fields: [residentId], references: [id])
   consents     Consent[]
   messages     Message[]
+
+  @@index([residentId])
 }
 
 // ─── Consent ───────────────────────────────────────────────────────────────
@@ -107,6 +111,7 @@ model Consent {
   contact         FamilyContact @relation(fields: [contactId], references: [id])
 
   @@unique([contactId, category])
+  @@index([contactId])
 }
 
 enum ConsentCategory {
@@ -147,6 +152,9 @@ model CareEvent {
 
   resident        Resident    @relation(fields: [residentId], references: [id])
   messages        Message[]
+
+  @@index([residentId])
+  @@index([createdAt])
 }
 
 enum EventType {
@@ -180,6 +188,10 @@ model Message {
   resident        Resident      @relation(fields: [residentId], references: [id])
   contact         FamilyContact @relation(fields: [contactId], references: [id])
   event           CareEvent?    @relation(fields: [eventId], references: [id])
+
+  @@index([residentId])
+  @@index([contactId])
+  @@index([createdAt])
 }
 
 enum MessageDirection {
@@ -222,6 +234,9 @@ model AuditLog {
 
   facility   Facility    @relation(fields: [facilityId], references: [id])
   actor      StaffUser?  @relation(fields: [actorId], references: [id])
+
+  @@index([facilityId])
+  @@index([createdAt])
 }
 
 enum AuditActor {

@@ -1,7 +1,7 @@
 // src/app/layout.tsx
 import type { Metadata } from 'next'
 import './globals.css'
-import { Sidebar } from '@/components/Sidebar'
+import { SidebarWrapper } from '@/components/SidebarWrapper'
 
 export const metadata: Metadata = {
   title: 'CareBridge Connect Messaging — SNF Family Communications',
@@ -13,7 +13,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className="bg-gray-50 text-gray-900 antialiased">
         <div className="flex h-screen overflow-hidden">
-          <Sidebar />
+          <SidebarWrapper />
           <main className="flex-1 overflow-y-auto">
             {children}
           </main>

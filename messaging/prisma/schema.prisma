@@ -1,11 +1,14 @@
 // prisma/schema.prisma
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+  schemas   = ["messaging"]
 }
 
 // ─── Facility (SNF customer) ───────────────────────────────────────────────
@@ -25,6 +28,8 @@ model Facility {
   residents   Resident[]
   staff       StaffUser[]
   auditLogs   AuditLog[]
+
+  @@schema("messaging")
 }
 
 // ─── Staff users (facility admins / nurses) ───────────────────────────────
@@ -38,12 +43,16 @@ model StaffUser {
 
   facility   Facility  @relation(fields: [facilityId], references: [id])
   auditLogs  AuditLog[]
+
+  @@schema("messaging")
 }
 
 enum StaffRole {
   ADMIN
   NURSE
   SOCIAL_WORKER
+
+  @@schema("messaging")
 }
 
 // ─── Resident ─────────────────────────────────────────────────────────────
@@ -67,12 +76,16 @@ model Resident {
   messages     Message[]
 
   @@index([facilityId])
+
+  @@schema("messaging")
 }
 
 enum ResidentStatus {
   ACTIVE
   DISCHARGED
   DECEASED
+
+  @@schema("messaging")
 }
 
 // ─── Family contact ────────────────────────────────────────────────────────
@@ -92,6 +105,8 @@ model FamilyContact {
   messages     Message[]
 
   @@index([residentId])
+
+  @@schema("messaging")
 }
 
 // ─── Consent ───────────────────────────────────────────────────────────────
@@ -112,6 +127,8 @@ model Consent {
 
   @@unique([contactId, category])
   @@index([contactId])
+
+  @@schema("messaging")
 }
 
 enum ConsentCategory {
@@ -123,6 +140,8 @@ enum ConsentCategory {
   WEIGHT_VITALS
   ROOM_TRANSFERS
   GENERAL
+
+  @@schema("messaging")
 }
 
 enum ConsentStatus {
@@ -130,12 +149,16 @@ enum ConsentStatus {
   ACTIVE        // YES received
   REVOKED       // STOP received or manually revoked
   EXPIRED       // Not yet implemented, for future annual renewal
+
+  @@schema("messaging")
 }
 
 enum ConsentMethod {
   SMS           // Reply YES to consent SMS
   FORM          // Signed paper/digital form at onboarding
   VERBAL        // Documented verbal consent by staff
+
+  @@schema("messaging")
 }
 
 // ─── Care events (EHR-triggered) ──────────────────────────────────────────
@@ -155,6 +178,8 @@ model CareEvent {
 
   @@index([residentId])
   @@index([createdAt])
+
+  @@schema("messaging")
 }
 
 enum EventType {
@@ -167,6 +192,8 @@ enum EventType {
   WEIGHT_CHANGE
   ROOM_TRANSFER
   MANUAL            // Staff-initiated
+
+  @@schema("messaging")
 }
 
 // ─── Messages ──────────────────────────────────────────────────────────────
@@ -192,11 +219,15 @@ model Message {
   @@index([residentId])
   @@index([contactId])
   @@index([createdAt])
+
+  @@schema("messaging")
 }
 
 enum MessageDirection {
   OUTBOUND  // CareBridge → family
   INBOUND   // Family → CareBridge
+
+  @@schema("messaging")
 }
 
 enum MessageStatus {
@@ -205,18 +236,22 @@ enum MessageStatus {
   DELIVERED
   FAILED
   SUPPRESSED   // No consent — blocked by compliance gate
+
+  @@schema("messaging")
 }
 
 // ─── Message templates ─────────────────────────────────────────────────────
 model MessageTemplate {
   id          String      @id @default(cuid())
-  facilityId  String?     // null = system-wide default
+  facilityId  String?
   name        String
   eventType   EventType
-  body        String      // Supports {{residentName}}, {{roomNumber}}, etc.
+  body        String
   isDefault   Boolean     @default(false)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+
+  @@schema("messaging")
 }
 
 // ─── Audit log (HIPAA 6-year retention) ───────────────────────────────────
@@ -237,6 +272,8 @@ model AuditLog {
 
   @@index([facilityId])
   @@index([createdAt])
+
+  @@schema("messaging")
 }
 
 enum AuditActor {
@@ -244,6 +281,8 @@ enum AuditActor {
   STAFF
   WEBHOOK
   FAMILY_CONTACT
+
+  @@schema("messaging")
 }
 
 // ─── Data Subject Rights requests (§10 of Privacy Policy) ─────────────────
@@ -262,6 +301,8 @@ model DataSubjectRequest {
   notes       String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+
+  @@schema("messaging")
 }
 
 enum DSRType {
@@ -271,6 +312,8 @@ enum DSRType {
   WITHDRAW_CONSENT
   RESTRICT_PROCESSING
   DISCLOSURE_ACCOUNTING
+
+  @@schema("messaging")
 }
 
 enum DSRStatus {
@@ -278,6 +321,8 @@ enum DSRStatus {
   IN_PROGRESS
   COMPLETED
   DENIED
+
+  @@schema("messaging")
 }
 
 // ─── PCC Webhook events (raw ingestion log) ────────────────────────────────
@@ -290,4 +335,6 @@ model PccWebhookEvent {
   processedAt DateTime?
   error       String?
   receivedAt  DateTime @default(now())
+
+  @@schema("messaging")
 }

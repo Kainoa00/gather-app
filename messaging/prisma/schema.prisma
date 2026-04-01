@@ -1,0 +1,278 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Facility (SNF customer) ───────────────────────────────────────────────
+model Facility {
+  id          String   @id @default(cuid())
+  name        String
+  npi         String   @unique
+  address     String
+  city        String
+  state       String
+  zip         String
+  phone       String
+  baaSignedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  residents   Resident[]
+  staff       StaffUser[]
+  auditLogs   AuditLog[]
+}
+
+// ─── Staff users (facility admins / nurses) ───────────────────────────────
+model StaffUser {
+  id         String   @id @default(cuid())
+  facilityId String
+  name       String
+  email      String   @unique
+  role       StaffRole @default(NURSE)
+  createdAt  DateTime @default(now())
+
+  facility   Facility  @relation(fields: [facilityId], references: [id])
+  auditLogs  AuditLog[]
+}
+
+enum StaffRole {
+  ADMIN
+  NURSE
+  SOCIAL_WORKER
+}
+
+// ─── Resident ─────────────────────────────────────────────────────────────
+model Resident {
+  id           String    @id @default(cuid())
+  facilityId   String
+  pccPatientId String?   @unique  // PointClickCare patient ID
+  firstName    String
+  lastName     String
+  dateOfBirth  DateTime
+  roomNumber   String
+  admittedAt   DateTime
+  dischargedAt DateTime?
+  status       ResidentStatus @default(ACTIVE)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  facility     Facility        @relation(fields: [facilityId], references: [id])
+  contacts     FamilyContact[]
+  events       CareEvent[]
+  messages     Message[]
+}
+
+enum ResidentStatus {
+  ACTIVE
+  DISCHARGED
+  DECEASED
+}
+
+// ─── Family contact ────────────────────────────────────────────────────────
+model FamilyContact {
+  id           String   @id @default(cuid())
+  residentId   String
+  name         String
+  relationship String   // "Daughter", "Son", "Spouse", etc.
+  phone        String   // E.164 format: +18015550192
+  email        String?
+  isPrimary    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  resident     Resident        @relation(fields: [residentId], references: [id])
+  consents     Consent[]
+  messages     Message[]
+}
+
+// ─── Consent ───────────────────────────────────────────────────────────────
+// Privacy-by-default: no SMS sent without active consent per category
+model Consent {
+  id              String        @id @default(cuid())
+  contactId       String
+  category        ConsentCategory
+  status          ConsentStatus @default(PENDING)
+  method          ConsentMethod @default(SMS)
+  consentedAt     DateTime?
+  revokedAt       DateTime?
+  twilioMessageSid String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  contact         FamilyContact @relation(fields: [contactId], references: [id])
+
+  @@unique([contactId, category])
+}
+
+enum ConsentCategory {
+  ADMISSIONS_DISCHARGES
+  LAB_RESULTS
+  MEDICATION_CHANGES
+  PSYCHOTROPIC_CONSENT
+  IMMUNIZATIONS
+  WEIGHT_VITALS
+  ROOM_TRANSFERS
+  GENERAL
+}
+
+enum ConsentStatus {
+  PENDING       // Consent request sent, awaiting reply
+  ACTIVE        // YES received
+  REVOKED       // STOP received or manually revoked
+  EXPIRED       // Not yet implemented, for future annual renewal
+}
+
+enum ConsentMethod {
+  SMS           // Reply YES to consent SMS
+  FORM          // Signed paper/digital form at onboarding
+  VERBAL        // Documented verbal consent by staff
+}
+
+// ─── Care events (EHR-triggered) ──────────────────────────────────────────
+model CareEvent {
+  id              String      @id @default(cuid())
+  residentId      String
+  pccEventId      String?     @unique  // PCC webhook event ID
+  type            EventType
+  details         Json        // Flexible: lab values, med name, new room, etc.
+  occurredAt      DateTime
+  processedAt     DateTime?
+  pccNoteWritten  Boolean     @default(false)  // Write-back to PCC chart
+  createdAt       DateTime    @default(now())
+
+  resident        Resident    @relation(fields: [residentId], references: [id])
+  messages        Message[]
+}
+
+enum EventType {
+  ADMISSION
+  DISCHARGE
+  LAB_RESULT
+  MEDICATION_CHANGE
+  PSYCHOTROPIC_MED_CONSENT
+  IMMUNIZATION
+  WEIGHT_CHANGE
+  ROOM_TRANSFER
+  MANUAL            // Staff-initiated
+}
+
+// ─── Messages ──────────────────────────────────────────────────────────────
+model Message {
+  id              String        @id @default(cuid())
+  residentId      String
+  contactId       String
+  eventId         String?
+  direction       MessageDirection
+  body            String
+  status          MessageStatus @default(QUEUED)
+  twilioSid       String?       @unique
+  sentAt          DateTime?
+  deliveredAt     DateTime?
+  failedAt        DateTime?
+  failureReason   String?
+  createdAt       DateTime      @default(now())
+
+  resident        Resident      @relation(fields: [residentId], references: [id])
+  contact         FamilyContact @relation(fields: [contactId], references: [id])
+  event           CareEvent?    @relation(fields: [eventId], references: [id])
+}
+
+enum MessageDirection {
+  OUTBOUND  // CareBridge → family
+  INBOUND   // Family → CareBridge
+}
+
+enum MessageStatus {
+  QUEUED
+  SENT
+  DELIVERED
+  FAILED
+  SUPPRESSED   // No consent — blocked by compliance gate
+}
+
+// ─── Message templates ─────────────────────────────────────────────────────
+model MessageTemplate {
+  id          String      @id @default(cuid())
+  facilityId  String?     // null = system-wide default
+  name        String
+  eventType   EventType
+  body        String      // Supports {{residentName}}, {{roomNumber}}, etc.
+  isDefault   Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+// ─── Audit log (HIPAA 6-year retention) ───────────────────────────────────
+model AuditLog {
+  id         String      @id @default(cuid())
+  facilityId String
+  actorId    String?     // StaffUser id, or null for system actions
+  actorType  AuditActor
+  action     String      // e.g. "SMS_DELIVERED", "CONSENT_REVOKED", "DSR_COMPLETED"
+  entityType String      // e.g. "Message", "Consent", "Resident"
+  entityId   String
+  metadata   Json?       // Additional context
+  ipAddress  String?
+  createdAt  DateTime    @default(now())
+
+  facility   Facility    @relation(fields: [facilityId], references: [id])
+  actor      StaffUser?  @relation(fields: [actorId], references: [id])
+}
+
+enum AuditActor {
+  SYSTEM
+  STAFF
+  WEBHOOK
+  FAMILY_CONTACT
+}
+
+// ─── Data Subject Rights requests (§10 of Privacy Policy) ─────────────────
+model DataSubjectRequest {
+  id          String    @id @default(cuid())
+  facilityId  String
+  requestType DSRType
+  requestorName String
+  requestorPhone String?
+  requestorEmail String?
+  residentName  String
+  status      DSRStatus @default(OPEN)
+  receivedAt  DateTime  @default(now())
+  dueAt       DateTime  // 30-day SLA
+  completedAt DateTime?
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+enum DSRType {
+  ACCESS
+  CORRECTION
+  DELETION
+  WITHDRAW_CONSENT
+  RESTRICT_PROCESSING
+  DISCLOSURE_ACCOUNTING
+}
+
+enum DSRStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+  DENIED
+}
+
+// ─── PCC Webhook events (raw ingestion log) ────────────────────────────────
+model PccWebhookEvent {
+  id          String   @id @default(cuid())
+  pccEventId  String   @unique
+  eventType   String
+  payload     Json
+  processed   Boolean  @default(false)
+  processedAt DateTime?
+  error       String?
+  receivedAt  DateTime @default(now())
+}

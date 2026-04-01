@@ -40,3 +40,7 @@ next-env.d.ts
 *.mp4
 *.zip
 *.docx
+messaging/node_modules/
+messaging/.next/
+messaging/.env
+messaging/.env.local

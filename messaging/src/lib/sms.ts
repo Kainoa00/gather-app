@@ -111,6 +111,21 @@ export async function sendConsentRequest({
   return sid
 }
 
+// ─── Shared helper: create an inbound message record ─────────────────────────
+async function createInboundMsg(contact: { id: string; residentId: string }, body: string, twilioSid: string) {
+  return prisma.message.create({
+    data: {
+      residentId: contact.residentId,
+      contactId: contact.id,
+      direction: MessageDirection.INBOUND,
+      body,
+      status: MessageStatus.DELIVERED,
+      twilioSid,
+      deliveredAt: new Date(),
+    },
+  })
+}
+
 // ─── Handle inbound SMS (YES / STOP / other) ──────────────────────────────────
 export async function handleInboundSMS({
   from,
@@ -136,73 +151,53 @@ export async function handleInboundSMS({
     const facilityId = contact.resident.facilityId
 
     if (normalised === 'YES') {
-      const updated = await prisma.consent.updateMany({
-        where: { contactId: contact.id, status: ConsentStatus.PENDING },
-        data: { status: ConsentStatus.ACTIVE, consentedAt: new Date() },
-      })
+      const [updated] = await Promise.all([
+        prisma.consent.updateMany({
+          where: { contactId: contact.id, status: ConsentStatus.PENDING },
+          data: { status: ConsentStatus.ACTIVE, consentedAt: new Date() },
+        }),
+        prisma.auditLog.create({
+          data: {
+            facilityId,
+            actorType: AuditActor.FAMILY_CONTACT,
+            action: 'CONSENT_GRANTED',
+            entityType: 'FamilyContact',
+            entityId: contact.id,
+            metadata: { from, twilioSid },
+          },
+        }),
+        createInboundMsg(contact, body, twilioSid),
+      ])
 
-      await prisma.auditLog.create({
-        data: {
-          facilityId,
-          actorType: AuditActor.FAMILY_CONTACT,
-          action: 'CONSENT_GRANTED',
-          entityType: 'FamilyContact',
-          entityId: contact.id,
-          metadata: { from, twilioSid, categoriesActivated: updated.count },
-        },
-      })
-
-      await prisma.message.create({
-        data: {
-          residentId: contact.residentId,
-          contactId: contact.id,
-          direction: MessageDirection.INBOUND,
-          body,
-          status: MessageStatus.DELIVERED,
-          twilioSid,
-          deliveredAt: new Date(),
-        },
-      })
-
-      revalidatePath('/consent')
       results.push({ contactId: contact.id, count: updated.count })
     } else if (normalised === 'STOP') {
-      await prisma.consent.updateMany({
-        where: { contactId: contact.id },
-        data: { status: ConsentStatus.REVOKED, revokedAt: new Date() },
-      })
+      await Promise.all([
+        prisma.consent.updateMany({
+          where: { contactId: contact.id },
+          data: { status: ConsentStatus.REVOKED, revokedAt: new Date() },
+        }),
+        prisma.auditLog.create({
+          data: {
+            facilityId,
+            actorType: AuditActor.FAMILY_CONTACT,
+            action: 'CONSENT_REVOKED_STOP',
+            entityType: 'FamilyContact',
+            entityId: contact.id,
+            metadata: { from, twilioSid },
+          },
+        }),
+      ])
 
-      await prisma.auditLog.create({
-        data: {
-          facilityId,
-          actorType: AuditActor.FAMILY_CONTACT,
-          action: 'CONSENT_REVOKED_STOP',
-          entityType: 'FamilyContact',
-          entityId: contact.id,
-          metadata: { from, twilioSid },
-        },
-      })
-
-      revalidatePath('/consent')
       results.push({ contactId: contact.id })
     } else {
       // Generic inbound message — store for staff review
-      await prisma.message.create({
-        data: {
-          residentId: contact.residentId,
-          contactId: contact.id,
-          direction: MessageDirection.INBOUND,
-          body,
-          status: MessageStatus.DELIVERED,
-          twilioSid,
-          deliveredAt: new Date(),
-        },
-      })
+      await createInboundMsg(contact, body, twilioSid)
 
       results.push({ contactId: contact.id })
     }
   }
 
+  revalidatePath('/consent')
   revalidatePath('/messages')
   revalidatePath('/')
 

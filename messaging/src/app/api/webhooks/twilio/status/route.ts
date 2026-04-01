@@ -24,12 +24,7 @@ export async function POST(req: NextRequest) {
     return new NextResponse('OK', { status: 200 })
   }
 
-  const message = await prisma.message.findUnique({ where: { twilioSid: messageSid } })
-  if (!message) {
-    return new NextResponse('OK', { status: 200 }) // Ignore unknown SIDs
-  }
-
-  await prisma.message.update({
+  await prisma.message.updateMany({
     where: { twilioSid: messageSid },
     data: {
       status: newStatus,
@@ -37,6 +32,7 @@ export async function POST(req: NextRequest) {
       ...(newStatus === MessageStatus.FAILED ? { failedAt: new Date(), failureReason: `Twilio: ${messageStatus}` } : {}),
     },
   })
+  // result.count === 0 means SID not found — that's fine, just return OK
 
   return new NextResponse('OK', { status: 200 })
 }

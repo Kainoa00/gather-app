@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { getFacilityId } from '@/lib/facility'
 import { Prisma } from '@prisma/client'
 import { formatDate } from '@/lib/format'
+import { Pagination } from '@/components/Pagination'
 import Link from 'next/link'
 
 const PAGE_SIZE = 20
@@ -129,29 +130,7 @@ export default async function AuditPage({
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100 bg-gray-50/50">
-            <p className="text-[11px] text-gray-400">
-              Page {page} of {totalPages} ({totalCount} entries)
-            </p>
-            <div className="flex items-center gap-2">
-              {page > 1 && (
-                <Link
-                  href={buildUrl({ page: String(page - 1) })}
-                  className="text-[11px] font-medium px-2.5 py-1 rounded-md bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
-                >
-                  Previous
-                </Link>
-              )}
-              {page < totalPages && (
-                <Link
-                  href={buildUrl({ page: String(page + 1) })}
-                  className="text-[11px] font-medium px-2.5 py-1 rounded-md bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
-                >
-                  Next
-                </Link>
-              )}
-            </div>
-          </div>
+          <Pagination page={page} totalPages={totalPages} totalCount={totalCount} entityLabel="entries" buildUrl={buildUrl} />
         )}
 
         <div className="px-5 py-3 bg-gray-50 border-t border-gray-100">

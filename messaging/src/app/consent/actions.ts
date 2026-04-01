@@ -4,12 +4,14 @@ import { sendConsentRequest } from '@/lib/sms'
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
 import { ConsentCategory, ConsentStatus } from '@prisma/client'
+import { ONE_DAY_MS } from '@/lib/ui-constants'
 
 const ALL_CATEGORIES = Object.values(ConsentCategory) as ConsentCategory[]
 
 export async function sendConsentSMS(contactId: string): Promise<{ success: boolean; error?: string }> {
-  const origin = (await headers()).get('origin')
-  const host = (await headers()).get('host')
+  const hdrs = await headers()
+  const origin = hdrs.get('origin')
+  const host = hdrs.get('host')
   if (origin && host && !origin.includes(host)) {
     return { success: false, error: 'Invalid request origin' }
   }
@@ -26,7 +28,7 @@ export async function sendConsentSMS(contactId: string): Promise<{ success: bool
   // Check if consent SMS was already sent recently (within 24h)
   const recentPending = contact.consents.find(
     c => c.status === ConsentStatus.PENDING &&
-    c.createdAt > new Date(Date.now() - 24 * 60 * 60 * 1000)
+    c.createdAt > new Date(Date.now() - ONE_DAY_MS)
   )
   if (recentPending) {
     return { success: false, error: 'Consent SMS already sent in the last 24 hours' }

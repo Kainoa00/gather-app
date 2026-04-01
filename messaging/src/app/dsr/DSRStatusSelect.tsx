@@ -1,15 +1,16 @@
 'use client'
 import { useState } from 'react'
 import { updateDSRStatus } from './actions'
+import { DSRStatus } from '@prisma/client'
 
-export function DSRStatusSelect({ dsrId, currentStatus }: { dsrId: string; currentStatus: string }) {
-  const [status, setStatus] = useState(currentStatus)
+export function DSRStatusSelect({ dsrId, currentStatus }: { dsrId: string; currentStatus: DSRStatus }) {
+  const [status, setStatus] = useState<DSRStatus>(currentStatus)
   const [saving, setSaving] = useState(false)
 
-  async function handleChange(newStatus: string) {
+  async function handleChange(newStatus: DSRStatus) {
     setSaving(true)
     setStatus(newStatus)
-    await updateDSRStatus(dsrId, newStatus as any)
+    await updateDSRStatus(dsrId, newStatus)
     setSaving(false)
   }
 
@@ -23,7 +24,7 @@ export function DSRStatusSelect({ dsrId, currentStatus }: { dsrId: string; curre
   return (
     <select
       value={status}
-      onChange={e => handleChange(e.target.value)}
+      onChange={e => handleChange(e.target.value as DSRStatus)}
       disabled={saving}
       className={`text-[11px] font-medium px-2 py-1 rounded-md border ${colors[status] ?? 'border-gray-200'} focus:outline-none cursor-pointer`}
     >

@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { processEventNotifications } from '@/lib/events'
-import { rateLimit } from '@/lib/rate-limit'
+import { applyRateLimit } from '@/lib/rate-limit'
 import { revalidatePath } from 'next/cache'
 import { EventType, AuditActor } from '@prisma/client'
 import { z } from 'zod'
@@ -14,11 +14,8 @@ const TriggerSchema = z.object({
 })
 
 export async function POST(req: NextRequest) {
-  const ip = req.headers.get('x-forwarded-for') ?? 'unknown'
-  const { allowed } = rateLimit(`events:${ip}`, 10, 60000) // 10 per minute
-  if (!allowed) {
-    return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 })
-  }
+  const rateLimited = applyRateLimit(req, 'events')
+  if (rateLimited) return rateLimited
 
   const body = await req.json()
   const parsed = TriggerSchema.safeParse(body)

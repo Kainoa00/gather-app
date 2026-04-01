@@ -11,6 +11,8 @@ const DSR_TYPES = [
   'DISCLOSURE_ACCOUNTING',
 ] as const
 
+const inputClass = 'w-full text-[12px] px-3 py-1.5 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-brand-300'
+
 export function NewDSRForm({ facilityId }: { facilityId: string }) {
   const [open, setOpen] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -52,7 +54,7 @@ export function NewDSRForm({ facilityId }: { facilityId: string }) {
           <select
             name="requestType"
             required
-            className="w-full text-[12px] px-3 py-1.5 border border-gray-200 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-brand-300"
+            className={`${inputClass} bg-white`}
           >
             {DSR_TYPES.map(t => (
               <option key={t} value={t}>{t.replace(/_/g, ' ')}</option>
@@ -64,7 +66,7 @@ export function NewDSRForm({ facilityId }: { facilityId: string }) {
           <input
             name="requestorName"
             required
-            className="w-full text-[12px] px-3 py-1.5 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-brand-300"
+            className={inputClass}
           />
         </div>
         <div>
@@ -72,7 +74,7 @@ export function NewDSRForm({ facilityId }: { facilityId: string }) {
           <input
             name="requestorPhone"
             type="tel"
-            className="w-full text-[12px] px-3 py-1.5 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-brand-300"
+            className={inputClass}
           />
         </div>
         <div>
@@ -80,7 +82,7 @@ export function NewDSRForm({ facilityId }: { facilityId: string }) {
           <input
             name="requestorEmail"
             type="email"
-            className="w-full text-[12px] px-3 py-1.5 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-brand-300"
+            className={inputClass}
           />
         </div>
         <div>
@@ -88,14 +90,14 @@ export function NewDSRForm({ facilityId }: { facilityId: string }) {
           <input
             name="residentName"
             required
-            className="w-full text-[12px] px-3 py-1.5 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-brand-300"
+            className={inputClass}
           />
         </div>
         <div>
           <label className="text-[11px] font-medium text-gray-500 block mb-1">Notes</label>
           <input
             name="notes"
-            className="w-full text-[12px] px-3 py-1.5 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-brand-300"
+            className={inputClass}
           />
         </div>
         <div className="col-span-2 flex items-center gap-2 pt-2">

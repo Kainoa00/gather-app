@@ -5,14 +5,15 @@ import { MessageStatus, ConsentStatus } from '@prisma/client'
 import { AlertTriangle, TrendingUp, CheckCircle, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import { formatTime } from '@/lib/format'
+import { MSG_STATUS_BADGE, EVENT_DOT_COLOR, ONE_DAY_MS } from '@/lib/ui-constants'
 
 export default async function DashboardPage() {
   const facility = await getFacility()
   const facilityId = facility.id
   const facilityName = facility.name
 
-  const sevenDaysAgo = new Date(Date.now() - 7 * 86400000)
-  const fourteenDaysAgo = new Date(Date.now() - 14 * 86400000)
+  const sevenDaysAgo = new Date(Date.now() - 7 * ONE_DAY_MS)
+  const fourteenDaysAgo = new Date(Date.now() - 14 * ONE_DAY_MS)
 
   const [
     residentCount,
@@ -57,26 +58,6 @@ export default async function DashboardPage() {
       ? `+${weekDiff} vs last week`
       : `${weekDiff} vs last week`
 
-  const statusColor: Record<string, string> = {
-    DELIVERED: 'bg-green-50 text-green-700',
-    SENT:      'bg-blue-50 text-blue-700',
-    SUPPRESSED:'bg-red-50 text-red-700',
-    QUEUED:    'bg-amber-50 text-amber-700',
-    FAILED:    'bg-red-100 text-red-800',
-  }
-
-  const eventDot: Record<string, string> = {
-    ADMISSION:                'bg-blue-400',
-    DISCHARGE:                'bg-gray-400',
-    LAB_RESULT:               'bg-amber-400',
-    MEDICATION_CHANGE:        'bg-red-400',
-    PSYCHOTROPIC_MED_CONSENT: 'bg-purple-400',
-    IMMUNIZATION:             'bg-teal-400',
-    WEIGHT_CHANGE:            'bg-blue-300',
-    ROOM_TRANSFER:            'bg-indigo-400',
-    MANUAL:                   'bg-gray-300',
-  }
-
   return (
     <div className="p-6">
       {/* Alerts */}
@@ -120,12 +101,12 @@ export default async function DashboardPage() {
           const status = msg?.status ?? 'QUEUED'
           return (
             <div key={ev.id} className="flex items-center gap-3 px-5 py-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors">
-              <div className={`w-2 h-2 rounded-full shrink-0 ${eventDot[ev.type] ?? 'bg-gray-300'}`} />
+              <div className={`w-2 h-2 rounded-full shrink-0 ${EVENT_DOT_COLOR[ev.type] ?? 'bg-gray-300'}`} />
               <div className="flex-1 min-w-0">
                 <p className="text-[13px] font-medium">{ev.type.replace(/_/g, ' ')}</p>
                 <p className="text-[11px] text-gray-400">{ev.resident.firstName} {ev.resident.lastName} · Room {ev.resident.roomNumber}</p>
               </div>
-              <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${statusColor[status] ?? 'bg-gray-100 text-gray-600'}`}>
+              <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${MSG_STATUS_BADGE[status] ?? 'bg-gray-100 text-gray-600'}`}>
                 {status === 'SUPPRESSED' ? 'No consent' : status.toLowerCase()}
               </span>
               <span className="text-[10px] text-gray-300 shrink-0">

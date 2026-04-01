@@ -33,30 +33,31 @@ export async function processEventNotifications({
     include: { contacts: true, facility: true },
   })
   if (!resident) return []
+  // Bind to const so closures see a non-null type
+  const res = resident
 
-  const results: ProcessEventResult[] = []
+  // Hoist template query out of loop — result depends only on eventType
+  const template = await prisma.messageTemplate.findFirst({
+    where: { eventType, isDefault: true },
+  })
 
-  for (const contact of resident.contacts) {
+  async function processContact(contact: typeof res.contacts[number]): Promise<ProcessEventResult> {
     const consentCheck = await checkConsent({ contactId: contact.id, eventType })
-
-    const template = await prisma.messageTemplate.findFirst({
-      where: { eventType, isDefault: true },
-    })
 
     let body = template
       ? interpolate(template.body, {
           contactFirstName: contact.name.split(' ')[0],
-          residentName: `${resident.firstName} ${resident.lastName}`,
-          roomNumber: resident.roomNumber,
-          facilityName: resident.facility.name,
-          facilityPhone: resident.facility.phone,
-          immunizationName: (details as Record<string, string>)?.vaccineName ?? 'vaccine',
+          residentName: `${res.firstName} ${res.lastName}`,
+          roomNumber: res.roomNumber,
+          facilityName: res.facility.name,
+          facilityPhone: res.facility.phone,
+          immunizationName: String(details.vaccineName ?? 'vaccine'),
         })
-      : `Update for ${resident.firstName} ${resident.lastName} from ${resident.facility.name}.`
+      : `Update for ${res.firstName} ${res.lastName} from ${res.facility.name}.`
 
     // For MANUAL events, use the nurse's note as the message body
     if (eventType === EventType.MANUAL && details.note) {
-      body = `${resident.facility.name}: ${details.note as string} — regarding ${resident.firstName} ${resident.lastName}.`
+      body = `${res.facility.name}: ${details.note as string} — regarding ${res.firstName} ${res.lastName}.`
     }
 
     const msg = await prisma.message.create({
@@ -73,11 +74,10 @@ export async function processEventNotifications({
     if (!consentCheck.allowed) {
       await suppressMessage({
         messageId: msg.id,
-        facilityId: resident.facilityId,
+        facilityId: res.facilityId,
         reason: consentCheck.reason ?? 'NO_CONSENT',
       })
-      results.push({ contactId: contact.id, status: 'SUPPRESSED', reason: consentCheck.reason })
-      continue
+      return { contactId: contact.id, status: 'SUPPRESSED', reason: consentCheck.reason }
     }
 
     try {
@@ -85,17 +85,22 @@ export async function processEventNotifications({
         to: contact.phone,
         body,
         messageId: msg.id,
-        facilityId: resident.facilityId,
+        facilityId: res.facilityId,
       })
-      results.push({ contactId: contact.id, status: 'SENT', twilioSid: sid })
+      return { contactId: contact.id, status: 'SENT', twilioSid: sid }
     } catch (err) {
       await prisma.message.update({
         where: { id: msg.id },
         data: { status: MessageStatus.FAILED, failedAt: new Date(), failureReason: String(err) },
       })
-      results.push({ contactId: contact.id, status: 'FAILED', error: String(err) })
+      return { contactId: contact.id, status: 'FAILED', error: String(err) }
     }
   }
 
-  return results
+  const settled = await Promise.allSettled(res.contacts.map(processContact))
+  return settled.map(r =>
+    r.status === 'fulfilled'
+      ? r.value
+      : { contactId: 'unknown', status: 'FAILED' as const, error: String(r.reason) }
+  )
 }

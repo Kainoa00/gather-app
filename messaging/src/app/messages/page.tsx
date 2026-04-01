@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { getFacilityId } from '@/lib/facility'
 import { MessageDirection } from '@prisma/client'
 import { formatTime } from '@/lib/format'
+import { MSG_STATUS_TEXT_COLOR } from '@/lib/ui-constants'
 import Link from 'next/link'
 
 const RESIDENTS_PER_PAGE = 10
@@ -33,14 +34,6 @@ export default async function MessagesPage({
     skip: (page - 1) * RESIDENTS_PER_PAGE,
     take: RESIDENTS_PER_PAGE,
   })
-
-  const statusColor: Record<string, string> = {
-    DELIVERED:  'text-green-600',
-    SENT:       'text-blue-600',
-    SUPPRESSED: 'text-red-500',
-    QUEUED:     'text-amber-600',
-    FAILED:     'text-red-600',
-  }
 
   return (
     <div className="p-6">
@@ -75,7 +68,7 @@ export default async function MessagesPage({
                           : 'bg-white border border-gray-100 text-gray-700 rounded-bl-sm'
                       }`}>
                         <p>{msg.body}</p>
-                        <p className={`text-[9px] mt-1 ${msg.direction === MessageDirection.OUTBOUND ? 'text-brand-100 opacity-70' : 'text-gray-400'} ${statusColor[msg.status] ?? ''}`}>
+                        <p className={`text-[9px] mt-1 ${msg.direction === MessageDirection.OUTBOUND ? 'text-brand-100 opacity-70' : 'text-gray-400'} ${MSG_STATUS_TEXT_COLOR[msg.status] ?? ''}`}>
                           {msg.direction === MessageDirection.OUTBOUND ? msg.status.toLowerCase() : 'received'} ·{' '}
                           {formatTime(msg.createdAt)}
                         </p>

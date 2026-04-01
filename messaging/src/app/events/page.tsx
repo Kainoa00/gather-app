@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { getFacilityId } from '@/lib/facility'
 import { EventType, MessageStatus, Prisma } from '@prisma/client'
 import { formatTime } from '@/lib/format'
+import { EVENT_DOT_COLOR, MSG_STATUS_BADGE, MSG_STATUS_LABEL } from '@/lib/ui-constants'
+import { Pagination } from '@/components/Pagination'
 import Link from 'next/link'
 
 const PAGE_SIZE = 20
@@ -78,34 +80,6 @@ export default async function EventsPage({
 
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE))
 
-  const dotColor: Record<string, string> = {
-    ADMISSION:                'bg-blue-400',
-    DISCHARGE:                'bg-gray-400',
-    LAB_RESULT:               'bg-amber-400',
-    MEDICATION_CHANGE:        'bg-red-400',
-    PSYCHOTROPIC_MED_CONSENT: 'bg-purple-400',
-    IMMUNIZATION:             'bg-teal-400',
-    WEIGHT_CHANGE:            'bg-blue-300',
-    ROOM_TRANSFER:            'bg-indigo-400',
-    MANUAL:                   'bg-gray-300',
-  }
-
-  const msgBadge: Record<string, string> = {
-    DELIVERED:  'bg-green-50 text-green-700',
-    SENT:       'bg-blue-50 text-blue-700',
-    SUPPRESSED: 'bg-red-50 text-red-700',
-    QUEUED:     'bg-amber-50 text-amber-700',
-    FAILED:     'bg-red-100 text-red-800',
-  }
-
-  const msgLabel: Record<string, string> = {
-    DELIVERED:  'Delivered',
-    SENT:       'Sent',
-    SUPPRESSED: 'No consent — suppressed',
-    QUEUED:     'Queued',
-    FAILED:     'Failed',
-  }
-
   function buildUrl(overrides: Record<string, string>) {
     const p = new URLSearchParams()
     if (overrides.q ?? query) p.set('q', overrides.q ?? query)
@@ -164,7 +138,7 @@ export default async function EventsPage({
 
           return (
             <div key={ev.id} className="flex items-start gap-3 px-5 py-3.5 border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors">
-              <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${dotColor[ev.type] ?? 'bg-gray-300'}`} />
+              <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${EVENT_DOT_COLOR[ev.type] ?? 'bg-gray-300'}`} />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
                   <p className="text-[13px] font-medium">{EVENT_TYPE_LABELS[ev.type] ?? ev.type.replace(/_/g, ' ')}</p>
@@ -181,8 +155,8 @@ export default async function EventsPage({
                 )}
               </div>
               <div className="shrink-0 text-right">
-                <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${msgBadge[status] ?? 'bg-gray-100 text-gray-500'}`}>
-                  {msgLabel[status] ?? status}
+                <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${MSG_STATUS_BADGE[status] ?? 'bg-gray-100 text-gray-500'}`}>
+                  {MSG_STATUS_LABEL[status] ?? status}
                 </span>
                 <p className="text-[10px] text-gray-300 mt-1">
                   {formatTime(ev.occurredAt)}
@@ -202,29 +176,7 @@ export default async function EventsPage({
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100 bg-gray-50/50">
-            <p className="text-[11px] text-gray-400">
-              Page {page} of {totalPages} ({totalCount} events)
-            </p>
-            <div className="flex items-center gap-2">
-              {page > 1 && (
-                <Link
-                  href={buildUrl({ page: String(page - 1) })}
-                  className="text-[11px] font-medium px-2.5 py-1 rounded-md bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
-                >
-                  Previous
-                </Link>
-              )}
-              {page < totalPages && (
-                <Link
-                  href={buildUrl({ page: String(page + 1) })}
-                  className="text-[11px] font-medium px-2.5 py-1 rounded-md bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
-                >
-                  Next
-                </Link>
-              )}
-            </div>
-          </div>
+          <Pagination page={page} totalPages={totalPages} totalCount={totalCount} entityLabel="events" buildUrl={buildUrl} />
         )}
 
         <div className="px-5 py-3 bg-gray-50 border-t border-gray-100">

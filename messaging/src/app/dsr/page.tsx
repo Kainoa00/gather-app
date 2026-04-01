@@ -22,7 +22,7 @@ export default async function DSRPage() {
         <NewDSRForm facilityId={facilityId} />
       </div>
 
-      <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
+      <div className="card-glass overflow-hidden">
         <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
           <h2 className="text-sm font-medium">Data subject rights requests</h2>
           <span className="text-xs text-gray-400">30-day SLA per HIPAA 45 CFR &sect;164.528</span>

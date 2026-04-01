@@ -43,7 +43,7 @@ export default async function MessagesPage({
           const primary = resident.contacts[0]
 
           return (
-            <div key={resident.id} className="bg-white border border-gray-100 rounded-xl overflow-hidden">
+            <div key={resident.id} className="card-glass overflow-hidden">
               <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
                 <div className="w-8 h-8 rounded-full bg-brand-50 flex items-center justify-center text-[11px] font-medium text-brand-600 shrink-0">
                   {resident.firstName[0]}{resident.lastName[0]}

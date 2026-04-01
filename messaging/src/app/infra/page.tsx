@@ -45,7 +45,7 @@ export default function InfraPage() {
   return (
     <div className="p-6 space-y-4">
       {/* Subprocessors */}
-      <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
+      <div className="card-glass overflow-hidden">
         <div className="px-5 py-3 border-b border-gray-100">
           <h2 className="text-sm font-medium">Subprocessors & business associate agreements</h2>
         </div>
@@ -72,7 +72,7 @@ export default function InfraPage() {
       </div>
 
       {/* Security posture */}
-      <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
+      <div className="card-glass overflow-hidden">
         <div className="px-5 py-3 border-b border-gray-100">
           <h2 className="text-sm font-medium">Security posture</h2>
         </div>

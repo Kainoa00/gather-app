@@ -31,7 +31,7 @@ export default async function ConsentPage() {
         </div>
       )}
 
-      <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
+      <div className="card-glass overflow-hidden">
         <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
           <h2 className="text-sm font-medium">Family consent registry</h2>
           <span className="text-xs text-gray-400">{contacts.length} contacts</span>

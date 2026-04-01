@@ -79,7 +79,7 @@ export default async function DashboardPage() {
           { label: 'Delivery rate',    value: `${deliveryRate}%`, sub: 'All carriers nominal', color: 'text-brand-600' },
           { label: 'Consent gaps',     value: consentGaps, sub: consentGaps > 0 ? 'Notifications paused' : 'All clear', color: consentGaps > 0 ? 'text-red-500' : 'text-brand-600' },
         ].map(m => (
-          <div key={m.label} className="bg-gray-50 rounded-lg p-4">
+          <div key={m.label} className="bg-navy-50 rounded-xl p-4">
             <p className="text-xs text-gray-400 mb-1">{m.label}</p>
             <p className="text-2xl font-medium">{m.value}</p>
             <p className={`text-[11px] mt-0.5 ${m.color || 'text-gray-400'}`}>{m.sub}</p>
@@ -88,7 +88,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Event feed */}
-      <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
+      <div className="card-glass overflow-hidden">
         <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
           <h2 className="text-sm font-medium">Recent EHR-triggered events</h2>
           <span className="text-xs bg-blue-50 text-blue-700 rounded px-2 py-0.5 font-medium">PointClickCare</span>

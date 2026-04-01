@@ -1,7 +1,14 @@
 // src/app/layout.tsx
 import type { Metadata } from 'next'
+import { Outfit } from 'next/font/google'
 import './globals.css'
 import { SidebarWrapper } from '@/components/SidebarWrapper'
+
+const outfit = Outfit({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700', '800'],
+  variable: '--font-outfit',
+})
 
 export const metadata: Metadata = {
   title: 'CareBridge Connect Messaging — SNF Family Communications',
@@ -10,8 +17,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className="bg-gray-50 text-gray-900 antialiased">
+    <html lang="en" className={outfit.variable}>
+      <body className={`${outfit.className} bg-slate-50 text-navy-800 antialiased`}>
         <div className="flex h-screen overflow-hidden">
           <SidebarWrapper />
           <main className="flex-1 overflow-y-auto">

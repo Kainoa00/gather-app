@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
-  LayoutDashboard, Clock, MessageSquare, Users,
+  LayoutDashboard, Clock, MessageSquare, Users, Send,
   ShieldCheck, FileText, ScrollText, Server, ChevronRight
 } from 'lucide-react'
 
@@ -27,6 +27,7 @@ export function Sidebar({ eventCount, inboundCount, consentGaps, facilityName = 
         { label: 'EHR Events',   href: '/events',     icon: Clock,          badge: eventCount > 0 ? String(eventCount) : undefined },
         { label: 'Messages',     href: '/messages',   icon: MessageSquare,  badgeRed: inboundCount > 0 ? String(inboundCount) : undefined },
         { label: 'Residents',    href: '/residents',  icon: Users },
+        { label: 'Compose',      href: '/compose',    icon: Send },
       ]
     },
     {

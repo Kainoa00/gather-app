@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { ChevronDown, Check, Plus, User } from 'lucide-react'
 import { isDemoMode, supabase } from '@/lib/supabase'
 import { UserRole } from '@/types'
+import { demoAllResidents } from '@/lib/demo-data'
 
 interface Resident {
   id: string
@@ -47,14 +48,14 @@ export default function ResidentSelector({
   useEffect(() => {
     async function loadResidents() {
       if (isDemoMode) {
-        setResidents([
-          {
-            id: currentPatientId,
-            name: currentPatientName,
-            room_number: '204',
-            primary_diagnosis: 'Post-surgical recovery',
-          },
-        ])
+        setResidents(
+          demoAllResidents.map((r) => ({
+            id: r.id,
+            name: r.name,
+            room_number: r.roomNumber,
+            primary_diagnosis: r.primaryDiagnosis,
+          }))
+        )
         return
       }
 
@@ -87,7 +88,7 @@ export default function ResidentSelector({
     loadResidents()
   }, [currentPatientId, currentPatientName])
 
-  const isDisabled = isDemoMode && residents.length <= 1
+  const isDisabled = false
 
   return (
     <div className="bg-slate-50 border-b border-slate-200 px-4 py-2" ref={dropdownRef}>

@@ -1,10 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { Building2, Bell, Users, Save, X, Mail, Plus, Shield } from 'lucide-react'
+import { Building2, Bell, Users, Save, X, Mail, Plus, Shield, Link2, CheckCircle2, RefreshCw } from 'lucide-react'
 import { UserRole } from '@/types'
+import PCCImportModal from './PCCImportModal'
 
-type SettingsTab = 'profile' | 'notifications' | 'team'
+type SettingsTab = 'profile' | 'notifications' | 'team' | 'integrations'
 
 interface StaffMember {
   id: string
@@ -26,7 +27,11 @@ const ROLE_BADGE_STYLES: Record<UserRole, string> = {
   family: 'bg-purple-100 text-purple-700',
 }
 
-export default function FacilitySettings() {
+interface FacilitySettingsProps {
+  onImportComplete?: () => void
+}
+
+export default function FacilitySettings({ onImportComplete }: FacilitySettingsProps) {
   const [activeSettingsTab, setActiveSettingsTab] = useState<SettingsTab>('profile')
 
   // Facility profile state
@@ -47,6 +52,15 @@ export default function FacilitySettings() {
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteRole, setInviteRole] = useState<'nurse' | 'admin'>('nurse')
   const [inviteSent, setInviteSent] = useState(false)
+
+  // PCC integration state
+  const [pccConnected, setPccConnected] = useState(false)
+  const [pccLastSync, setPccLastSync] = useState<Date | null>(null)
+  const [showPccConnectModal, setShowPccConnectModal] = useState(false)
+  const [showPccImportModal, setShowPccImportModal] = useState(false)
+  const [pccConnecting, setPccConnecting] = useState(false)
+  const [pccFacilityId, setPccFacilityId] = useState('PCC-SUNRISE-4821')
+  const [pccApiKey, setPccApiKey] = useState('sk-pcc-demo-••••••••••')
 
   const handleSaveProfile = () => {
     setProfileSaved(true)
@@ -71,10 +85,25 @@ export default function FacilitySettings() {
     }, 2000)
   }
 
+  const handlePccConnect = async () => {
+    setPccConnecting(true)
+    await new Promise((r) => setTimeout(r, 2800))
+    setPccConnecting(false)
+    setPccConnected(true)
+    setShowPccConnectModal(false)
+  }
+
+  const handlePccImportComplete = () => {
+    setShowPccImportModal(false)
+    setPccLastSync(new Date())
+    onImportComplete?.()
+  }
+
   const settingsTabs: { id: SettingsTab; label: string; icon: typeof Building2 }[] = [
     { id: 'profile', label: 'Facility Profile', icon: Building2 },
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'team', label: 'Team', icon: Users },
+    { id: 'integrations', label: 'Integrations', icon: Link2 },
   ]
 
   return (
@@ -248,6 +277,152 @@ export default function FacilitySettings() {
             ))}
           </div>
         </div>
+      )}
+
+      {/* Integrations Tab */}
+      {activeSettingsTab === 'integrations' && (
+        <div className="card-glass p-6">
+          <h3 className="text-lg font-bold text-slate-900 mb-2">Integrations</h3>
+          <p className="text-sm text-slate-500 mb-6">Connect CareBridge to your existing systems to automatically sync resident data.</p>
+
+          {/* PCC Integration Card */}
+          <div className="border border-slate-200 rounded-2xl p-5 bg-white max-w-xl">
+            <div className="flex items-start gap-4">
+              <div
+                className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                style={{ background: 'linear-gradient(135deg, #1e40af, #3b82f6)' }}
+              >
+                PCC
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="text-sm font-semibold text-slate-900">Point Click Care</p>
+                  {pccConnected ? (
+                    <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                      <CheckCircle2 className="h-3 w-3" />
+                      Connected
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-500">
+                      Not connected
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Sync resident census, medications, vitals, and care plans automatically.
+                </p>
+                {pccConnected && (
+                  <p className="text-xs text-slate-400 mt-1">
+                    {pccLastSync
+                      ? `Last synced: ${pccLastSync.toLocaleDateString()} at ${pccLastSync.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                      : 'Last synced: Never'}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex gap-2 mt-4">
+              {!pccConnected ? (
+                <button
+                  onClick={() => setShowPccConnectModal(true)}
+                  className="flex items-center gap-1.5 min-h-[44px] px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 transition-colors"
+                >
+                  <Link2 className="h-4 w-4" />
+                  Connect to Point Click Care
+                </button>
+              ) : (
+                <button
+                  onClick={() => setShowPccImportModal(true)}
+                  className="flex items-center gap-1.5 min-h-[44px] px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 transition-colors"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  Sync Now
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* PCC Connect Modal */}
+      {showPccConnectModal && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm"
+                  style={{ background: 'linear-gradient(135deg, #1e40af, #3b82f6)' }}
+                >
+                  PCC
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">Connect Point Click Care</p>
+                  <p className="text-xs text-slate-400">Enter your facility credentials</p>
+                </div>
+              </div>
+              {!pccConnecting && (
+                <button
+                  onClick={() => setShowPccConnectModal(false)}
+                  className="p-2 rounded-xl hover:bg-slate-100 transition-colors"
+                >
+                  <X className="h-5 w-5 text-slate-400" />
+                </button>
+              )}
+            </div>
+
+            {pccConnecting ? (
+              <div className="flex flex-col items-center py-8 gap-3">
+                <RefreshCw className="h-8 w-8 text-primary-500 animate-spin" />
+                <p className="text-sm font-medium text-slate-700">Verifying credentials...</p>
+                <p className="text-xs text-slate-400">Connecting to Point Click Care API</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Facility ID
+                  </label>
+                  <input
+                    type="text"
+                    value={pccFacilityId}
+                    onChange={(e) => setPccFacilityId(e.target.value)}
+                    className="w-full px-4 py-2.5 min-h-[44px] rounded-xl border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    API Key
+                  </label>
+                  <input
+                    type="text"
+                    value={pccApiKey}
+                    onChange={(e) => setPccApiKey(e.target.value)}
+                    className="w-full px-4 py-2.5 min-h-[44px] rounded-xl border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent font-mono"
+                  />
+                </div>
+                <p className="text-xs text-slate-400">
+                  Your credentials are encrypted and never stored in plain text. CareBridge only reads resident data — it never modifies Point Click Care records.
+                </p>
+                <button
+                  onClick={handlePccConnect}
+                  className="w-full min-h-[44px] px-4 py-2.5 bg-primary-600 text-white text-sm font-semibold rounded-xl hover:bg-primary-700 transition-colors flex items-center justify-center gap-2"
+                >
+                  <Link2 className="h-4 w-4" />
+                  Connect &amp; Authorize
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* PCC Import Modal */}
+      {showPccImportModal && (
+        <PCCImportModal
+          onClose={() => setShowPccImportModal(false)}
+          onImportComplete={handlePccImportComplete}
+        />
       )}
 
       {/* Invite Modal */}

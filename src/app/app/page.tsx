@@ -86,6 +86,20 @@ export default function Home() {
   const [showAddResidentModal, setShowAddResidentModal] = useState(false)
   const [demoResidents, setDemoResidents] = useState<ResidentSnapshot[]>(demoAllResidents)
 
+  // Onboarding bridge: auto-login as admin when arriving from the onboarding flow
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem('demo_onboarding')
+      if (raw) {
+        sessionStorage.removeItem('demo_onboarding')
+        setCurrentUser({ id: 'a1', name: 'Mary Wilson', role: 'admin', relationship: 'Facility Administrator' })
+        setActiveTab('home')
+      }
+    } catch {
+      // sessionStorage unavailable — ignore
+    }
+  }, [])
+
   const showError = (msg: string) => {
     setErrorMsg(msg)
     setTimeout(() => setErrorMsg(null), 5000)
@@ -833,7 +847,7 @@ export default function Home() {
 
         {activeTab === 'settings' && currentUserRole === 'admin' && (
           <ErrorBoundary>
-            <FacilitySettings />
+            <FacilitySettings onImportComplete={() => setActiveTab('residents')} />
           </ErrorBoundary>
         )}
 
@@ -879,8 +893,8 @@ export default function Home() {
             <Sparkles className="h-4 w-4" />
           </div>
           <div className="text-sm">
-            <p className="font-medium">{isDemoMode ? 'Demo Mode' : 'Live Mode'}</p>
-            <p className="text-navy-200 text-xs">{isDemoMode ? 'Data stored locally' : 'Connected to Supabase'}</p>
+            <p className="font-medium">{isDemoMode ? 'Grant Demo' : 'Live Mode'}</p>
+            <p className="text-navy-200 text-xs">{isDemoMode ? 'Interactive preview' : 'Connected to Supabase'}</p>
           </div>
         </div>
       </div>

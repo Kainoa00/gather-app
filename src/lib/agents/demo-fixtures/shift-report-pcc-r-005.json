@@ -1,0 +1,37 @@
+{
+  "residentId": "pcc-r-005",
+  "residentFirstName": "Dorothy",
+  "agentName": "shift_report",
+  "generatedAt": "2026-04-20T04:19:49.768Z",
+  "scenarioMode": "demo",
+  "output": {
+    "shiftWindow": {
+      "start": "2026-04-19T22:00:00.000Z",
+      "end": "2026-04-20T06:00:00.000Z"
+    },
+    "situation": "No care log entries were documented for Dorothy (Room 302) during the specified night shift window (2026-04-19T22:00–2026-04-20T06:00), representing a complete documentation gap for the overnight period. Review of surrounding shift data reveals a persistent pattern of Stage 1–2 hypertensive blood pressure readings, agitation, and poor appetite across multiple assessments spanning 2026-04-19 through 2026-04-20. A notable alertness decline to 'unresponsive' was recorded on the afternoon of 2026-04-19, with partial recovery to 'alert' by the morning of 2026-04-20.",
+    "background": "Pre-shift vitals at 2026-04-19T17:00 showed BP 144/89 mmHg, HR 84 bpm, Temp 98.2°F, SpO2 96%, RR 15, weight 161.6 lbs. The first documented post-shift vitals at 2026-04-20T07:00 showed BP 148/87 mmHg, HR 80 bpm, Temp 97.9°F, SpO2 95%, RR 18, weight 162.2 lbs. Wellness assessments from 2026-04-19T08:00 and 14:00, and 2026-04-20T08:00 all documented agitated mood and poor appetite consistently. Alertness was recorded as 'drowsy' at 2026-04-19T08:00, deteriorated to 'unresponsive' at 2026-04-19T14:00, and recovered to 'alert' by 2026-04-20T08:00. No medication administrations were captured in any available log entries across the surrounding shift period.",
+    "assessment": "Dorothy's blood pressure has remained persistently elevated across all available vitals readings, with systolic values ranging 144–148 mmHg and diastolic values ranging 86–90 mmHg, consistent with Stage 1–2 hypertension. The acute alertness decline to 'unresponsive' at 2026-04-19T14:00 — sandwiched between 'drowsy' and 'alert' assessments — represents the most clinically significant finding in the available data and lacks any documented clinical response or follow-up within this record set. SpO2 trended to 95% in the first post-shift reading, sitting at the lower margin of acceptable range and warranting close monitoring. Sustained poor appetite and agitation across all three wellness assessments suggests these are not transient findings. Weight has fluctuated minimally (161.6–162.2 lbs), without a significant trending concern at this time. The complete absence of overnight documentation is a critical care continuity gap.",
+    "recommendation": "1) Reconcile the overnight documentation gap immediately — confirm with overnight staff whether assessments were performed but not recorded, or whether care was not delivered; escalate per facility protocol if needed. 2) Trend blood pressure closely this shift; notify the provider if systolic exceeds 150 mmHg or diastolic exceeds 90 mmHg, given the persistent hypertensive pattern. 3) Monitor SpO2 continuously and reassess if it drops below 95%; evaluate respiratory effort and positioning. 4) Conduct a thorough alertness and orientation assessment at the start of this shift given the prior 'unresponsive' episode on 2026-04-19 afternoon; document any deviation from current 'alert' status and notify provider if altered consciousness recurs. 5) Actively encourage oral intake at all meals and document appetite; escalate to dietitian or provider if poor intake continues. 6) Assess and document potential contributing factors to sustained agitation, including pain, discomfort, environmental stressors, or medication effects.",
+    "entryCount": 0,
+    "keyVitals": {
+      "bloodPressure": "148/87",
+      "heartRate": 80,
+      "temperature": 97.9,
+      "oxygenSaturation": 95
+    },
+    "medicationsGiven": [],
+    "incidents": [
+      {
+        "type": "Documentation Gap",
+        "severity": "high",
+        "summary": "Zero care log entries were recorded during the entire night shift window (2026-04-19T22:00–2026-04-20T06:00). No vitals, wellness assessments, or medication administrations are documented for this period. Immediate reconciliation with overnight staff is required to determine whether care was provided but undocumented, or whether assessments were missed entirely."
+      },
+      {
+        "type": "Alertness Change",
+        "severity": "moderate",
+        "summary": "Dorothy was documented as 'unresponsive' during a wellness assessment at 2026-04-19T14:00, a significant decline from 'drowsy' earlier that morning (08:00). No clinical response, provider notification, or follow-up assessment was found in the available records for this episode. Alertness subsequently recovered to 'alert' by 2026-04-20T08:00, though the cause of the acute decline remains unaddressed in the log data."
+      }
+    ]
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "residentId": "pcc-r-002",
+  "residentFirstName": "Robert",
+  "agentName": "care_insights",
+  "generatedAt": "2026-04-20T04:11:16.437Z",
+  "scenarioMode": "demo",
+  "output": {
+    "overallAssessment": "Robert had a medically stable day in Room 118, with all vital signs remaining well within healthy ranges across every check — a reassuring sign for his recovery. That said, his emotional wellbeing and several longer-term patterns, including a return to a sad mood this afternoon, a week of persistently low appetite, and an absence of therapy and family visits, deserve thoughtful attention from both his care team and the people who love him.",
+    "highlights": [
+      {
+        "title": "Consistently Stable Vital Signs All Day",
+        "detail": "All five rounds of vitals over the past 24 hours showed blood pressure, heart rate, temperature, oxygen saturation, and respiratory rate comfortably within healthy ranges. His most recent reading (BP 131/75 mmHg, HR 69 bpm, O2 96%, Temp 98.0°F, RR 15) reflects solid cardiovascular stability."
+      },
+      {
+        "title": "Appetite Made a Positive Turn Today",
+        "detail": "After two consecutive 'poor' appetite readings yesterday, Robert's appetite rebounded to 'fair' this morning and 'good' this afternoon — an encouraging shift following a difficult stretch for nutrition over the past week."
+      },
+      {
+        "title": "Alert and Engaged for Most of the Day",
+        "detail": "Robert was assessed as fully alert during three of his four wellness checks today, suggesting good cognitive engagement for the majority of the day despite some grogginess noted early this morning."
+      }
+    ],
+    "concerns": [
+      {
+        "title": "Sad Mood Returned This Afternoon",
+        "detail": "Robert's most recent wellness assessment (this afternoon, April 20) noted a 'sad' mood. This follows a 7-day trend that included four consecutive 'sad' morning readings from April 12–15, with only a partial recovery to 'neutral' from April 16–19. The recurrence today suggests his emotional wellbeing remains fragile and has not yet stabilized. Consult the care team for clinical interpretation.",
+        "severity": "warning"
+      },
+      {
+        "title": "Persistent Poor Appetite Over the Past Week",
+        "detail": "Appetite was recorded as 'poor' on 7 of the past 8 days (April 13–19), significantly exceeding the 2-consecutive-reading threshold. While today showed welcome improvement, the sustained pattern warrants continued close monitoring to ensure adequate nutritional intake. Consult the care team for clinical interpretation.",
+        "severity": "warning"
+      },
+      {
+        "title": "No Therapy Sessions Recorded in 8 Days",
+        "detail": "Zero physical or occupational therapy sessions were logged across the entire 8-day trend period (April 12–19). For a patient in post-hip replacement recovery, consistent rehabilitation participation is typically a core part of the care plan. It is unclear whether sessions are occurring but going undocumented, or whether participation has not yet resumed. Consult the care team for clinical interpretation.",
+        "severity": "warning"
+      },
+      {
+        "title": "Pain Levels Trending Upward Over Past 4 Days",
+        "detail": "Pain scores in the 7-day trend have risen gradually from 1/10 on April 16 to 4/10 on April 19, following a consistent day-over-day increase. While the current level remains well below the critical threshold of 7/10, the four-day upward trajectory is worth monitoring closely. No pain score was documented in today's care log. Consult the care team for clinical interpretation.",
+        "severity": "info"
+      },
+      {
+        "title": "No Family or Social Visits in 8 Days",
+        "detail": "No family visits were recorded during the entire 8-day period reviewed (April 12–19). Social connection and the presence of loved ones can play a meaningful role in a patient's emotional wellbeing and motivation during recovery. The absence of visits may be a contributing factor to Robert's observed low mood.",
+        "severity": "info"
+      },
+      {
+        "title": "Drowsy Alertness Noted This Morning",
+        "detail": "Robert was assessed as 'drowsy' during the 8:00 AM wellness check on April 20 — the only such reading in today's data. He returned to 'alert' status by the afternoon assessment. This appears to be an isolated observation, but is noted here for incoming shift awareness.",
+        "severity": "info"
+      }
+    ],
+    "trends": {
+      "trajectory": "stable",
+      "vitalsSummary": "Vital signs have been consistently stable across all recorded checks in the past 24 hours with no values outside clinical thresholds. Blood pressure showed a modest but non-concerning increase today (systolic 131–132 mmHg) compared to yesterday (123–124 mmHg), both comfortably within range. Heart rate, temperature, oxygen saturation, and respiratory rate have all remained steady throughout. Weight has been stable between 181.7 and 182.3 lbs with no significant fluctuation.",
+      "moodSummary": "Robert's mood followed a difficult trajectory at the start of the 7-day window, with four consecutive 'sad' morning assessments from April 12–15. A partial lift to 'neutral' emerged from April 16–19, but today's afternoon reading of 'sad' suggests the improvement has not yet held. Alertness has generally been strong, with the exception of one drowsy observation this morning. The complete absence of family visits across this period is a notable contextual factor.",
+      "activitySummary": "No therapy sessions were logged during any of the 8 tracked days, which is a significant gap for a post-hip replacement recovery plan. Appetite remained predominantly poor throughout the week (7 of 8 days), with the first encouraging signs of improvement appearing today on April 20. Pain levels, while well below critical thresholds, have been on a slow upward trend over the most recent four days, rising from 1/10 to 4/10."
+    },
+    "familyTalkingPoints": [
+      "Robert has been feeling a bit down emotionally for much of the past week. Simply being present with him, listening, and sharing a warm memory or two can be incredibly meaningful — your visit itself is one of the most powerful things you can offer right now.",
+      "His appetite has been low most of this week, though it picked up today. Asking him about foods he's been enjoying or craving — and whether there's something from home you might bring with care team approval — could be a warm, practical way to show support.",
+      "Robert's comfort level is worth gently asking about. His pain scores have been slowly creeping upward over the past several days, and hearing his own words about how he's feeling physically can be very helpful for his care team.",
+      "It may be worth checking in with the nursing staff about Robert's current rehabilitation schedule. Understanding what his therapy plan looks like and what progress could mean for him gives the whole family a clearer picture and shared goal to rally around.",
+      "Even if longer in-person visits aren't always possible, shorter and more frequent drop-ins — or a video call on days you can't make it in — can make a real difference for someone in a stretch like the one Robert is navigating."
+    ],
+    "nurseNotes": "Patient: Robert, Room 118 | Dx: Post-Hip Replacement Recovery | Report Date: 2026-04-20\n\nVITALS (24-hr summary): All readings within normal limits across five check points spanning 04/19 0700 – 04/20 1700. BP range: 123–132 / 74–81 mmHg. HR: 68–74 bpm. Temp: 97.9–98.2°F. O2 Sat: 96–98%. RR: 14–16 breaths/min. Weight: 181.7–182.3 lbs (stable). Note: Systolic BP trended modestly higher today (131–132) vs. yesterday (123–124); both within range but worth monitoring across the next 24–48 hrs for continued upward movement.\n\nMOOD / ALERTNESS: Alert at 3 of 4 assessments today. Drowsy noted at 0800 on 04/20; resolved to alert by 1400 — isolated, but document if recurs. Mood: neutral at 0800 (04/20), sad at 1400 (04/20). 7-day history: four consecutive sad AM readings 04/12–04/15; shift to neutral 04/16–04/19; sad recurrence today. Pattern meets and exceeds the 3-consecutive-reading mood threshold when looking at trend data. Recommend flagging for social work or behavioral health consult if sad mood persists into 04/21.\n\nAPPETITE: Two consecutive 'poor' readings on 04/19 (0800 and 1400) — threshold met per protocol. Improved to 'fair' (04/20 0800) and 'good' (04/20 1400). 7-day trend: predominantly poor (7 of 8 days, 04/12–04/19). Monitor intake at next meals; if today's improvement does not hold, consider dietitian referral and nutritional intake documentation.\n\nPAIN: 7-day trend shows gradual escalation — pain scores of 1, 2, 3, 4 (out of 10) on April 16, 17, 18, 19 respectively. Below critical threshold (7/10) but four-day consecutive increase warrants attention. No pain score documented in today's care log entries. Recommend formal pain assessment at next interaction and consistent documentation going forward.\n\nTHERAPY / ACTIVITY: Zero therapy sessions logged 04/12–04/19 (8 days). Verify with PT/OT team whether sessions are occurring and not being entered, or whether there is a gap in participation. For post-hip replacement recovery, this is a clinically significant finding that requires follow-up.\n\nSOCIAL / PSYCHOSOCIAL: No family visits recorded over the 8-day period. In context of sustained low mood and absent social engagement, consider a psychosocial assessment and proactive family outreach by the social work team."
+  }
+}

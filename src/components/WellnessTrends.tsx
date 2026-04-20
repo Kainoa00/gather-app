@@ -177,25 +177,32 @@ export default function WellnessTrends({ days }: WellnessTrendsProps) {
   )
 
   const rangeConfig = RANGE_OPTIONS.find((r) => r.value === selectedRange)!
-  const hasEnoughData = sortedDays.length >= (selectedRange === '7d' ? 2 : rangeConfig.days * 0.3)
+
+  // Slice to the requested number of days (most recent N)
+  const filteredDays = useMemo(
+    () => sortedDays.slice(-rangeConfig.days),
+    [sortedDays, rangeConfig.days],
+  )
+
+  const hasEnoughData = filteredDays.length >= (selectedRange === '7d' ? 2 : rangeConfig.days * 0.3)
 
   // -------------------------------------------------------------------------
   // Computed metrics
   // -------------------------------------------------------------------------
 
   const avgScore = useMemo(() => {
-    if (sortedDays.length === 0) return 0
+    if (filteredDays.length === 0) return 0
     return (
-      sortedDays.reduce((sum, d) => sum + d.overallScore, 0) / sortedDays.length
+      filteredDays.reduce((sum, d) => sum + d.overallScore, 0) / filteredDays.length
     )
-  }, [sortedDays])
+  }, [filteredDays])
 
   const prevPeriodAvg = useMemo(() => {
-    const mid = Math.floor(sortedDays.length / 2)
-    const firstHalf = sortedDays.slice(0, mid)
+    const mid = Math.floor(filteredDays.length / 2)
+    const firstHalf = filteredDays.slice(0, mid)
     if (firstHalf.length === 0) return avgScore
     return firstHalf.reduce((s, d) => s + d.overallScore, 0) / firstHalf.length
-  }, [sortedDays, avgScore])
+  }, [filteredDays, avgScore])
 
   const scoreChange = useMemo(
     () => +(avgScore - prevPeriodAvg).toFixed(1),
@@ -212,45 +219,45 @@ export default function WellnessTrends({ days }: WellnessTrendsProps) {
       sad: 0,
       agitated: 0,
     }
-    sortedDays.forEach((d) => {
+    filteredDays.forEach((d) => {
       if (d.moodAM && counts[d.moodAM as MoodKey] !== undefined) counts[d.moodAM as MoodKey]++
       if (d.moodPM && counts[d.moodPM as MoodKey] !== undefined) counts[d.moodPM as MoodKey]++
     })
     return counts
-  }, [sortedDays])
+  }, [filteredDays])
 
   // Best day
   const bestDay = useMemo(() => {
-    if (sortedDays.length === 0) return null
-    const best = sortedDays.reduce((best, d) =>
+    if (filteredDays.length === 0) return null
+    const best = filteredDays.reduce((best, d) =>
       d.overallScore > best.overallScore ? d : best,
     )
     return best
-  }, [sortedDays])
+  }, [filteredDays])
 
   // Appetite distribution
   const appetiteDistribution = useMemo(() => {
     const counts: Record<AppetiteKey, number> = { good: 0, fair: 0, poor: 0, refused: 0 }
-    sortedDays.forEach((d) => {
+    filteredDays.forEach((d) => {
       if (d.appetite && counts[d.appetite as AppetiteKey] !== undefined)
         counts[d.appetite as AppetiteKey]++
     })
     return counts
-  }, [sortedDays])
+  }, [filteredDays])
 
   // Social engagement distribution
   const engagementDistribution = useMemo(() => {
     const counts: Record<EngagementKey, number> = { active: 0, moderate: 0, minimal: 0 }
-    sortedDays.forEach((d) => {
+    filteredDays.forEach((d) => {
       if (d.socialEngagement && counts[d.socialEngagement as EngagementKey] !== undefined)
         counts[d.socialEngagement as EngagementKey]++
     })
     return counts
-  }, [sortedDays])
+  }, [filteredDays])
 
   // Pain stats
   const painStats = useMemo(() => {
-    const painDays = sortedDays.filter((d) => d.painLevel !== undefined && d.painLevel !== null)
+    const painDays = filteredDays.filter((d) => d.painLevel !== undefined && d.painLevel !== null)
     if (painDays.length === 0) return null
     const values = painDays.map((d) => d.painLevel!)
     return {
@@ -259,57 +266,57 @@ export default function WellnessTrends({ days }: WellnessTrendsProps) {
       max: Math.max(...values),
       days: painDays,
     }
-  }, [sortedDays])
+  }, [filteredDays])
 
   // Category trend directions (first half vs second half)
   const appetiteTrend = useMemo(() => {
-    const mid = Math.floor(sortedDays.length / 2)
+    const mid = Math.floor(filteredDays.length / 2)
     const appetiteScore: Record<string, number> = { good: 3, fair: 2, poor: 1, refused: 0 }
-    const first = sortedDays
+    const first = filteredDays
       .slice(0, mid)
       .filter((d) => d.appetite)
       .map((d) => appetiteScore[d.appetite!] ?? 0)
-    const second = sortedDays
+    const second = filteredDays
       .slice(mid)
       .filter((d) => d.appetite)
       .map((d) => appetiteScore[d.appetite!] ?? 0)
     return computeTrendDirection(first, second)
-  }, [sortedDays])
+  }, [filteredDays])
 
   const engagementTrend = useMemo(() => {
-    const mid = Math.floor(sortedDays.length / 2)
+    const mid = Math.floor(filteredDays.length / 2)
     const engScore: Record<string, number> = { active: 3, moderate: 2, minimal: 1 }
-    const first = sortedDays
+    const first = filteredDays
       .slice(0, mid)
       .filter((d) => d.socialEngagement)
       .map((d) => engScore[d.socialEngagement!] ?? 0)
-    const second = sortedDays
+    const second = filteredDays
       .slice(mid)
       .filter((d) => d.socialEngagement)
       .map((d) => engScore[d.socialEngagement!] ?? 0)
     return computeTrendDirection(first, second)
-  }, [sortedDays])
+  }, [filteredDays])
 
   const painTrend = useMemo(() => {
-    const mid = Math.floor(sortedDays.length / 2)
-    const first = sortedDays
+    const mid = Math.floor(filteredDays.length / 2)
+    const first = filteredDays
       .slice(0, mid)
       .filter((d) => d.painLevel !== undefined)
       .map((d) => d.painLevel!)
-    const second = sortedDays
+    const second = filteredDays
       .slice(mid)
       .filter((d) => d.painLevel !== undefined)
       .map((d) => d.painLevel!)
     return computeTrendDirection(first, second)
-  }, [sortedDays])
+  }, [filteredDays])
 
   // Week-over-week comparison
   const weekComparison = useMemo(() => {
-    if (sortedDays.length < 4) return null
+    if (filteredDays.length < 4) return null
 
-    const mid = Math.floor(sortedDays.length / 2)
-    const thisWeek = sortedDays.slice(mid)
-    const lastWeek = sortedDays.slice(0, mid)
+    const mid = Math.floor(filteredDays.length / 2)
+    const thisWeek = filteredDays.slice(mid)
+    const lastWeek = filteredDays.slice(0, mid)
 
     const avgMoodThis = thisWeek
       .map(moodScoreForDay)
@@ -440,7 +447,7 @@ export default function WellnessTrends({ days }: WellnessTrendsProps) {
       upCount > downCount ? 'improving' : downCount > upCount ? 'declining' : 'stable'
 
     return { rows, trajectory, scoreThisAvg, scoreLastAvg }
-  }, [sortedDays])
+  }, [filteredDays])
 
   // -------------------------------------------------------------------------
   // Render
@@ -536,7 +543,7 @@ export default function WellnessTrends({ days }: WellnessTrendsProps) {
 
             {/* Bar chart */}
             <div className="space-y-2.5">
-              {sortedDays.map((day, idx) => {
+              {filteredDays.map((day, idx) => {
                 const widthPercent = Math.max((day.overallScore / 10) * 100, 4)
                 const barColor =
                   day.overallScore >= 7
@@ -594,7 +601,7 @@ export default function WellnessTrends({ days }: WellnessTrendsProps) {
                     <th className="text-xs font-medium text-navy-500 text-left px-2 pb-2 w-12">
                       &nbsp;
                     </th>
-                    {sortedDays.map((day, idx) => (
+                    {filteredDays.map((day, idx) => (
                       <th
                         key={idx}
                         className="text-xs font-medium text-navy-500 text-center px-1 pb-2"
@@ -611,7 +618,7 @@ export default function WellnessTrends({ days }: WellnessTrendsProps) {
                   {/* AM row */}
                   <tr>
                     <td className="text-xs font-medium text-navy-600 px-2 py-2">AM</td>
-                    {sortedDays.map((day, idx) => (
+                    {filteredDays.map((day, idx) => (
                       <td key={idx} className="text-center px-1 py-2">
                         {day.moodAM ? (
                           <span
@@ -629,7 +636,7 @@ export default function WellnessTrends({ days }: WellnessTrendsProps) {
                   {/* PM row */}
                   <tr>
                     <td className="text-xs font-medium text-navy-600 px-2 py-2">PM</td>
-                    {sortedDays.map((day, idx) => (
+                    {filteredDays.map((day, idx) => (
                       <td key={idx} className="text-center px-1 py-2">
                         {day.moodPM ? (
                           <span
@@ -786,7 +793,7 @@ export default function WellnessTrends({ days }: WellnessTrendsProps) {
 
                   {/* Daily pain dots */}
                   <div className="space-y-1.5">
-                    {sortedDays.map((day, idx) => {
+                    {filteredDays.map((day, idx) => {
                       if (day.painLevel === undefined || day.painLevel === null) return null
                       const pct = (day.painLevel / 10) * 100
                       return (

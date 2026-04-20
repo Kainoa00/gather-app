@@ -1,0 +1,73 @@
+{
+  "residentId": "pcc-r-004",
+  "residentFirstName": "Frank",
+  "agentName": "care_insights",
+  "generatedAt": "2026-04-20T04:16:38.480Z",
+  "scenarioMode": "demo",
+  "output": {
+    "overallAssessment": "Frank had a generally positive day, remaining alert and in good spirits across both wellness checks, though his blood pressure has been consistently elevated throughout the 24-hour window and warrants close monitoring given his cardiac history. His mood has meaningfully improved compared to earlier in the week, and his other vital signs remain stable and within normal limits.",
+    "highlights": [
+      {
+        "title": "Positive Mood and Full Alertness",
+        "detail": "Frank was assessed as 'happy' and 'alert' during his afternoon wellness check, and 'content' and 'alert' in the morning — a welcome and sustained lift in spirits compared to the anxious and agitated readings seen earlier in the week."
+      },
+      {
+        "title": "Heart Rate, Temperature, and Respiratory Rate All Stable",
+        "detail": "Across all five vitals entries in the 24-hour window, Frank's heart rate (71–77 bpm), temperature (97.8–98.5°F), and respiratory rate (16–17 breaths/min) remained comfortably within normal ranges with no concerning fluctuations."
+      },
+      {
+        "title": "Oxygen Saturation Well Within Safe Range",
+        "detail": "Frank's oxygen saturation held between 94–97% across all readings, remaining safely above the clinical threshold of 92% throughout the entire 24-hour period."
+      },
+      {
+        "title": "Systolic Blood Pressure Showing a Modest Downward Trend",
+        "detail": "While systolic BP remains elevated, the most recent reading (142 mmHg at 17:00 on Apr 20) represents a notable step down from the 158 mmHg readings recorded yesterday morning and midday — a directional movement worth acknowledging."
+      },
+      {
+        "title": "Appetite Holding Steady",
+        "detail": "Frank's appetite was rated 'good' in the afternoon and 'fair' in the morning — consistent with his predominantly good appetite across the 7-day trend, with no refusals or 'poor' ratings recorded."
+      }
+    ],
+    "concerns": [
+      {
+        "title": "Persistently Elevated Systolic Blood Pressure",
+        "detail": "All five vitals readings across the 24-hour window show systolic blood pressure above the 140 mmHg threshold (range: 142–158 mmHg). The most recent reading of 142/86 mmHg is the lowest recorded in this period and suggests a slight easing, but consistent elevation across multiple checks is an ongoing pattern. Given Frank's diagnosis of Compensated Congestive Heart Failure, sustained elevated systolic pressure warrants attentive monitoring. Consult the care team for clinical interpretation.",
+        "severity": "warning"
+      },
+      {
+        "title": "Diastolic Blood Pressure Exceeded Threshold on Two Readings (Now Normalized)",
+        "detail": "Two vitals entries on Apr 19 recorded diastolic blood pressure above the 90 mmHg threshold — 94 mmHg at 17:00 and 93 mmHg at 12:00. The subsequent readings on Apr 20 (86 and 88 mmHg) have returned below threshold, suggesting normalization, but the earlier elevation should be noted in the context of the overall BP pattern. Consult the care team for clinical interpretation.",
+        "severity": "info"
+      },
+      {
+        "title": "Four Consecutive Days of Negative Morning Mood (Apr 12–15, Now Resolved)",
+        "detail": "The 7-day wellness trend shows Frank recorded anxious, anxious, agitated, and sad morning moods across April 12–15 — four consecutive negative readings exceeding the three-day threshold for flagging. Since April 16, his mood has largely rebounded (happy, content, happy in three of the last four days), which is encouraging. The recurrence of 'agitated' on Apr 18 is a reminder that the pattern bears watching. Consult the care team for clinical interpretation if negative moods return in succession.",
+        "severity": "warning"
+      },
+      {
+        "title": "Episode of Lethargic Alertness (Apr 19 Morning, Not Repeated)",
+        "detail": "Frank's morning wellness assessment on Apr 19 noted his alertness as 'lethargic,' which contrasts with the 'alert' readings in both of today's assessments. This appears to have been an isolated single observation, but it is documented here for continuity of care awareness.",
+        "severity": "info"
+      },
+      {
+        "title": "No Therapy Sessions Recorded Over 8-Day Period",
+        "detail": "The 7-day wellness trend shows zero therapy sessions logged across all eight days (Apr 12–19). No activity data is available in the 24-hour log to supplement this. This observation is noted for care coordination review.",
+        "severity": "info"
+      }
+    ],
+    "trends": {
+      "trajectory": "stable",
+      "vitalsSummary": "Blood pressure has been the defining vital sign concern over the observed window, with systolic readings ranging from 142 to 158 mmHg — all above the 140 mmHg threshold — and two diastolic readings briefly exceeding 90 mmHg on Apr 19. The most recent readings show a modest downward trend in systolic pressure. Weight has been stable (197.5–198.5 lbs across 48 hours), and heart rate, temperature, oxygen saturation, and respiratory rate have all remained within normal clinical limits throughout.",
+      "moodSummary": "Frank's mood over the 7-day period has been notably variable. The week opened with four consecutive days of negative morning moods (anxious × 2, agitated, sad — Apr 12–15), followed by a clear upswing: happy on Apr 16, content on Apr 17, agitated on Apr 18, and happy again on Apr 19. The 24-hour log reinforces this positive turn, with happy and content moods recorded today alongside full alertness. Overall the trajectory from the low point earlier in the week is encouraging, though the oscillating pattern warrants continued attention.",
+      "activitySummary": "No therapy sessions were recorded on any of the eight days captured in the wellness trend. No activity-specific observations were documented in the 24-hour care log. Sufficient data is not available to assess physical activity levels or engagement in structured programming during this period."
+    },
+    "familyTalkingPoints": [
+      "Frank's mood has taken a real positive turn — he's been described as 'happy' and 'content' today. When you visit or call, ask him what's been bringing him joy lately or what he's been looking forward to.",
+      "No family visits have been recorded in the past eight days. Even a brief phone call, video chat, or in-person visit can be a meaningful boost for Frank's emotional well-being — his mood trend suggests connection may be especially valuable right now.",
+      "Frank's blood pressure has been running higher than the target range across recent checks. The care team is actively monitoring this. It's a great topic to ask the nursing staff about during your next visit so you can stay informed on how it's being tracked.",
+      "His appetite has been good overall — ask Frank about what meals he's been enjoying or whether there are any foods or treats from home he'd love to have. Small personal touches around food can really brighten a resident's day.",
+      "You may want to ask the care team about Frank's current therapy schedule, as no therapy sessions have been logged over the past eight days. Understanding what programming is available and whether Frank is interested in participating could be a helpful conversation to have."
+    ],
+    "nurseNotes": "Patient: Frank, Room 304. Primary Dx: Congestive Heart Failure — Compensated. Report period: Apr 19–20, 2026 (24-hour window) with 7-day trend context.\n\nVITALS: Systolic BP elevated above threshold (>140 mmHg) across all five vitals entries in the 24-hour window (range: 142–158 mmHg). Most recent reading: 142/86 mmHg at 17:00 on 04/20 — lowest systolic recorded in this period, suggesting a modest downward trajectory but not yet normalized. Diastolic exceeded threshold on two entries on 04/19 (93 mmHg at 12:00, 94 mmHg at 17:00); subsequent readings on 04/20 (88 mmHg at 07:00, 86 mmHg at 17:00) returned below threshold. HR stable (71–77 bpm). Temp stable (97.8–98.5°F). O2 sat: 94–97% across all readings, above the 92% threshold. RR: 16–17 breaths/min, within normal limits. Weight: 197.5–198.5 lbs across 48-hour window — relatively stable; no acute fluid retention pattern observed, though trend monitoring is appropriate given CHF dx.\n\nALERTNESS: Lethargic alertness documented on 04/19 at 08:00 morning wellness assessment. Both 04/20 assessments (08:00 and 14:00) returned to 'alert.' Single isolated observation — flag for continuity.\n\nMOOD & APPETITE: Mood positive in current 24-hour window (happy × 2, content × 1). 7-day trend shows 4 consecutive negative morning moods Apr 12–15 (anxious, anxious, agitated, sad), meeting the 3+ consecutive threshold for flagging. Mood has since rebounded with positive readings Apr 16, 17, and 19; agitated noted on Apr 18. Appetite rated 'good' in afternoon, 'fair' in morning today; predominantly good across 7-day trend with no refusals or consecutive poor readings.\n\nPAIN: 7-day trend pain levels range 1–4/10; no reading at or above the 7/10 threshold. No pain documentation in 24-hour care log entries.\n\nACTIVITY / THERAPY: Zero therapy sessions recorded across all 8 days of the wellness trend. No activity entries in the 24-hour log.\n\nFAMILY VISITS: Zero family visits recorded over the 8-day wellness trend period.\n\nPRIORITY FOR INCOMING SHIFT: (1) Continue BP monitoring per current schedule — systolic has been persistently above threshold; document any further changes in trend direction. (2) Maintain alertness level documentation given the isolated lethargic episode on 04/19. (3) Note mood at next wellness check; flag if negative mood returns. Care team should review BP pattern in context of CHF management."
+  }
+}

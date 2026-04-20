@@ -15,9 +15,9 @@ const ROLES: { id: UserRole; label: string; description: string; icon: typeof He
 
 const DEMO_USERS: Record<UserRole, { id: string; name: string; relationship: string }> = {
   primary: { id: '1', name: 'Toshio Shintaku', relationship: 'Son' },
-  admin: { id: 'a1', name: 'Admin User', relationship: 'Administrator' },
-  nurse: { id: 'n1', name: 'Maria Rodriguez', relationship: 'Registered Nurse' },
-  family: { id: '2', name: 'Sarah Wilson', relationship: 'Daughter' },
+  admin: { id: 'a1', name: 'Mary Wilson', relationship: 'Facility Administrator' },
+  nurse: { id: 'n1', name: 'Jane Doe', relationship: 'Primary Nurse' },
+  family: { id: '2', name: 'Kainoa Shintaku', relationship: 'Nephew' },
 }
 
 interface LoginScreenProps {

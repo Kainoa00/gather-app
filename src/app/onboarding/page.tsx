@@ -70,7 +70,18 @@ export default function OnboardingPage() {
   }
 
   function handleComplete() {
-    // TODO: Persist onboarding data to Supabase
+    // Store onboarding context so the app can auto-login as admin
+    try {
+      sessionStorage.setItem(
+        'demo_onboarding',
+        JSON.stringify({
+          facilityName: facility.name || 'Sunrise Care Facility',
+          residentName: resident.name || 'Kenji Shintaku',
+        })
+      )
+    } catch {
+      // sessionStorage unavailable (SSR/private browsing) — proceed anyway
+    }
     router.push('/app')
   }
 

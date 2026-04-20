@@ -1,0 +1,52 @@
+{
+  "generatedAt": "2026-04-20T04:19:49.774Z",
+  "scenarioMode": "demo",
+  "model": "claude-sonnet-4-6",
+  "residents": [
+    {
+      "residentId": "pcc-r-001",
+      "firstName": "Margaret",
+      "lastName": "Chen",
+      "fixtures": [
+        "care-insights-pcc-r-001.json",
+        "shift-report-pcc-r-001.json"
+      ]
+    },
+    {
+      "residentId": "pcc-r-002",
+      "firstName": "Robert",
+      "lastName": "Johnson",
+      "fixtures": [
+        "care-insights-pcc-r-002.json",
+        "shift-report-pcc-r-002.json"
+      ]
+    },
+    {
+      "residentId": "pcc-r-003",
+      "firstName": "Eleanor",
+      "lastName": "Martinez",
+      "fixtures": [
+        "care-insights-pcc-r-003.json",
+        "shift-report-pcc-r-003.json"
+      ]
+    },
+    {
+      "residentId": "pcc-r-004",
+      "firstName": "Frank",
+      "lastName": "Davis",
+      "fixtures": [
+        "care-insights-pcc-r-004.json",
+        "shift-report-pcc-r-004.json"
+      ]
+    },
+    {
+      "residentId": "pcc-r-005",
+      "firstName": "Dorothy",
+      "lastName": "Williams",
+      "fixtures": [
+        "care-insights-pcc-r-005.json",
+        "shift-report-pcc-r-005.json"
+      ]
+    }
+  ]
+}

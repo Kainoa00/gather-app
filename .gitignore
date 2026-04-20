@@ -40,3 +40,15 @@ next-env.d.ts
 *.mp4
 *.zip
 *.docx
+
+# Unrelated working directories (receipts, extracted archives, side projects)
+/carebridge-connect/
+/carebridge-unpacked/
+/familylink-mvp-extracted/
+/telegram-bot/
+
+# Claude workspace
+/.claude/plans/
+/.claude/worktrees/
+/.claude/settings.local.json
+/.claude/launch.json

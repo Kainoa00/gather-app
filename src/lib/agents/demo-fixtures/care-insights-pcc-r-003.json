@@ -1,0 +1,74 @@
+{
+  "residentId": "pcc-r-003",
+  "residentFirstName": "Eleanor",
+  "agentName": "care_insights",
+  "generatedAt": "2026-04-20T04:13:32.403Z",
+  "scenarioMode": "demo",
+  "output": {
+    "overallAssessment": "Eleanor had a generally calm and stable day in Room 215, presenting as alert and content with vitals remaining largely within normal ranges; ongoing care team monitoring continues following a recent fall incident and persistent right hip discomfort.",
+    "highlights": [
+      {
+        "title": "Consistently Positive Mood",
+        "detail": "Eleanor has maintained a 'content' mood for five consecutive days (April 15–19), and today she was assessed as alert — a welcome improvement from the lethargic alertness recorded yesterday."
+      },
+      {
+        "title": "Heart Rate and Temperature Remain Stable",
+        "detail": "All four vital readings over the past 48 hours showed a steady heart rate between 77–79 bpm and a normal temperature range of 97.7–98.5°F, both comfortably within healthy parameters."
+      },
+      {
+        "title": "Blood Pressure Well-Controlled",
+        "detail": "Eleanor's blood pressure across the past two days has remained in a safe range — systolic 130–137 mmHg and diastolic 79–86 mmHg — with no threshold-level elevations observed."
+      },
+      {
+        "title": "Overall Wellness Score Holding Steady",
+        "detail": "Eleanor's overall wellness score has held at 7.0 for four consecutive days in the trend data (April 16–19), up from a low of 5.5 on April 13, suggesting a stabilizing pattern."
+      }
+    ],
+    "concerns": [
+      {
+        "title": "Fall Incident — Increased Monitoring Protocol Active",
+        "detail": "Nursing notes from both April 19 and April 20 reference an active fall incident monitoring protocol. The circumstances and timing of the fall are not documented in the provided log entries. This remains an active safety consideration. Consult the care team for clinical interpretation.",
+        "severity": "critical"
+      },
+      {
+        "title": "Persistent Right Hip Discomfort",
+        "detail": "Eleanor has reported right hip discomfort across both nursing assessments (April 19 and April 20), noted in the context of post-fall monitoring. The discomfort appears ongoing across at least a 48-hour window. Consult the care team for clinical interpretation.",
+        "severity": "warning"
+      },
+      {
+        "title": "Afternoon Oxygen Saturation Decline",
+        "detail": "Eleanor's oxygen saturation measured 96% during the morning reading (07:00) but declined to 93% by the afternoon check (17:00) on April 20. While 93% is above the critical threshold of 92%, the 3-point intraday drop is notable given her primary COPD diagnosis and cardiac history. Consult the care team for clinical interpretation.",
+        "severity": "warning"
+      },
+      {
+        "title": "No Therapy Sessions Documented — 8 Consecutive Days",
+        "detail": "The 7-day wellness trend shows zero therapy sessions logged across all eight tracked days (April 12–19). Given Eleanor's COPD, cardiac history, and active post-fall monitoring protocol, the absence of any documented PT or OT engagement is worth reviewing. Consult the care team for clinical interpretation.",
+        "severity": "warning"
+      },
+      {
+        "title": "Appetite Variability",
+        "detail": "Eleanor's appetite was noted as 'fair' today compared to 'good' yesterday. The 7-day trend also shows two days of 'refused' appetite (April 12 and April 16). Although these refused days are non-consecutive and do not cross the clinical threshold, the pattern warrants continued monitoring.",
+        "severity": "info"
+      },
+      {
+        "title": "Minor Weight Fluctuation Over 48 Hours",
+        "detail": "Eleanor's weight varied between 154.6 and 155.3 lbs across four readings over the past two days — a range of 0.7 lbs. While this may reflect normal variation, any sustained upward trend in weight should be noted given her cardiac history.",
+        "severity": "info"
+      }
+    ],
+    "trends": {
+      "trajectory": "stable",
+      "vitalsSummary": "Vitals have been consistently stable over the tracked period. Blood pressure has remained below the 140/90 mmHg threshold throughout, heart rate steady in the upper 70s bpm, and respiratory rate within normal limits at 16–18 breaths/min. Oxygen saturation has ranged from 93–96%, with a notable afternoon dip to 93% on April 20 that warrants continued close monitoring given Eleanor's COPD and cardiac history. Temperature has remained within normal range across all readings.",
+      "moodSummary": "Eleanor's mood has trended positively over the 8-day period. After a brief stretch of agitated mood (April 13) and anxious mood (April 14) — two consecutive difficult days but below the 3-day threshold for a clinical flag — her mood has been recorded as 'content' for five consecutive days through April 19. Alertness improved from lethargic on April 19 to alert on April 20, which is an encouraging development.",
+      "activitySummary": "No therapy sessions have been documented across all eight tracked days (April 12–19), and no family visits have been recorded during this same period. Overall wellness scores have been relatively stable, ranging from 5.5 to 7.0, with the most recent four days all scoring 7.0. Pain levels have been intermittent — peaking at 5/10 on April 19 — and while they remain below the critical threshold of 7/10, they have been a recurring presence throughout the week."
+    },
+    "familyTalkingPoints": [
+      "Eleanor has been in a content, positive mood for several days running — this is a wonderful time to ask her what's been bringing her joy and which parts of her daily routine she looks forward to most.",
+      "There was a fall incident noted in Eleanor's care record, and the nursing team has increased monitoring as a precaution. Connecting directly with her care team can give you a fuller picture of what happened and what steps are being taken to keep her safe.",
+      "Eleanor has mentioned some right hip discomfort since the fall. Checking in with her about how she's feeling, and simply letting her know that you're aware and thinking of her, can be deeply reassuring during a period of increased monitoring.",
+      "It has been 8 days since a family visit was recorded in Eleanor's care log. Even a brief in-person visit, phone call, or video chat can provide a meaningful emotional lift — her care team has noted she is alert and engaged today, which makes it a great time to connect.",
+      "Eleanor's appetite has had some ups and downs this week. Asking her whether there are foods she's been craving, or whether anything about mealtimes could feel more enjoyable, is a great way to advocate for her comfort and help the care team tailor her experience."
+    ],
+    "nurseNotes": "Resident: Eleanor, Room 215 | Primary Dx: COPD with Cardiac History | Report Date: 2026-04-20\n\nFALL PROTOCOL ACTIVE: Increased monitoring is in place per nursing notes on both 04/19 and 04/20. Resident reports persistent right hip discomfort across both assessment periods. Confirm that fall injury documentation, pain assessment scores, and any physician notifications are current and communicated to the oncoming shift. No pain score is captured in today's structured care log entries — verify that a formal pain assessment was completed and documented.\n\nVITALS SUMMARY (48 hrs, 4 readings):\n— BP: 130–137 / 79–86 mmHg; all within normal limits, no threshold breaches.\n— HR: 77–79 bpm; stable throughout.\n— Temp: 97.7–98.5°F; within range. Single low reading of 97.7°F on 04/19 07:00 — isolated, no pattern established, but note for trending.\n— RR: 16–18 breaths/min; within normal limits.\n— O2 Saturation: 96% at 07:00 → 93% at 17:00 on 04/20 — a 3-point intraday decline in a COPD/cardiac resident. Does not breach the 92% critical threshold but warrants close reassessment at the next vitals check and proactive notification to the attending physician if the decline continues.\n\nWEIGHT: Ranging 154.6–155.3 lbs across four readings over 48 hours. Continue routine weight monitoring; flag any sustained upward trend to the attending physician given cardiac history and associated fluid retention risk.\n\nMOOD/ALERTNESS: Lethargic on 04/19, alert on 04/20 — improvement noted. Mood has been consistently 'content' for 5+ days per trend data. Continue to monitor alertness at each assessment.\n\nAPPETITE: 'Good' on 04/19; 'fair' on 04/20. Trend data shows two non-consecutive 'refused' days (04/12 and 04/16) over the past 8 days. Does not meet the 2-consecutive threshold for a clinical flag, but appetite should be monitored closely at upcoming meals.\n\nPAIN: Trend data records a pain level of 5/10 on 04/19. No structured pain score is present in today's care log. Confirm pain assessment was completed today and document; escalate if pain is trending upward in the context of the fall and reported hip discomfort.\n\nTHERAPY: Zero therapy sessions documented over 8 tracked days. Recommend review with PT/OT and the care coordinator to determine whether a therapy plan is indicated or was recently discontinued, particularly given the active fall protocol.\n\nFAMILY ENGAGEMENT: No family visits recorded in the past 8 days. Consider a proactive outreach to Eleanor's listed family contact to share a care update and encourage a visit or call."
+  }
+}

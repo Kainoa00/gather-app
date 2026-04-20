@@ -545,11 +545,11 @@ export function useVault(patientId: string = DEMO_PATIENT_ID) {
     }
 
     const [
-      { data: cards },
-      { data: meds },
-      { data: providers },
-      { data: facility },
-      { data: docs },
+      { data: cards, error: cardsErr },
+      { data: meds, error: medsErr },
+      { data: providers, error: providersErr },
+      { data: facility, error: facilityErr },
+      { data: docs, error: docsErr },
     ] = await Promise.all([
       supabase.from('insurance_cards').select('*').eq('patient_id', patientId),
       supabase.from('medications').select('*').eq('patient_id', patientId).eq('active', true),
@@ -557,6 +557,11 @@ export function useVault(patientId: string = DEMO_PATIENT_ID) {
       supabase.from('facility_info').select('*').eq('patient_id', patientId).single(),
       supabase.from('vault_documents').select('*').eq('patient_id', patientId).order('uploaded_at', { ascending: false }),
     ])
+
+    const vaultErrors = [cardsErr, medsErr, providersErr, facilityErr, docsErr].filter(Boolean)
+    if (vaultErrors.length) {
+      console.error('[useVault] Fetch errors:', vaultErrors.map(e => e?.message))
+    }
 
     setVault({
       insuranceCards: (cards || []).map(c => ({

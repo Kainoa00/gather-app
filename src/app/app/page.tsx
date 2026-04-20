@@ -21,6 +21,10 @@ import ErrorBoundary from '@/components/ErrorBoundary'
 import ResidentDirectory from '@/components/ResidentDirectory'
 import AddResidentModal, { NewResidentData } from '@/components/AddResidentModal'
 import { isDemoMode, DEMO_PATIENT_ID } from '@/lib/supabase'
+import { USE_PCC } from '@/lib/config'
+import { usePCCData } from '@/lib/hooks/usePCCData'
+import SyncIndicator from '@/components/SyncIndicator'
+import { PCC_RESIDENTS } from '@/lib/pcc/mock/residents'
 import {
   usePatient,
   useMembers,
@@ -50,7 +54,7 @@ import {
 import { CareCircleMember, CalendarEvent, Vault, LogEntry, FeedPost, UserRole, Visit, Notification, FacilityReviewEntry } from '@/types'
 import { Heart, Shield, Calendar, Users, ClipboardList, Sparkles, Download, Lock, CheckCircle2, MessageSquare, TrendingUp, Star, CheckSquare } from 'lucide-react'
 import { format } from 'date-fns'
-import { demoGoals, demoAllResidents, ResidentSnapshot } from '@/lib/demo-data'
+import { demoGoals, demoAllResidents, demoPatient, ResidentSnapshot } from '@/lib/demo-data'
 import { auditPatient } from '@/lib/audit'
 import {
   canUseQuickActions,
@@ -80,11 +84,27 @@ export default function Home() {
 
   const [selectedPatientId, setSelectedPatientId] = useState(DEMO_PATIENT_ID)
   const [selectedPatientName, setSelectedPatientName] = useState('Yuki Tanaka')
+  const [pccResidentId, setPccResidentId] = useState('pcc-r-001')
+  const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null)
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showAddResidentModal, setShowAddResidentModal] = useState(false)
   const [demoResidents, setDemoResidents] = useState<ResidentSnapshot[]>(demoAllResidents)
+
+  // Onboarding bridge: auto-login as admin when arriving from the onboarding flow
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem('demo_onboarding')
+      if (raw) {
+        sessionStorage.removeItem('demo_onboarding')
+        setCurrentUser({ id: 'a1', name: 'Mary Wilson', role: 'admin', relationship: 'Facility Administrator' })
+        setActiveTab('home')
+      }
+    } catch {
+      // sessionStorage unavailable — ignore
+    }
+  }, [])
 
   const showError = (msg: string) => {
     setErrorMsg(msg)
@@ -117,15 +137,45 @@ export default function Home() {
   const [logSubTab, setLogSubTab] = useState<'timeline' | 'trends' | 'vitals' | 'wellness' | 'progress'>('timeline')
 
   // Supabase data hooks (fall back to demo data when isDemoMode)
-  const { patient } = usePatient(selectedPatientId)
+  const { patient: _patient } = usePatient(selectedPatientId)
   const { members, loading: membersLoading, setMembers, refetch: refetchMembers } = useMembers(selectedPatientId)
-  const { events, loading: eventsLoading, setEvents, refetch: refetchEvents } = useEvents(selectedPatientId)
-  const { logEntries, loading: logsLoading, setLogEntries, refetch: refetchLogs } = useLogEntries(selectedPatientId)
+  const { events: _events, loading: _eventsLoading, setEvents, refetch: refetchEvents } = useEvents(selectedPatientId)
+  const { logEntries: _logEntries, loading: _logsLoading, setLogEntries, refetch: refetchLogs } = useLogEntries(selectedPatientId)
   const { posts, loading: postsLoading, setPosts, refetch: refetchPosts } = usePosts(selectedPatientId)
   const { visits, setVisits, refetch: refetchVisits } = useVisits(selectedPatientId)
   const { notifications, setNotifications, refetch: refetchNotifications } = useNotifications(selectedPatientId)
-  const { vault, setVault, refetch: refetchVault } = useVault(selectedPatientId)
-  const { wellnessDays } = useWellnessDays(selectedPatientId)
+  const { vault: _vault, setVault, refetch: refetchVault } = useVault(selectedPatientId)
+  const { wellnessDays: _wellnessDays } = useWellnessDays(selectedPatientId)
+
+  // PCC data hooks — only fetches when USE_PCC is enabled
+  const pccData = usePCCData(USE_PCC ? pccResidentId : '')
+
+  useEffect(() => {
+    if (USE_PCC && !pccData.loading && !pccData.error) setLastSyncTime(new Date())
+  }, [pccData.loading, pccData.error])
+
+  // Data selectors — PCC takes precedence when USE_PCC is enabled
+  const patient = USE_PCC ? pccData.patient : _patient
+  const logEntries = USE_PCC ? pccData.logEntries : _logEntries
+  const events = USE_PCC ? pccData.events : _events
+  const wellnessDays = USE_PCC ? pccData.wellnessDays : _wellnessDays
+  const logsLoading = USE_PCC ? pccData.loading : _logsLoading
+  const eventsLoading = USE_PCC ? pccData.loading : _eventsLoading
+  const vault = USE_PCC ? { ..._vault, medications: pccData.medications } : _vault
+
+  // PCC resident list for admin/nurse directory and selector
+  const pccResidentSnapshots: ResidentSnapshot[] = PCC_RESIDENTS.map(r => ({
+    id: r.residentId,
+    name: `${r.firstName} ${r.lastName}`,
+    roomNumber: r.roomNumber ?? 'Unknown',
+    primaryDiagnosis: r.primaryDiagnosis ?? 'No diagnosis recorded',
+    admissionDate: new Date(r.admissionDate),
+    dateOfBirth: new Date(r.dateOfBirth),
+    lastVitals: { bp: '—', heartRate: 0, o2: 0, recordedAt: new Date() },
+    currentMood: 'good' as const,
+    status: r.status === 'current' ? 'active' as const : 'discharged' as const,
+  }))
+  const displayResidents = USE_PCC ? pccResidentSnapshots : demoResidents
 
   // ==========================================
   // Handler functions (demo mode = local state, Supabase mode = DB + refetch)
@@ -542,14 +592,21 @@ export default function Home() {
       {/* Resident Selector for admin and nurse roles */}
       {(currentUserRole === 'admin' || currentUserRole === 'nurse') && (
         <ResidentSelector
-          currentPatientId={selectedPatientId}
+          currentPatientId={USE_PCC ? pccResidentId : selectedPatientId}
           currentPatientName={selectedPatientName}
           onSelectResident={(id, name) => {
-            setSelectedPatientId(id)
+            if (USE_PCC) setPccResidentId(id)
+            else setSelectedPatientId(id)
             setSelectedPatientName(name)
           }}
           userRole={currentUserRole}
           onAddResident={() => setShowAddResidentModal(true)}
+          residentList={USE_PCC ? pccResidentSnapshots.map(r => ({
+            id: r.id,
+            name: r.name,
+            room_number: r.roomNumber,
+            primary_diagnosis: r.primaryDiagnosis,
+          })) : undefined}
         />
       )}
 
@@ -570,6 +627,11 @@ export default function Home() {
                     family: { id: '2', name: 'Kainoa Shintaku', role: 'family', relationship: 'Nephew' },
                   }
                   setCurrentUser(roleMap[role])
+                  // Lock family/primary to their assigned resident (pcc-r-001 in demo)
+                  if (USE_PCC && (role === 'family' || role === 'primary')) {
+                    setPccResidentId('pcc-r-001')
+                    setSelectedPatientName('Margaret Chen')
+                  }
                 }}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                   currentUserRole === role
@@ -581,7 +643,8 @@ export default function Home() {
               </button>
             ))}
           </div>
-          {!isDemoMode && (
+          {USE_PCC && <SyncIndicator lastSyncTime={lastSyncTime} />}
+          {!isDemoMode && !USE_PCC && (
             <span className="text-xs text-mint-600 font-medium px-2 py-1 bg-mint-50 rounded-lg">
               Connected to Supabase
             </span>
@@ -591,7 +654,7 @@ export default function Home() {
         {activeTab === 'home' && (
           <ErrorBoundary>
             <HomeView
-              patient={patient}
+              patient={patient ?? demoPatient}
               logEntries={logEntries}
               events={events}
               visits={visits}
@@ -833,14 +896,14 @@ export default function Home() {
 
         {activeTab === 'settings' && currentUserRole === 'admin' && (
           <ErrorBoundary>
-            <FacilitySettings />
+            <FacilitySettings onImportComplete={() => setActiveTab('residents')} />
           </ErrorBoundary>
         )}
 
         {activeTab === 'residents' && (currentUserRole === 'admin' || currentUserRole === 'nurse') && (
           <ErrorBoundary>
             <ResidentDirectory
-              residents={demoResidents}
+              residents={displayResidents}
               currentUserRole={currentUserRole}
               onViewResident={(id, name) => {
                 setSelectedPatientId(id)
@@ -879,8 +942,8 @@ export default function Home() {
             <Sparkles className="h-4 w-4" />
           </div>
           <div className="text-sm">
-            <p className="font-medium">{isDemoMode ? 'Demo Mode' : 'Live Mode'}</p>
-            <p className="text-navy-200 text-xs">{isDemoMode ? 'Data stored locally' : 'Connected to Supabase'}</p>
+            <p className="font-medium">{USE_PCC ? 'PCC Demo' : isDemoMode ? 'Grant Demo' : 'Live Mode'}</p>
+            <p className="text-navy-200 text-xs">{USE_PCC ? 'PointClickCare data' : isDemoMode ? 'Interactive preview' : 'Connected to Supabase'}</p>
           </div>
         </div>
       </div>
@@ -896,7 +959,7 @@ export default function Home() {
 
       {/* AI Chat Assistant */}
       <ChatBot
-        patientInfo={patient}
+        patientInfo={patient ?? demoPatient}
         logEntries={logEntries.filter(e => getVisibleLogCategories(currentUserRole).includes(e.category))}
         events={events.filter(e => getVisibleCalendarEventTypes(currentUserRole).includes(e.type))}
         vault={canViewMedications(currentUserRole) ? vault : { ...vault, medications: [], providers: [], insuranceCards: [] }}

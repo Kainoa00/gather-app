@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import { isDemoMode } from '@/lib/supabase'
 
 // ── Types ──────────────────────────────────────────────────────────
 
@@ -55,6 +56,9 @@ export default function OnboardingPage() {
     { email: '', role: ROLES[0] },
   ])
 
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
+
   function addStaffRow() {
     setStaffInvites((prev) => [...prev, { email: '', role: ROLES[0] }])
   }
@@ -69,20 +73,56 @@ export default function OnboardingPage() {
     setStaffInvites((prev) => prev.filter((_, i) => i !== index))
   }
 
-  function handleComplete() {
-    // Store onboarding context so the app can auto-login as admin
+  async function handleComplete() {
+    if (submitting) return
+    setSubmitError(null)
+
+    // Always cache what the user entered so /app can show a welcome toast
+    // and the Settings tab can reflect their facility name even when demo
+    // data is layered underneath.
     try {
-      sessionStorage.setItem(
+      localStorage.setItem(
         'demo_onboarding',
         JSON.stringify({
           facilityName: facility.name || 'Sunrise Care Facility',
           residentName: resident.name || 'Kenji Shintaku',
-        })
+          completedAt: new Date().toISOString(),
+        }),
       )
     } catch {
-      // sessionStorage unavailable (SSR/private browsing) — proceed anyway
+      // localStorage unavailable (SSR/private browsing) — proceed anyway
     }
-    router.push('/app')
+
+    // In demo mode there is no authenticated Supabase session to write
+    // against. Skip the API call and land directly in /app with the
+    // localStorage hint.
+    if (isDemoMode) {
+      router.push('/app')
+      return
+    }
+
+    setSubmitting(true)
+    try {
+      const res = await fetch('/api/onboarding', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ facility, resident, staffInvites }),
+      })
+      if (!res.ok) {
+        const { error } = (await res.json().catch(() => ({ error: null }))) as {
+          error?: string
+        }
+        throw new Error(error || `Request failed with ${res.status}`)
+      }
+      router.push('/app')
+    } catch (err) {
+      setSubmitError(
+        err instanceof Error
+          ? err.message
+          : 'Could not complete setup. Check your connection and try again.',
+      )
+      setSubmitting(false)
+    }
   }
 
   // ── Shared field styles ──────────────────────────────────────────
@@ -367,24 +407,31 @@ export default function OnboardingPage() {
                 + Add another
               </button>
 
+              {submitError && (
+                <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg mt-4">{submitError}</p>
+              )}
+
               <div className="flex gap-3 mt-6">
                 <button
                   onClick={() => setStep(2)}
-                  className="btn-secondary flex-1 text-center text-sm"
+                  disabled={submitting}
+                  className="btn-secondary flex-1 text-center text-sm disabled:opacity-60"
                 >
                   Back
                 </button>
                 <button
                   onClick={handleComplete}
-                  className="btn-primary flex-1 text-center"
+                  disabled={submitting}
+                  className="btn-primary flex-1 text-center disabled:opacity-60"
                 >
-                  Finish setup
+                  {submitting ? 'Setting up…' : 'Finish setup'}
                 </button>
               </div>
 
               <button
                 onClick={handleComplete}
-                className="w-full text-center text-sm mt-3 hover:underline"
+                disabled={submitting}
+                className="w-full text-center text-sm mt-3 hover:underline disabled:opacity-60"
                 style={{ color: 'var(--navy-400)' }}
               >
                 Skip for now

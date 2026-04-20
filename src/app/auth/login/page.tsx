@@ -37,15 +37,31 @@ function LoginForm() {
 
     try {
       const supabase = getSupabaseBrowserClient()
-      const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
+      const timeout = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('TIMEOUT')), 15_000),
+      )
+      const { error: authError } = await Promise.race([
+        supabase.auth.signInWithPassword({ email, password }),
+        timeout,
+      ])
       if (authError) {
-        setError(authError.message)
+        const msg = authError.message.toLowerCase()
+        if (msg.includes('invalid') || msg.includes('credentials')) {
+          setError('Invalid email or password. Please try again.')
+        } else {
+          setError(authError.message)
+        }
         setLoading(false)
       } else {
         router.push(redirect)
       }
-    } catch {
-      setError('Something went wrong. Please try again.')
+    } catch (err) {
+      const isTimeout = err instanceof Error && err.message === 'TIMEOUT'
+      setError(
+        isTimeout
+          ? 'Sign-in is taking longer than expected. Check your connection and try again.'
+          : 'Could not reach the sign-in service. Check your connection and try again.',
+      )
       setLoading(false)
     }
   }

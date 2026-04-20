@@ -9,6 +9,9 @@ export type AuditAction =
   | 'view_incidents'
   | 'view_log_entry'
   | 'view_vault'
+  | 'switch_resident'
+  | 'switch_role'
+  | 'open_chatbot'
   | 'add_member'
   | 'add_event'
   | 'add_log_entry'
@@ -132,3 +135,24 @@ export const auditLogEntryView = (
     resourceId: entryId,
     metadata: { category },
   })
+
+// Generic helper for non-view actions (role switch, export, chatbot open).
+// Fire-and-forget — do not block the UI on audit writes. Failures are
+// logged inside logAuditEvent and never surfaced to the user.
+export function auditAction(
+  action: AuditAction,
+  actorId: string,
+  actorName: string,
+  actorRole: string,
+  patientId: string = DEMO_PATIENT_ID,
+  metadata?: Record<string, unknown>,
+): void {
+  void logAuditEvent({
+    patientId,
+    actorId,
+    actorName,
+    actorRole,
+    action,
+    metadata,
+  })
+}

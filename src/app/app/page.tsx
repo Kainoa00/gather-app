@@ -55,7 +55,7 @@ import { CareCircleMember, CalendarEvent, Vault, LogEntry, FeedPost, UserRole, V
 import { Heart, Shield, Calendar, Users, ClipboardList, Sparkles, Download, Lock, CheckCircle2, MessageSquare, TrendingUp, Star, CheckSquare } from 'lucide-react'
 import { format } from 'date-fns'
 import { demoGoals, demoAllResidents, demoPatient, ResidentSnapshot } from '@/lib/demo-data'
-import { auditPatient } from '@/lib/audit'
+import { auditPatient, auditAction } from '@/lib/audit'
 import {
   canUseQuickActions,
   canViewMedications,
@@ -93,16 +93,28 @@ export default function Home() {
   const [demoResidents, setDemoResidents] = useState<ResidentSnapshot[]>(demoAllResidents)
 
   // Onboarding bridge: auto-login as admin when arriving from the onboarding flow
+  // and surface a one-time welcome toast with the facility name the user entered.
   useEffect(() => {
     try {
-      const raw = sessionStorage.getItem('demo_onboarding')
-      if (raw) {
-        sessionStorage.removeItem('demo_onboarding')
+      const raw = localStorage.getItem('demo_onboarding')
+      if (!raw) return
+      const parsed = JSON.parse(raw) as { facilityName?: string; completedAt?: string }
+      // Only bridge once per onboarding completion. Session bridging still fires
+      // for the very next app load; subsequent reloads just show the toast.
+      const completedRecently =
+        parsed.completedAt &&
+        Date.now() - new Date(parsed.completedAt).getTime() < 2 * 60 * 1000
+      if (completedRecently) {
         setCurrentUser({ id: 'a1', name: 'Mary Wilson', role: 'admin', relationship: 'Facility Administrator' })
         setActiveTab('home')
+        // Strip completedAt so the bridge doesn't re-fire on refresh.
+        localStorage.setItem(
+          'demo_onboarding',
+          JSON.stringify({ ...parsed, completedAt: null }),
+        )
       }
     } catch {
-      // sessionStorage unavailable — ignore
+      // localStorage unavailable — ignore
     }
   }, [])
 
@@ -153,6 +165,19 @@ export default function Home() {
   useEffect(() => {
     if (USE_PCC && !pccData.loading && !pccData.error) setLastSyncTime(new Date())
   }, [pccData.loading, pccData.error])
+
+  // HIPAA §164.312(b) — audit PHI views when user lands on sensitive tabs.
+  useEffect(() => {
+    if (activeTab === 'vault') {
+      auditAction(
+        'view_vault',
+        currentUserId,
+        currentUserName,
+        currentUserRole,
+        selectedPatientId,
+      )
+    }
+  }, [activeTab, currentUserId, currentUserName, currentUserRole, selectedPatientId])
 
   // Data selectors — PCC takes precedence when USE_PCC is enabled
   const patient = USE_PCC ? pccData.patient : _patient
@@ -595,6 +620,10 @@ export default function Home() {
           currentPatientId={USE_PCC ? pccResidentId : selectedPatientId}
           currentPatientName={selectedPatientName}
           onSelectResident={(id, name) => {
+            auditAction('switch_resident', currentUserId, currentUserName, currentUserRole, id, {
+              fromResident: USE_PCC ? pccResidentId : selectedPatientId,
+              toResident: id,
+            })
             if (USE_PCC) setPccResidentId(id)
             else setSelectedPatientId(id)
             setSelectedPatientName(name)
@@ -626,7 +655,12 @@ export default function Home() {
                     nurse: { id: 'n1', name: 'Jane Doe', role: 'nurse', relationship: 'Primary Nurse' },
                     family: { id: '2', name: 'Kainoa Shintaku', role: 'family', relationship: 'Nephew' },
                   }
-                  setCurrentUser(roleMap[role])
+                  const next = roleMap[role]
+                  auditAction('switch_role', next.id, next.name, role, selectedPatientId, {
+                    fromRole: currentUserRole,
+                    toRole: role,
+                  })
+                  setCurrentUser(next)
                   // Lock family/primary to their assigned resident (pcc-r-001 in demo)
                   if (USE_PCC && (role === 'family' || role === 'primary')) {
                     setPccResidentId('pcc-r-001')
@@ -929,7 +963,16 @@ export default function Home() {
 
       {/* Export Button - positioned above chatbot */}
       <button
-        onClick={() => setShowExportModal(true)}
+        onClick={() => {
+          auditAction(
+            'export_data',
+            currentUserId,
+            currentUserName,
+            currentUserRole,
+            selectedPatientId,
+          )
+          setShowExportModal(true)
+        }}
         className="fixed bottom-36 md:bottom-24 right-6 p-3.5 bg-gradient-to-br from-navy-600 to-navy-700 text-white rounded-2xl shadow-float hover:shadow-float hover:-translate-y-0.5 transition-all duration-300 z-30"
         title="Export & Share"
       >

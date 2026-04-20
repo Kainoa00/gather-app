@@ -655,6 +655,7 @@ export default function Home() {
           <ErrorBoundary>
             <HomeView
               patient={patient ?? demoPatient}
+              residentId={USE_PCC ? pccResidentId : selectedPatientId}
               logEntries={logEntries}
               events={events}
               visits={visits}

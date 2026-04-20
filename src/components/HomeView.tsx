@@ -13,12 +13,15 @@ import {
   CheckSquare,
   ChevronRight,
   Utensils,
+  AlertCircle,
+  Lightbulb,
 } from 'lucide-react'
 import { PatientInfo, LogEntry, CalendarEvent, Visit, CareCircleMember, UserRole, FacilityReviewEntry } from '@/types'
 import { differenceInDays, format, isToday, isTomorrow, addDays, formatDistanceToNow } from 'date-fns'
 import { demoGoals } from '@/lib/demo-data'
 import FacilityReview from './FacilityReview'
 import { canViewExactVitals, canViewMoodDetails } from '@/lib/permissions'
+import { useCareInsights } from '@/lib/hooks/useCareInsights'
 
 // ---------------------------------------------------------------------------
 // Props
@@ -26,6 +29,7 @@ import { canViewExactVitals, canViewMoodDetails } from '@/lib/permissions'
 
 interface HomeViewProps {
   patient: PatientInfo
+  residentId?: string
   logEntries: LogEntry[]
   events: CalendarEvent[]
   visits: Visit[]
@@ -204,6 +208,7 @@ function generateDigestSummary(
 
 export default function HomeView({
   patient,
+  residentId,
   logEntries,
   events,
   visits,
@@ -213,6 +218,7 @@ export default function HomeView({
   onAddReview,
   onNavigateToCalendar,
 }: HomeViewProps) {
+  const careInsights = useCareInsights(residentId)
   const [homeTab, setHomeTab] = useState<'log' | 'plan' | 'progress'>('log')
   const [showReviewModal, setShowReviewModal] = useState(false)
 
@@ -533,26 +539,110 @@ export default function HomeView({
       {/* RIGHT MAIN AREA                                                   */}
       {/* ================================================================= */}
       <main className="flex-1 min-w-0 space-y-5">
-        {/* ----- Daily Digest Card ----- */}
+        {/* ----- Daily Digest / Care Insights Card ----- */}
         <div className="card-glass p-6">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-xl bg-primary-50">
                 <Sparkles className="h-4 w-4 text-primary-500" />
               </div>
-              <h3 className="text-sm font-semibold text-navy-900">Daily Digest</h3>
+              <h3 className="text-sm font-semibold text-navy-900">
+                {careInsights.insight ? 'Care Insights' : 'Daily Digest'}
+              </h3>
             </div>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary-100 text-primary-600 text-[10px] font-semibold rounded-full uppercase tracking-wider">
               <Sparkles className="h-3 w-3" />
-              AI Generated · Today
+              {careInsights.insight && careInsights.generatedAt
+                ? `AI · ${formatDistanceToNow(new Date(careInsights.generatedAt), { addSuffix: true })}`
+                : 'AI Generated · Today'}
             </span>
           </div>
 
-          <blockquote className="relative pl-4 border-l-3 border-primary-300" style={{ borderLeftWidth: '3px' }}>
-            <p className="text-navy-700 text-sm leading-relaxed italic">
-              &ldquo;{digestSummary}&rdquo;
-            </p>
-          </blockquote>
+          {careInsights.insight ? (
+            <div className="space-y-5">
+              {/* Overall assessment — the hero paragraph */}
+              <blockquote className="relative pl-4 border-l-[3px] border-primary-300">
+                <p className="text-navy-700 text-sm leading-relaxed">
+                  {careInsights.insight.overallAssessment}
+                </p>
+              </blockquote>
+
+              {/* Highlights — top 2 */}
+              {careInsights.insight.highlights.length > 0 && (
+                <div>
+                  <h4 className="text-xs font-semibold text-navy-900 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <Lightbulb className="h-3.5 w-3.5 text-mint-500" />
+                    Highlights
+                  </h4>
+                  <ul className="space-y-2">
+                    {careInsights.insight.highlights.slice(0, 2).map((h, i) => (
+                      <li key={i} className="rounded-xl bg-mint-50/60 border border-mint-100 p-3">
+                        <p className="text-xs font-semibold text-navy-900 mb-0.5">{h.title}</p>
+                        <p className="text-xs text-navy-600 leading-relaxed">{h.detail}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Concerns — top 2 warnings/criticals first, or top 2 overall */}
+              {careInsights.insight.concerns.length > 0 && (
+                <div>
+                  <h4 className="text-xs font-semibold text-navy-900 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <AlertCircle className="h-3.5 w-3.5 text-amber-500" />
+                    Worth monitoring
+                  </h4>
+                  <ul className="space-y-2">
+                    {[...careInsights.insight.concerns]
+                      .sort((a, b) => {
+                        const weight = (s: string) => (s === 'critical' ? 0 : s === 'warning' ? 1 : 2)
+                        return weight(a.severity) - weight(b.severity)
+                      })
+                      .slice(0, 2)
+                      .map((c, i) => {
+                        const pill =
+                          c.severity === 'critical'
+                            ? 'bg-red-100 text-red-700'
+                            : c.severity === 'warning'
+                              ? 'bg-amber-100 text-amber-700'
+                              : 'bg-slate-100 text-slate-600'
+                        return (
+                          <li key={i} className="rounded-xl bg-amber-50/40 border border-amber-100 p-3">
+                            <div className="flex items-center gap-2 mb-0.5">
+                              <p className="text-xs font-semibold text-navy-900">{c.title}</p>
+                              <span className={`text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded ${pill}`}>
+                                {c.severity}
+                              </span>
+                            </div>
+                            <p className="text-xs text-navy-600 leading-relaxed">{c.detail}</p>
+                          </li>
+                        )
+                      })}
+                  </ul>
+                </div>
+              )}
+
+              {/* For your visit — family/primary only, single talking point */}
+              {(currentUserRole === 'family' || currentUserRole === 'primary') &&
+                careInsights.insight.familyTalkingPoints.length > 0 && (
+                  <div className="rounded-xl bg-primary-50/60 border border-primary-100 p-3">
+                    <h4 className="text-xs font-semibold text-primary-700 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                      <Heart className="h-3.5 w-3.5" />
+                      For your next visit
+                    </h4>
+                    <p className="text-xs text-navy-700 leading-relaxed">
+                      {careInsights.insight.familyTalkingPoints[0]}
+                    </p>
+                  </div>
+                )}
+            </div>
+          ) : (
+            <blockquote className="relative pl-4 border-l-[3px] border-primary-300">
+              <p className="text-navy-700 text-sm leading-relaxed italic">
+                &ldquo;{digestSummary}&rdquo;
+              </p>
+            </blockquote>
+          )}
         </div>
 
         {/* ----- Care Dashboard Tab Bar + Review Button ----- */}

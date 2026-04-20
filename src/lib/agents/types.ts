@@ -4,7 +4,6 @@
 
 export type AgentName =
   | 'care_insights'
-  | 'shift_report'
   | 'wellness_monitor'
   | 'family_update'
   | 'care_plan'
@@ -117,38 +116,6 @@ export interface CareInsightsOutput {
   }
   familyTalkingPoints: string[]
   nurseNotes: string
-}
-
-// -------------------------------------------
-// Shift Report Output (SBAR Format)
-// -------------------------------------------
-
-export interface ShiftReportOutput {
-  shiftWindow: {
-    start: string
-    end: string
-  }
-  situation: string
-  background: string
-  assessment: string
-  recommendation: string
-  entryCount: number
-  keyVitals?: {
-    bloodPressure?: string
-    heartRate?: number
-    temperature?: number
-    oxygenSaturation?: number
-  }
-  medicationsGiven: Array<{
-    name: string
-    dosage: string
-    time: string
-  }>
-  incidents: Array<{
-    type: string
-    severity: string
-    summary: string
-  }>
 }
 
 // -------------------------------------------

@@ -6,13 +6,11 @@
  *
  * Outputs the agent and environment IDs to add to .env.local:
  *   ANTHROPIC_AGENT_INSIGHTS_ID=...
- *   ANTHROPIC_AGENT_SHIFT_REPORT_ID=...
  *   ANTHROPIC_ENVIRONMENT_ID=...
  */
 
 import Anthropic from '@anthropic-ai/sdk'
 import { CARE_INSIGHTS_SYSTEM_PROMPT } from '../src/lib/agents/prompts/care-insights'
-import { SHIFT_REPORT_SYSTEM_PROMPT } from '../src/lib/agents/prompts/shift-report'
 
 async function main() {
   const apiKey = process.env.ANTHROPIC_API_KEY
@@ -53,25 +51,10 @@ async function main() {
   console.log(`  Agent ID: ${insightsAgent.id} (v${insightsAgent.version})\n`)
 
   // -------------------------------------------
-  // 3. Create Shift Report Agent
-  // -------------------------------------------
-  console.log('Creating Shift Report Agent...')
-  const shiftAgent = await client.beta.agents.create({
-    name: 'CareBridge Shift Report',
-    model: 'claude-sonnet-4-6',
-    system: SHIFT_REPORT_SYSTEM_PROMPT,
-    tools: [
-      { type: 'agent_toolset_20260401' },
-    ],
-  })
-  console.log(`  Agent ID: ${shiftAgent.id} (v${shiftAgent.version})\n`)
-
-  // -------------------------------------------
   // Output
   // -------------------------------------------
   console.log('=== Add these to your .env.local ===\n')
   console.log(`ANTHROPIC_AGENT_INSIGHTS_ID=${insightsAgent.id}`)
-  console.log(`ANTHROPIC_AGENT_SHIFT_REPORT_ID=${shiftAgent.id}`)
   console.log(`ANTHROPIC_ENVIRONMENT_ID=${environment.id}`)
   console.log('')
   console.log('Setup complete!')

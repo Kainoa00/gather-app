@@ -8,8 +8,7 @@
       "firstName": "Margaret",
       "lastName": "Chen",
       "fixtures": [
-        "care-insights-pcc-r-001.json",
-        "shift-report-pcc-r-001.json"
+        "care-insights-pcc-r-001.json"
       ]
     },
     {
@@ -17,8 +16,7 @@
       "firstName": "Robert",
       "lastName": "Johnson",
       "fixtures": [
-        "care-insights-pcc-r-002.json",
-        "shift-report-pcc-r-002.json"
+        "care-insights-pcc-r-002.json"
       ]
     },
     {
@@ -26,8 +24,7 @@
       "firstName": "Eleanor",
       "lastName": "Martinez",
       "fixtures": [
-        "care-insights-pcc-r-003.json",
-        "shift-report-pcc-r-003.json"
+        "care-insights-pcc-r-003.json"
       ]
     },
     {
@@ -35,8 +32,7 @@
       "firstName": "Frank",
       "lastName": "Davis",
       "fixtures": [
-        "care-insights-pcc-r-004.json",
-        "shift-report-pcc-r-004.json"
+        "care-insights-pcc-r-004.json"
       ]
     },
     {
@@ -44,8 +40,7 @@
       "firstName": "Dorothy",
       "lastName": "Williams",
       "fixtures": [
-        "care-insights-pcc-r-005.json",
-        "shift-report-pcc-r-005.json"
+        "care-insights-pcc-r-005.json"
       ]
     }
   ]

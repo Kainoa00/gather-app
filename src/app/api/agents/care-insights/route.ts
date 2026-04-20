@@ -20,14 +20,48 @@ import type { CareInsightsOutput } from '@/lib/agents/types'
 
 export const maxDuration = 120 // Allow up to 2 minutes for multi-patient processing
 
+// Per-instance rate limit. Serverless instances can scale to N workers so this
+// is defense-in-depth, not distributed protection — swap for Upstash Ratelimit
+// when real multi-tenant traffic arrives.
+const WINDOW_MS = 60_000
+const MAX_REQS_PER_WINDOW = 10
+const hits = new Map<string, number[]>()
+
+function isRateLimited(key: string): boolean {
+  const now = Date.now()
+  const recent = (hits.get(key) ?? []).filter((t) => now - t < WINDOW_MS)
+  recent.push(now)
+  hits.set(key, recent)
+  return recent.length > MAX_REQS_PER_WINDOW
+}
+
 export async function POST(request: Request) {
   // --- Auth ---
   const cronSecret = process.env.CRON_SECRET
-  if (cronSecret) {
+  if (!cronSecret) {
+    // Fail closed in production — skipping auth when the secret is undefined
+    // would expose an expensive LLM endpoint to anonymous callers.
+    if (process.env.NODE_ENV === 'production' && !isDemoMode) {
+      console.error('[care-insights] CRON_SECRET not configured — refusing request')
+      return NextResponse.json({ error: 'Route not configured' }, { status: 503 })
+    }
+  } else {
     const authHeader = request.headers.get('authorization')
     if (authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+  }
+
+  // --- Rate limit ---
+  const ip =
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    request.headers.get('x-real-ip') ||
+    'unknown'
+  if (isRateLimited(ip)) {
+    return NextResponse.json(
+      { error: 'Too many requests — please retry in a minute.' },
+      { status: 429, headers: { 'Retry-After': '60' } },
+    )
   }
 
   // --- Demo mode ---

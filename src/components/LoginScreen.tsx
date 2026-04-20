@@ -103,7 +103,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
       </div>
 
       {/* Right panel — form */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12 lg:px-12 relative">
+      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8 sm:py-12 lg:px-12 relative">
         {/* Dot grid background */}
         <div
           className="absolute inset-0 pointer-events-none"
@@ -121,13 +121,17 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           className="relative w-full max-w-md"
         >
-          {/* Mobile logo */}
-          <div className="lg:hidden mb-8">
-            <Image src="/logos/Logo 1 (color).png" alt="CareBridge Connect" width={160} height={40} className="h-8 w-auto" />
+          {/* Mobile logo + tagline (left panel is hidden below lg) */}
+          <div className="lg:hidden mb-6">
+            <Image src="/logos/Logo 1 (color).png" alt="CareBridge Connect" width={160} height={40} className="h-8 w-auto mb-3" />
+            <p className="text-xs text-slate-500 flex items-center gap-1.5">
+              <Shield size={12} className="text-emerald-500 shrink-0" />
+              HIPAA Certified · SOC 2 Type II
+            </p>
           </div>
 
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-slate-900 mb-1">Choose your view</h2>
+          <div className="mb-6 sm:mb-8">
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-1">Choose your view</h2>
             <p className="text-sm text-slate-500">Select a role to explore the demo</p>
           </div>
 

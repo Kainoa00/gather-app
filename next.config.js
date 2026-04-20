@@ -73,9 +73,13 @@ const nextConfig = {
   },
 }
 
+// Source-map upload is gated on SENTRY_AUTH_TOKEN. When the token is absent
+// the build still succeeds but Sentry receives minified stack frames only.
+// Set SENTRY_AUTH_TOKEN in Vercel project settings to get readable stacks.
 module.exports = withSentryConfig(nextConfig, {
   org: 'carebridge-connect',
   project: 'carebridge-connect',
+  authToken: process.env.SENTRY_AUTH_TOKEN,
   silent: true,
   widenClientFileUpload: true,
   hideSourceMaps: true,

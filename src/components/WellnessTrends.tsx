@@ -465,7 +465,7 @@ export default function WellnessTrends({ days }: WellnessTrendsProps) {
             <h2 className="text-2xl font-bold text-navy-900">Wellness Trends</h2>
           </div>
           <p className="text-navy-600 text-sm">
-            Margaret&apos;s wellbeing over time
+            Wellbeing over time
           </p>
         </div>
 

@@ -127,8 +127,8 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
           </div>
 
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-slate-900 mb-1">Sign in to continue</h2>
-            <p className="text-sm text-slate-500">Select your role to access the demo</p>
+            <h2 className="text-2xl font-bold text-slate-900 mb-1">Choose your view</h2>
+            <p className="text-sm text-slate-500">Select a role to explore the demo</p>
           </div>
 
           {/* Role cards */}

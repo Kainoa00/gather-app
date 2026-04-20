@@ -63,6 +63,19 @@ export default function ChatBot({
     }
   }, [isOpen])
 
+  // Reset conversation when the selected resident changes so the greeting and
+  // any stale messages don't leak across residents.
+  useEffect(() => {
+    setMessages([
+      {
+        id: '1',
+        role: 'assistant',
+        content: `Hi! I'm your CareBridge Connect assistant. I can help you with questions about ${patientInfo.name}'s care, the facility, medications, upcoming appointments, or anything else you'd like to know. How can I help you today?`,
+        timestamp: new Date(),
+      },
+    ])
+  }, [patientInfo.name])
+
   // Build context about the patient for the AI
   const buildPatientContext = useCallback(() => {
     const recentLogs = logEntries.slice(-10)

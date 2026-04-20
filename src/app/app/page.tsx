@@ -197,7 +197,7 @@ export default function Home() {
         refetchMembers()
       }
     } catch (error) {
-      showError('Something went wrong. Please try again.')
+      showError('Could not save care circle member. Check your connection and try again.')
       console.error('[ERROR]', error)
     } finally {
       setIsSubmitting(false)
@@ -218,7 +218,7 @@ export default function Home() {
         await claimEventInDb(eventId, currentUserId, userName)
         refetchEvents()
       } catch (error) {
-        showError('Something went wrong. Please try again.')
+        showError('Could not claim this visit. Check your connection and try again.')
         console.error('[ERROR]', error)
       }
     }
@@ -241,7 +241,7 @@ export default function Home() {
         refetchEvents()
       }
     } catch (error) {
-      showError('Something went wrong. Please try again.')
+      showError('Could not save this calendar event. Check your connection and try again.')
       console.error('[ERROR]', error)
     } finally {
       setIsSubmitting(false)
@@ -302,7 +302,7 @@ export default function Home() {
         refetchNotifications()
       }
     } catch (error) {
-      showError('Something went wrong. Please try again.')
+      showError('Could not save this care log entry. Check your connection and try again.')
       console.error('[ERROR]', error)
     } finally {
       setIsSubmitting(false)
@@ -332,7 +332,7 @@ export default function Home() {
         await addLogCommentToDb(entryId, currentUserId, currentMember?.name || 'You', content)
         refetchLogs()
       } catch (error) {
-        showError('Something went wrong. Please try again.')
+        showError('Could not post your comment. Check your connection and try again.')
         console.error('[ERROR]', error)
       }
     }
@@ -357,7 +357,7 @@ export default function Home() {
         refetchPosts()
       }
     } catch (error) {
-      showError('Something went wrong. Please try again.')
+      showError('Could not publish your post. Check your connection and try again.')
       console.error('[ERROR]', error)
     } finally {
       setIsSubmitting(false)
@@ -383,7 +383,7 @@ export default function Home() {
         await likePostInDb(postId, currentUserId)
         refetchPosts()
       } catch (error) {
-        showError('Something went wrong. Please try again.')
+        showError('Could not update the like. Check your connection and try again.')
         console.error('[ERROR]', error)
       }
     }
@@ -412,7 +412,7 @@ export default function Home() {
         await addPostCommentToDb(postId, currentUserId, currentMember?.name || 'You', content)
         refetchPosts()
       } catch (error) {
-        showError('Something went wrong. Please try again.')
+        showError('Could not post your comment. Check your connection and try again.')
         console.error('[ERROR]', error)
       }
     }
@@ -443,7 +443,7 @@ export default function Home() {
         refetchVisits()
       }
     } catch (error) {
-      showError('Something went wrong. Please try again.')
+      showError('Could not check in your visit. Check your connection and try again.')
       console.error('[ERROR]', error)
     } finally {
       setIsSubmitting(false)
@@ -500,7 +500,7 @@ export default function Home() {
         }
       }
     } catch (error) {
-      showError('Something went wrong. Please try again.')
+      showError('Could not check out. Check your connection and try again.')
       console.error('[ERROR]', error)
     } finally {
       setIsSubmitting(false)
@@ -521,7 +521,7 @@ export default function Home() {
         await markNotificationReadInDb(notificationId, currentUserId)
         refetchNotifications()
       } catch (error) {
-        showError('Something went wrong. Please try again.')
+        showError('Could not update notifications. Check your connection and try again.')
         console.error('[ERROR]', error)
       }
     }
@@ -540,7 +540,7 @@ export default function Home() {
         await markAllNotificationsReadInDb(selectedPatientId, currentUserId)
         refetchNotifications()
       } catch (error) {
-        showError('Something went wrong. Please try again.')
+        showError('Could not mark all as read. Check your connection and try again.')
         console.error('[ERROR]', error)
       }
     }
@@ -935,15 +935,15 @@ export default function Home() {
         <Download className="h-5 w-5" />
       </button>
 
-      {/* Demo Notice */}
-      <div className="fixed bottom-20 md:bottom-4 left-4 right-20 sm:left-auto sm:right-20 sm:w-auto">
-        <div className="bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-lg flex items-center gap-3">
-          <div className={`p-2 ${isDemoMode ? 'bg-primary-500' : 'bg-mint-500'} rounded-xl`}>
-            <Sparkles className="h-4 w-4" />
+      {/* Demo Notice — compact on mobile to avoid overlapping content */}
+      <div className="fixed bottom-4 right-20 sm:right-20 z-20">
+        <div className="bg-slate-900 text-white px-3 py-2 md:px-4 md:py-3 rounded-2xl shadow-lg flex items-center gap-2 md:gap-3">
+          <div className={`p-1.5 md:p-2 ${isDemoMode ? 'bg-primary-500' : 'bg-mint-500'} rounded-lg md:rounded-xl`}>
+            <Sparkles className="h-3.5 w-3.5 md:h-4 md:w-4" />
           </div>
-          <div className="text-sm">
-            <p className="font-medium">{USE_PCC ? 'PCC Demo' : isDemoMode ? 'Grant Demo' : 'Live Mode'}</p>
-            <p className="text-navy-200 text-xs">{USE_PCC ? 'PointClickCare data' : isDemoMode ? 'Interactive preview' : 'Connected to Supabase'}</p>
+          <div className="text-xs md:text-sm">
+            <p className="font-medium leading-tight">{USE_PCC ? 'PCC Demo' : isDemoMode ? 'Grant Demo' : 'Live Mode'}</p>
+            <p className="text-navy-200 text-[10px] md:text-xs hidden sm:block">{USE_PCC ? 'PointClickCare data' : isDemoMode ? 'Interactive preview' : 'Connected to Supabase'}</p>
           </div>
         </div>
       </div>

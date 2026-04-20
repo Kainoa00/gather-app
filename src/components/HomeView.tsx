@@ -155,15 +155,21 @@ function generateDigestSummary(
 
   if (latestActivity?.activityLog) {
     const activity = latestActivity.activityLog
+    const active = activity.participation === 'active'
     if (activity.activityType === 'physical_therapy') {
-      parts.push(`She was ${activity.participation === 'active' ? 'highly responsive' : 'engaged'} during her morning mobility exercise, completing all tasks with a smile.`)
+      parts.push(`${firstName} was ${active ? 'highly responsive' : 'engaged'} during morning mobility exercises.`)
+    } else if (activity.activityType === 'occupational_therapy') {
+      parts.push(`${firstName} ${active ? 'actively participated in' : 'was supported through'} occupational therapy today.`)
     } else if (activity.activityType === 'social') {
-      parts.push(`She particularly enjoyed the afternoon social activity, spending time chatting with her neighbor.`)
+      parts.push(`${firstName} enjoyed the afternoon social activity.`)
     } else if (activity.activityType === 'meal') {
-      parts.push(`Meal time went ${activity.participation === 'active' ? 'very well' : 'smoothly'} today.`)
-    } else {
-      parts.push(`She participated in ${activity.description.toLowerCase()} today.`)
+      parts.push(`Meal time went ${active ? 'very well' : 'smoothly'} today.`)
+    } else if (activity.activityType === 'walk' || activity.activityType === 'exercise') {
+      parts.push(`${firstName} ${active ? 'completed' : 'participated in'} a light activity session today.`)
     }
+    // Intentionally skip the generic 'other' branch — activity.description is
+    // often a full multi-sentence shift note that cannot be grammatically
+    // spliced into a single summary line.
   }
 
   if (latestVitals?.vitals) {
@@ -175,18 +181,18 @@ function generateDigestSummary(
         parts.push(`Vitals are being monitored — BP ${bp}/${latestVitals.vitals.bloodPressureDiastolic}.`)
       }
     } else if (bp && bp <= 130) {
-      parts.push('Her vitals have been perfectly stable throughout the last 24 hours.')
+      parts.push('Vitals have been stable throughout the last 24 hours.')
     } else if (bp) {
-      parts.push('Her vitals are being monitored closely today.')
+      parts.push('Vitals are being monitored closely today.')
     }
   }
 
   if (latestMood?.moodLog?.appetite) {
-    parts.push(`Her appetite remains ${latestMood.moodLog.appetite}.`)
+    parts.push(`Appetite remains ${latestMood.moodLog.appetite}.`)
   }
 
   if (todayVisits.length > 0) {
-    parts.push(`She had ${todayVisits.length} visit${todayVisits.length > 1 ? 's' : ''} today.`)
+    parts.push(`${firstName} had ${todayVisits.length} visit${todayVisits.length > 1 ? 's' : ''} today.`)
   }
 
   return parts.join(' ')

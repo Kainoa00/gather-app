@@ -151,8 +151,8 @@ export default function Home() {
   const pccData = usePCCData(USE_PCC ? pccResidentId : '')
 
   useEffect(() => {
-    if (USE_PCC && !pccData.loading) setLastSyncTime(new Date())
-  }, [pccData.loading])
+    if (USE_PCC && !pccData.loading && !pccData.error) setLastSyncTime(new Date())
+  }, [pccData.loading, pccData.error])
 
   // Data selectors — PCC takes precedence when USE_PCC is enabled
   const patient = USE_PCC ? pccData.patient : _patient

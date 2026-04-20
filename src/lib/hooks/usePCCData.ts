@@ -102,6 +102,9 @@ export function usePCCPatient(residentId: string): {
   useEffect(() => {
     if (!residentId) return
 
+    setPatient(null)
+    setLoading(true)
+    setError(null)
     let cancelled = false
 
     async function load() {
@@ -150,6 +153,9 @@ export function usePCCLogEntries(residentId: string, days = 30): {
   useEffect(() => {
     if (!residentId) return
 
+    setLogEntries([])
+    setLoading(true)
+    setError(null)
     let cancelled = false
 
     async function load() {
@@ -234,6 +240,9 @@ export function usePCCMedications(residentId: string): {
   useEffect(() => {
     if (!residentId) return
 
+    setMedications([])
+    setLoading(true)
+    setError(null)
     let cancelled = false
 
     async function load() {
@@ -286,6 +295,9 @@ export function usePCCEvents(residentId: string): {
   useEffect(() => {
     if (!residentId) return
 
+    setEvents([])
+    setLoading(true)
+    setError(null)
     let cancelled = false
 
     async function load() {
@@ -336,6 +348,9 @@ export function usePCCWellnessDays(residentId: string, days = 30): {
   useEffect(() => {
     if (!residentId) return
 
+    setWellnessDays([])
+    setLoading(true)
+    setError(null)
     let cancelled = false
 
     async function load() {

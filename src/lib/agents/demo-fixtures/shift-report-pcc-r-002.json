@@ -1,0 +1,32 @@
+{
+  "residentId": "pcc-r-002",
+  "residentFirstName": "Robert",
+  "agentName": "shift_report",
+  "generatedAt": "2026-04-20T04:11:51.743Z",
+  "scenarioMode": "demo",
+  "output": {
+    "shiftWindow": {
+      "start": "2026-04-19T22:00:00.000Z",
+      "end": "2026-04-20T06:00:00.000Z"
+    },
+    "situation": "No care log entries were recorded for Robert (Room 118) during the night shift (2026-04-19 22:00 – 2026-04-20 06:00 UTC). All 9 provided log entries fall entirely outside this shift window — the nearest pre-shift entry is timestamped 2026-04-19T17:00Z and the nearest post-shift entry is 2026-04-20T07:00Z. This constitutes a documentation gap requiring immediate clarification from outgoing night staff.",
+    "background": "No vitals, mood assessments, medications, or incident reports were charted within the night shift window. For clinical context, the most recent pre-shift vitals (2026-04-19 17:00 UTC) recorded BP 123/79, HR 73, Temp 98.1°F, SpO2 98%, RR 14, Weight 181.7 lbs — all within normal limits. The first post-shift vitals (2026-04-20 07:00 UTC) showed BP 131/74, HR 74, Temp 97.9°F, SpO2 97%, RR 14, Weight 182.2 lbs — also within acceptable ranges. Pre-shift mood assessments from 2026-04-19 (08:00 and 14:00 UTC) documented neutral affect with poor appetite on both occasions, representing a trend of reduced oral intake heading into the night shift.",
+    "assessment": "The complete absence of overnight documentation prevents any clinical assessment of Robert's condition, trajectory, or response to care during the night shift. While bracketing vitals (immediately pre- and post-shift) show no flagged abnormals and hemodynamic stability appears maintained, the documentation gap means changes in condition, patient complaints, or interventions performed cannot be accounted for. The persistent poor appetite documented across two consecutive pre-shift assessments is a notable baseline concern that was unmonitored overnight. A minor weight fluctuation of +0.5 lbs between the pre-shift (181.7 lbs) and first post-shift reading (182.2 lbs) is non-significant but should be tracked given appetite concerns.",
+    "recommendation": "1. Immediately debrief outgoing night staff to determine whether assessments were performed but not documented, and reconcile any outstanding chart entries before the outgoing nurse signs off. 2. Perform a complete head-to-toe assessment and full vitals check at the start of this incoming shift given the overnight documentation gap. 3. Continue close monitoring of appetite and oral intake — poor appetite was documented on two consecutive assessments prior to this shift; assess and document food/fluid intake at each meal. 4. Monitor affect and emotional status; a trend toward low mood should be assessed on this shift in the context of the prior poor appetite findings. 5. Report any undisclosed overnight incidents, patient complaints, or clinical changes identified during debrief to the charge nurse.",
+    "entryCount": 0,
+    "keyVitals": {
+      "bloodPressure": "N/A — no vitals documented within shift window",
+      "heartRate": null,
+      "temperature": null,
+      "oxygenSaturation": null
+    },
+    "medicationsGiven": [],
+    "incidents": [
+      {
+        "type": "Documentation Gap",
+        "severity": "moderate",
+        "summary": "Zero care log entries were charted during the night shift (2026-04-19 22:00 – 2026-04-20 06:00 UTC). It is unknown whether assessments were performed and not documented, or whether no assessments were conducted. Outgoing night nurse must reconcile missing documentation with the charge nurse before shift close."
+      }
+    ]
+  }
+}

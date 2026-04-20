@@ -17,6 +17,11 @@ export type AuditAction =
   | 'check_out'
   | 'mark_notification_read'
   | 'export_data'
+  // Agent audit actions
+  | 'agent_execution'
+  | 'agent_output_viewed'
+  | 'agent_alert_acknowledged'
+  | 'agent_alert_resolved'
 
 export interface AuditEvent {
   patientId: string

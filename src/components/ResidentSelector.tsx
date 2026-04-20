@@ -19,6 +19,8 @@ interface ResidentSelectorProps {
   onSelectResident: (patientId: string, patientName: string) => void
   userRole: UserRole
   onAddResident?: () => void
+  /** When provided, skips internal loading and uses this list directly */
+  residentList?: Resident[]
 }
 
 export default function ResidentSelector({
@@ -27,6 +29,7 @@ export default function ResidentSelector({
   onSelectResident,
   userRole,
   onAddResident,
+  residentList,
 }: ResidentSelectorProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [residents, setResidents] = useState<Resident[]>([])
@@ -44,8 +47,13 @@ export default function ResidentSelector({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  // Load residents
+  // Load residents — skip if caller provided a list
   useEffect(() => {
+    if (residentList) {
+      setResidents(residentList)
+      return
+    }
+
     async function loadResidents() {
       if (isDemoMode) {
         setResidents(
@@ -74,7 +82,6 @@ export default function ResidentSelector({
         if (data && data.length > 0) {
           setResidents(data)
         } else {
-          // Fallback to current patient
           setResidents([{ id: currentPatientId, name: currentPatientName }])
         }
       } catch (err) {
@@ -86,7 +93,7 @@ export default function ResidentSelector({
     }
 
     loadResidents()
-  }, [currentPatientId, currentPatientName])
+  }, [residentList, currentPatientId, currentPatientName])
 
   const isDisabled = false
 

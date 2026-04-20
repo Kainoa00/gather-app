@@ -1,0 +1,65 @@
+{
+  "residentId": "pcc-r-001",
+  "residentFirstName": "Margaret",
+  "agentName": "care_insights",
+  "generatedAt": "2026-04-20T04:08:15.469Z",
+  "scenarioMode": "demo",
+  "output": {
+    "overallAssessment": "Margaret had a genuinely encouraging day today — her morning wellness check on April 20th captured a happy mood, full alertness, and a good appetite, a meaningful lift from yesterday's lower-energy presentation. All vital signs recorded across both days remained well within normal clinical limits, painting a reassuring picture of her current physical stability.",
+    "highlights": [
+      {
+        "title": "Bright and Cheerful Morning",
+        "detail": "Margaret's April 20th wellness assessment noted a happy mood and full alertness — a heartening turnaround from yesterday's sad and drowsy presentation. Her appetite was also reported as good, suggesting she began the day with energy and a sense of well-being."
+      },
+      {
+        "title": "All Vitals Within Normal Range",
+        "detail": "Across all six vital sign readings taken over the past 24 hours, every parameter — blood pressure, heart rate, temperature, oxygen saturation, and respiratory rate — remained comfortably within normal clinical limits. No thresholds were approached or breached."
+      },
+      {
+        "title": "Consistent, Stable Weight",
+        "detail": "Margaret's recorded weight held steady between 137.8 and 138.2 lbs across all readings over the past 48 hours, reflecting good nutritional balance and consistent hydration."
+      }
+    ],
+    "concerns": [
+      {
+        "title": "No Therapy Sessions Recorded in 8 Days",
+        "detail": "The 7-day wellness trend shows zero therapy sessions logged across all eight recorded days (April 12–19). Structured therapeutic engagement is a meaningful component of daily life for residents with Alzheimer's Disease. The care team may wish to review and confirm the current therapy schedule and ensure sessions are being documented accurately. Consult the care team for clinical interpretation.",
+        "severity": "warning"
+      },
+      {
+        "title": "Recurring Mood Variability — Pattern Worth Monitoring",
+        "detail": "Margaret's mood over the 8-day trend period has been variable, with negative mood states (agitated, anxious, or sad) recorded on four of eight days: agitated on April 12, anxious on April 14, and sad on both April 15 and April 19. While no three consecutive negative readings were observed — the defined threshold — the frequency of these states warrants continued close monitoring. Today's happy and alert presentation is a positive sign. Consult the care team for clinical interpretation.",
+        "severity": "warning"
+      },
+      {
+        "title": "Consecutive Poor Appetite — April 14 and 15",
+        "detail": "The wellness trend log shows Margaret's appetite was recorded as 'poor' on two consecutive days, April 14 and April 15, meeting the monitoring threshold. Her appetite subsequently recovered to 'fair' (April 13, 17, 19) and 'good' (April 12, 16, 18, and today, April 20). The pattern is noted for awareness and to inform ongoing monitoring. Consult the care team for clinical interpretation.",
+        "severity": "info"
+      },
+      {
+        "title": "Fluctuating Pain Levels Over the Past Week",
+        "detail": "Pain levels across the 7-day trend have ranged from 1 to 5 on a 10-point scale, with notable spikes on April 14 (5/10) and April 17 (5/10). No readings reached the critical threshold of 7 or above. The variability in reported pain is worth continued monitoring. Consult the care team for clinical interpretation.",
+        "severity": "info"
+      },
+      {
+        "title": "No Family Visits Recorded in 8 Days",
+        "detail": "The wellness trend log shows no family visits recorded across any of the eight tracked days (April 12–19). Consistent social connection and familiar faces can play a meaningful role in emotional well-being for individuals with Alzheimer's. This observation is shared to help facilitate connection opportunities for Margaret.",
+        "severity": "info"
+      }
+    ],
+    "trends": {
+      "trajectory": "stable",
+      "vitalsSummary": "Vital signs have been consistently within normal clinical ranges across all six readings in the 24-hour observation window. Blood pressure ranged from 128–137 mmHg systolic and 80–86 mmHg diastolic — no readings approached the hypertensive threshold of 140/90. Heart rate held between 72–80 bpm. Temperature ranged from 97.8°F to 98.6°F. Oxygen saturation ranged from 95–97%, remaining safely above the 92% flag threshold. Respiratory rate was steady at 16–17 breaths/min. Overall wellness scores over the 7-day trend ranged from 5.5 to 7.0, with the majority of recent days scoring at 7.0 before a modest dip to 6.0 on April 19.",
+      "moodSummary": "Margaret's mood has been variable across the 8-day trend window. Negative mood states — agitated (April 12), anxious (April 14), and sad (April 15 and April 19) — appeared on four of eight days. Positive or neutral states — content (April 13, 16, 17, 18) and happy (April 20 daily entry) — were also frequently recorded. No run of three or more consecutive negative readings was observed. The alternating pattern, while not meeting the formal threshold, reflects meaningful day-to-day variability that warrants ongoing attention.",
+      "activitySummary": "No therapy sessions were documented on any of the eight trend days (April 12–19), and no family visits were recorded during this period. The absence of logged structured therapeutic activity and social engagement across this stretch is a notable gap in the data. No additional activity information — such as group programming, recreational engagement, or mobility exercises — was present in the provided records."
+    },
+    "familyTalkingPoints": [
+      "Margaret had a wonderful morning today — she was happy, fully alert, and ate well. Your next visit would be a great opportunity to celebrate that positive energy with her. Bringing up a favorite memory, a familiar song, or a cherished photo can help sustain moments like these.",
+      "You may notice that Margaret's mood varies from day to day — this is very common with Alzheimer's, and it doesn't always reflect how a visit will go. The care team is watching these patterns closely, and your presence can be one of the most powerful sources of comfort and familiarity for her.",
+      "Margaret has had no recorded family visits over the past eight days. Even a short visit or a warm phone call can make a meaningful difference to her sense of connection. If scheduling has been a challenge, the care team is a great resource for coordinating visit times that align with her most alert and engaged periods of the day.",
+      "If you've noticed Margaret mentioning any discomfort or pain during previous visits — or if she seems more fatigued or withdrawn — the care team would welcome that observation. Her pain levels have fluctuated across the past week, and your insights can be a valuable complement to clinical monitoring.",
+      "It may be worth asking the care team about what types of activities or structured engagement Margaret has been participating in. Therapeutic programming tailored to her stage and interests can be a meaningful part of her day, and your input about what she has historically enjoyed could help shape those opportunities."
+    ],
+    "nurseNotes": "Patient: Margaret, Room 206. Primary Dx: Alzheimer's Disease, Stage 2. Reporting period: April 19–20, 2026.\n\nVITALS (24-hr, 6 readings): All parameters within normal limits across all checks. BP range: 128–137 mmHg systolic / 80–86 mmHg diastolic — no readings at or above 140/90. HR range: 72–80 bpm. Temp range: 97.8–98.6°F. SpO2 range: 95–97% — no readings below 92%. RR range: 16–17 breaths/min. Weight stable at 137.8–138.2 lbs across all readings. No critical thresholds breached.\n\nMOOD/BEHAVIOR (24-hr): April 19 (08:00) — sad mood, drowsy alertness, fair appetite. April 20 (08:00) — happy mood, alert, good appetite. Notable same-day improvement; recommend monitoring mood continuity and alertness through upcoming shift, particularly evening hours.\n\n7-DAY TREND FLAGS:\n— THERAPY: Zero sessions logged April 12–19 (8 consecutive days). Recommend verification of therapy scheduling, attendance, and documentation practices.\n— FAMILY VISITS: Zero visits logged April 12–19. Note for social work and care coordination review.\n— APPETITE: 'Poor' on two consecutive days, April 14–15, meeting the 2-day consecutive threshold. Appetite subsequently recovered to fair/good. Monitor for recurrence.\n— PAIN: Fluctuating 1–5/10 across the trend window; spikes noted April 14 (5/10) and April 17 (5/10). No readings at or above the 7/10 flag threshold. Continue pain monitoring per care plan.\n— MOOD TREND: Negative mood states (agitated, anxious, or sad) recorded on 4 of 8 days. Pattern does not meet the 3-consecutive-negative-reading threshold but frequency warrants documented monitoring. Overall wellness scores ranged 5.5–7.0; most recent score (April 19) was 6.0, down from 7.0 the prior three days.\n\nNo falls, incidents, or acute events documented in the provided data. All clinical observations should be reviewed and interpreted in consultation with the attending care team."
+  }
+}

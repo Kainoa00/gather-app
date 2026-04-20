@@ -1,0 +1,78 @@
+{
+  "residentId": "pcc-r-005",
+  "residentFirstName": "Dorothy",
+  "agentName": "care_insights",
+  "generatedAt": "2026-04-20T04:18:49.450Z",
+  "scenarioMode": "demo",
+  "output": {
+    "overallAssessment": "Dorothy has had a challenging couple of days — her care team is keeping a close eye on her blood pressure, mood, and appetite, all of which have shown some changes that warrant continued monitoring. While her heart rate, temperature, and breathing have remained steady and comfortable, a few patterns over the past 48 hours are being tracked carefully by staff.",
+    "highlights": [
+      {
+        "title": "Stable Heart Rate & Temperature",
+        "detail": "Dorothy's heart rate has remained consistently in the healthy range (75–84 bpm) across all checks, and her temperature has held steady between 97.9°F and 98.5°F — both well within normal limits."
+      },
+      {
+        "title": "Respiratory Rate Within Normal Range",
+        "detail": "Dorothy's breathing rate has been measured between 15 and 18 breaths per minute across all readings, comfortably within the normal range of 12–20."
+      },
+      {
+        "title": "Alertness Improved This Morning",
+        "detail": "Dorothy was documented as fully alert during this morning's wellness assessment on April 20th, a reassuring sign following some fluctuations in alertness observed yesterday."
+      },
+      {
+        "title": "Pain Levels Remain Manageable",
+        "detail": "Over the past 8 days, Dorothy's recorded pain levels have ranged from 1 to 5 out of 10 — consistently below the threshold of 7 that would require urgent attention. No acute pain events have been flagged."
+      },
+      {
+        "title": "Weight Remaining Stable",
+        "detail": "Dorothy's weight has held steady between 161.6 and 162.2 lbs across all recent readings, with no significant fluctuations noted."
+      }
+    ],
+    "concerns": [
+      {
+        "title": "Elevated Systolic Blood Pressure — Persistent Pattern",
+        "detail": "Dorothy's systolic blood pressure has been above the 140 mmHg monitoring threshold across all five vital checks in the past 24–48 hours, reading between 144 and 148 mmHg. Given her diagnosis of hypertension, this persistent elevation is being flagged for close observation. Consult the care team for clinical interpretation.",
+        "severity": "warning"
+      },
+      {
+        "title": "Episode of Unresponsiveness Documented",
+        "detail": "During the afternoon wellness assessment on April 19th at 2:00 PM, Dorothy's alertness was recorded as 'unresponsive.' While her alertness had improved to 'alert' by the morning of April 20th, this episode represents a notable change from baseline and should be reviewed and monitored carefully. Consult the care team for clinical interpretation.",
+        "severity": "critical"
+      },
+      {
+        "title": "Three Consecutive Agitated Mood Readings",
+        "detail": "Dorothy has been documented as 'agitated' across three consecutive wellness assessments — the morning and afternoon of April 19th, and the morning of April 20th. This meets the threshold for a mood concern. Comfort-focused interventions and environmental assessment may be appropriate. Consult the care team for clinical interpretation.",
+        "severity": "warning"
+      },
+      {
+        "title": "Three Consecutive Poor Appetite Readings",
+        "detail": "Dorothy's appetite has been recorded as 'poor' in all three wellness assessments over the past two days (April 19th AM, April 19th PM, April 20th AM), exceeding the two-consecutive-reading threshold. Nutritional intake and hydration should continue to be monitored. Consult the care team for clinical interpretation.",
+        "severity": "warning"
+      },
+      {
+        "title": "No Family Visits in 8+ Days",
+        "detail": "The wellness trend data shows no family visits recorded between April 12th and April 19th. For residents with vascular dementia, social connection and familiar faces can be meaningful sources of comfort, particularly during periods of increased agitation.",
+        "severity": "info"
+      },
+      {
+        "title": "No Therapy Sessions Recorded Over 8 Days",
+        "detail": "The 7-day trend data shows zero therapy sessions logged between April 12th and April 19th. Consistent therapeutic engagement is often beneficial for overall wellness. Families may wish to speak with the care team about Dorothy's current therapy schedule.",
+        "severity": "info"
+      }
+    ],
+    "trends": {
+      "trajectory": "declining",
+      "vitalsSummary": "Systolic blood pressure has been persistently elevated above 140 mmHg across all readings in the reviewed period, ranging from 144 to 148 mmHg. Diastolic pressure has held near but below the 90 mmHg monitoring threshold (86–90 mmHg). Heart rate, temperature, oxygen saturation, and respiratory rate have all remained within acceptable ranges throughout, providing some stability amid the BP pattern.",
+      "moodSummary": "Dorothy's mood has followed a clear declining arc over the 8-day trend window. She began the period at 'content' on April 12th, transitioned to 'anxious' for three days (April 13–15), and has been documented as 'agitated' for the past five consecutive days (April 16–20). This progression, combined with alertness fluctuations in the most recent 24-hour period, represents a meaningful behavioral shift worth discussing with the clinical team.",
+      "activitySummary": "No therapy sessions were recorded across the entire 8-day trend period, and no family visits were logged during this window. Overall wellness scores declined from a high of 7.0 (April 13–15) to a sustained low of 5.0 (April 16–19), coinciding with the shift in mood from anxious to agitated and the return of poor appetite. Pain levels have been variable (ranging 1–5/10) but have not reached the critical threshold."
+    },
+    "familyTalkingPoints": [
+      "Dorothy has seemed more restless and agitated over the past several days — asking staff what has been helping to soothe her, and whether there are favorite songs, objects, or routines that bring her comfort, could make a real difference.",
+      "Her appetite has been described as poor over the last two days. It may be helpful to ask the care team whether there are particular foods or snack options Dorothy has responded to before, or if a meal you bring from home might encourage her to eat.",
+      "A visit or even a phone call can be meaningful for Dorothy, especially during a period like this. The care team can advise on the best time of day when she tends to be most calm and receptive.",
+      "Ask the nursing staff about the alertness episode that was noted yesterday afternoon — the team can explain what was observed, how Dorothy is doing since, and what signs to be aware of during your next visit.",
+      "It may be worth asking whether Dorothy is currently enrolled in any therapy sessions or group activities, as the records show none in recent days. Engagement in structured activity can sometimes support mood and overall wellbeing."
+    ],
+    "nurseNotes": "Incoming shift summary for Dorothy, Room 302 (Vascular Dementia / Hypertension) — as of April 20, 2026:\n\nVITALS: Systolic BP has been persistently elevated above the 140 mmHg threshold across all five readings in the past 48 hours (range: 144–148 mmHg). Diastolic pressure reached 90 mmHg at the 04/19 07:00 check (threshold: >90) and was 89 mmHg at two subsequent readings — monitor for upward drift. HR stable (75–84 bpm). Temperature stable (97.9–98.5°F). SpO2 recorded at 95% on 04/20 07:00 — above the critical threshold of 92% but below 96%; continue to monitor. RR within normal range (15–18 bpm) throughout.\n\nALERTNESS / NEURO: Significant fluctuation noted — resident documented as 'drowsy' at 04/19 08:00, 'unresponsive' at 04/19 14:00, and returned to 'alert' at 04/20 08:00. The unresponsive episode at 04/19 14:00 should be reviewed for documentation completeness and followed up with the supervising clinician if not already escalated. Continue to monitor alertness closely this shift.\n\nMOOD / BEHAVIOR: Three consecutive agitated mood readings (04/19 AM, 04/19 PM, 04/20 AM). Assess for environmental triggers, pain, urinary discomfort, or sleep disruption as potential contributing factors. Non-pharmacologic comfort measures should be attempted and documented.\n\nNUTRITION: Appetite documented as 'poor' across all three wellness assessments in the past 48 hours. Monitor and document oral intake each meal. Encourage fluids. Flag to dietitian if poor intake continues.\n\nSOCIAL / ACTIVITY: No family visits or therapy sessions logged in the 8-day trend data. Consider flagging to social work for follow-up on family engagement and review of therapy schedule.\n\nWEIGHT: Stable at 161.6–162.2 lbs — no acute change.\n\nAll warning and critical items noted above should be flagged to the attending physician per facility protocol for clinical interpretation and any indicated orders."
+  }
+}
